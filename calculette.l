@@ -7,9 +7,12 @@
 %%
 
 [0-9]+(\.[0-9]*)?([Ee][0-9]+)? {  yylval = atof(yytext); return NUM; }
-\n     {  return '\n'; }
+\n    {  return '\n'; }
 plus   { return '+'; }
-fois   { return '*'; }
+fois   { return '*'; 
+Si|if {return IF ;}
+Alors|then {return THEN ;}
+Sinon|else {return ELSE ;}
 " "    {}
 .      {  return yytext[0]; }
 un     { yylval = 1 ; return NUM;}

@@ -16,6 +16,8 @@
 %token NUM	
 %token SIN
 %token TAN
+%token IF THEN ELSE
+
 %left '+' '-'
 %left '*' '/'
 
@@ -36,25 +38,15 @@ expr:
      | '(' expr ')'      { $$ = $2;  }
      | SIN '(' expr ')'  { $$ = sin($3);  printf("sin (%g) = %g\n", $3, $$); }
      | TAN '(' expr ')'  { $$ = tan($3);  printf("tan (%g) = %g\n", $3, $$); }
+     | IF expr THEN expr ELSE expr {if($2){$$ = $4}else{$$ = $6}}
      ;
 %%
 
 int yyerror(char *s) {					
     printf("%s\n", s);
 }
-/*
-int main( int argc, char **argv )
-{
-	++argv, --argc;  /* skip over program name */
-	if ( argc > 0 )
-		yyin = fopen( argv[0], "r" );
-	else
-		yyin = stdin;
-	yylex();
-}
 
 int main(void) {
     yyparse();						
     return 0;
 }
-*\
