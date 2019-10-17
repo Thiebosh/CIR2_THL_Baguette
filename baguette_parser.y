@@ -1,6 +1,7 @@
 %{
   #include <iostream>
-  #include <math.h>    
+  #include <math.h>
+  #define FILENAME "program.choco"
   extern int yylex ();
 
   int yyerror(char *s);
@@ -43,7 +44,11 @@ int yyerror(char *s) {
     cout << s << endl;
 }
 
-int main(void) {
-    yyparse();						
-    return 0;
+
+int main()
+{
+  //yyparse() retourne 0 si entrée valide en fonctionde la grammaire
+  //yylex() retourne une valeur qui indique le type du token optenu
+	auto yyin = fopen( FILENAME, "r" );
+	cout << yyparse();
 }

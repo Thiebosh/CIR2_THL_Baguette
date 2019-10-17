@@ -42,8 +42,19 @@ expr:
 int yyerror(char *s) {					
     printf("%s\n", s);
 }
+/*
+int main( int argc, char **argv )
+{
+	++argv, --argc;  /* skip over program name */
+	if ( argc > 0 )
+		yyin = fopen( argv[0], "r" );
+	else
+		yyin = stdin;
+	yylex();
+}
 
 int main(void) {
     yyparse();						
     return 0;
 }
+*\
