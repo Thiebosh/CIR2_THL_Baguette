@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
       cout << "Nom du fichier .choco : ";
       string filename;
       cin >> filename;
-      /*if ()*/ filename += ".choco";
+      /*if (!filename.find(.choco))*/ filename += ".choco";
       yyin = fopen(filename.c_str(),"r");
     }
     cout << endl;
