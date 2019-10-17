@@ -12,10 +12,9 @@ plus   { return '+'; }
 fois   { return '*'; }
 " "    {}
 .      {  return yytext[0]; }
-un     { yylval = 1 ; return NUM}
-deux   { yylval = 2 ; return NUM}
+un     { yylval = 1 ; return NUM;}
+deux   { yylval = 2 ; return NUM;}
 
 %%
 
 int yywrap(){}
-
