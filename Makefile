@@ -58,8 +58,8 @@ run: program ## Run the program
 
 all:
 	rm -rf baguette
-	flex -o scanner.lex.cpp language_scanner.l
-	bison -d language_parser.y -o parser.bison.cpp
+	flex -o scanner.lex.cpp baguette_scanner.l
+	bison -d baguette_parser.y -o parser.bison.cpp
 	g++ scanner.lex.cpp parser.bison.cpp -o custom_language
 	rm -rf scanner.lex.cpp parser.bison.cpp parser.bison.hpp
 	./baguette
