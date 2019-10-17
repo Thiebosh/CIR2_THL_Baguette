@@ -57,9 +57,9 @@ run: program ## Run the program
 	./program source.ect
 
 all:
-	rm -rf calculette
-	flex -o calculette.lex.cpp calculette.l
-	bison -d calculette.y -o calculette.bison.cpp
-	g++ calculette.lex.cpp calculette.bison.cpp -o calculette
-	rm -rf calculette.lex.cpp calculette.bison.cpp calculette.bison.hpp
-	./calculette
+	rm -rf baguette
+	flex -o scanner.lex.cpp language_scanner.l
+	bison -d language_parser.y -o parser.bison.cpp
+	g++ scanner.lex.cpp parser.bison.cpp -o custom_language
+	rm -rf scanner.lex.cpp parser.bison.cpp parser.bison.hpp
+	./baguette
