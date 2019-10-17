@@ -6,9 +6,26 @@
 
 
 ## Nos spécifications 
-essentiellement de la copie du cpp (cpp francisé)
+langage cible : cpp
 améliorations : 
 - typage faible des variables (auto en cpp ou spécifie selon format de la variable)
 - typage fort des fonctions
 - indice -1 d'un tableau pour accéder au dernier élément
 
+conservé :
+- accolades
+- déclaration fonctions
+- ternaires
+
+
+## ordre d'avancement
+- point de lancement <- avancement actuel
+- variables
+- tableaux //multidimentionnel
+- conditions
+- boucles
+- fonctions
+- lecture fichier ou interprétation à la volée
+- listes //élément facilement supressible
+- dictionnaires //map associatives
+- etc (ternaires)
