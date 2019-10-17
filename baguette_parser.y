@@ -1,6 +1,5 @@
 %{
-  #include <stdio>
-  #include <stdlib>
+  #include <iostream>
   #include <math.h>    
   extern int yylex ();
 
@@ -26,22 +25,22 @@ program: /* empty */
 	   ;
 
 line: '\n'			 
-	| expr '\n' { printf("\nResult : %g\n", $1); }	
+	| expr '\n' { cout << endl << "Result : " << $1 << endl; }	
 	;
 
 expr:
-     NUM                 { $$ = $1;  /* printf("%g ", $1); */ }		
-     | expr '+' expr     { $$ = $1 + $3;  printf("%g + %g = %g\n", $1, $3, $$); }
-     | expr '-' expr     { $$ = $1 - $3;  printf("%g - %g = %g\n", $1, $3, $$); }   		
-     | expr '*' expr     { $$ = $1 * $3;  printf("%g * %g = %g\n", $1, $3, $$); }		
-     | '(' expr ')'      { $$ = $2;  }
-     | SIN '(' expr ')'  { $$ = sin($3);  printf("sin (%g) = %g\n", $3, $$); }
-     | TAN '(' expr ')'  { $$ = tan($3);  printf("tan (%g) = %g\n", $3, $$); }
+     NUM                 { $$ = $1; }		
+     | expr '+' expr     { $$ = $1 + $3; cout << $1 << " + " << $3 << " = " << $$ << endl; }
+     | expr '-' expr     { $$ = $1 - $3; cout << $1 << " - " << $3 << " = " << $$ << endl; }
+     | expr '*' expr     { $$ = $1 * $3; cout << $1 << " * " << $3 << " = " << $$ << endl; }
+     | '(' expr ')'      { $$ = $2; }
+     | SIN '(' expr ')'  { $$ = sin($3); cout << "sin(" << $3 << ") = " << $$ << endl; }
+     | TAN '(' expr ')'  { $$ = tan($3); cout << "tan(" << $3 << ") = " << $$ << endl; }
      ;
 %%
 
 int yyerror(char *s) {					
-    printf("%s\n", s);
+    cout << s << endl;
 }
 
 int main(void) {

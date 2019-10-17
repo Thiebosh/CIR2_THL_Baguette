@@ -1,7 +1,7 @@
 %{
   #include <stdio.h>
   #include <stdlib.h>
-  #include "calculette.bison.hpp"
+  #include "parser.bison.hpp"
 %}
 
 %%

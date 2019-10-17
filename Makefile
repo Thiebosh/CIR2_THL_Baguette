@@ -60,6 +60,6 @@ all:
 	rm -rf baguette
 	flex -o scanner.lex.cpp baguette_scanner.l
 	bison -d baguette_parser.y -o parser.bison.cpp
-	g++ scanner.lex.cpp parser.bison.cpp -o custom_language
+	g++ scanner.lex.cpp parser.bison.cpp -o baguette
 	rm -rf scanner.lex.cpp parser.bison.cpp parser.bison.hpp
 	./baguette
