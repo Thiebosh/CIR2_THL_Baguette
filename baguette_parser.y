@@ -17,16 +17,19 @@
 %token NUM	
 %token SIN
 %token TAN
+%token LOAD_FILE
+%token END_OF_FILE
 %left '+' '-'
 %left '*' '/'
 
 %%
 program: /* empty */		
-       | program line          
+       | program line      
 	   ;
 
-line: '\n'			 
-	| expr '\n' { cout << endl << "Result : " << $1 << endl; }	
+line: '\n'
+	| expr '\n' { cout << endl << "Result : " << $1 << endl; }
+	| expr { cout << endl << "Last Result : " << $1 << endl; }
 	;
 
 expr:
@@ -42,13 +45,4 @@ expr:
 
 int yyerror(char *s) {					
     cout << s << endl;
-}
-
-
-int main()
-{
-  //yyparse() retourne 0 si entrée valide en fonctionde la grammaire
-  //yylex() retourne une valeur qui indique le type du token optenu
-	auto yyin = fopen( FILENAME, "r" );
-	cout << yyparse();
 }

@@ -1,7 +1,9 @@
 %{
-  #include <stdio.h>
-  #include <stdlib.h>
+  #include <iostream>
+  #include <string>
   #include "parser.bison.hpp"
+
+  using namespace std;
 %}
 
 %%
@@ -20,3 +22,27 @@ tan    {return TAN;}
 %%
 
 int yywrap(){}
+
+int main(int argc, char **argv) {
+  ++argv, --argc;
+
+  if (!argc) {
+    cout << "0 - Interpréter un script" << endl 
+        << "1 - Compiler un fichier" << endl;
+    int saisie;
+    cin >> saisie;
+
+    if (!saisie) yyin = stdin;
+    else {
+      cout << "Nom du fichier .choco : ";
+      string filename;
+      cin >> filename;
+      /*if ()*/ filename += ".choco";
+      yyin = fopen(filename.c_str(),"r");
+    }
+    cout << endl;
+  }
+  else yyin = fopen(argv[0],"r");
+
+  yyparse();
+}
