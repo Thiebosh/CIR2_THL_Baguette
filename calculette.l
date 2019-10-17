@@ -14,6 +14,8 @@ fois   { return '*'; }
 .      {  return yytext[0]; }
 un     { yylval = 1 ; return NUM;}
 deux   { yylval = 2 ; return NUM;}
+sin    {return SIN;}
+tan    {return TAN;}
 
 %%
 
