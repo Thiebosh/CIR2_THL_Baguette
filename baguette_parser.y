@@ -37,8 +37,8 @@ program: /* empty */
 	   ;
 
 line: '\n'
-	| expr '\n' { cout << endl << "Result : " << $1 << endl; }
-  | ID '=' expr'\n' { variables[$1] = $3; cout << $1 << " = " << $3 << endl;}
+	| expr ';' { cout << endl << "Result : " << $1 << endl; }
+  | ID '=' expr ';' { variables[$1] = $3; cout << $1 << " = " << $3 << endl;}
 	;
 
 expr:
