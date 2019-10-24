@@ -45,7 +45,7 @@ Sinon|else {return ELSE ;}
 int yywrap(){}
 
 int main(int argc, char **argv) {
-  string folder = "programFile/", filename, extension = ".choco";
+  string folder = "programFiles/", filename, extension = ".choco";
 
   //teste existence de dossier
   bool getFolder = true;
