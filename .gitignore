@@ -7,6 +7,5 @@
 # Unignore all dirs
 !*/
 
-# Ignore files with extension `.class` & `.sm`
+# Ignore choco files
 *.choco
-*.sm
