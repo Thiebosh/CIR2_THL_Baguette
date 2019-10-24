@@ -12,6 +12,7 @@ améliorations :
 - typage fort des fonctions
 - indice -1 d'un tableau pour accéder au dernier élément
 - boucles for imbriquées (Pour x+1 va de 0 à 10 et y+1 va de 0 à 10 {})
+- séparation des nombres 1_000 <=> 1000 (bonne lisibilitée)
 
 conservé :
 - accolades
