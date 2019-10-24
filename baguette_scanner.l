@@ -27,8 +27,8 @@ int main(int argc, char **argv) {
   ++argv, --argc;
 
   if (!argc) {
-    cout << "0 - Interpréter un script" << endl 
-        << "1 - Compiler un fichier" << endl;
+    cout << "0 - Interpréter la console" << endl 
+        << "1 - Interpréter un fichier" << endl;
     int saisie;
     cin >> saisie;
 
@@ -37,7 +37,10 @@ int main(int argc, char **argv) {
       cout << "Nom du fichier .choco : ";
       string filename;
       cin >> filename;
-      /*if (!filename.find(.choco))*/ filename += ".choco";
+      if (filename.find(".choco") ==  string::npos) {
+        //faire un substring des derniers caractères puis comparer
+        filename += ".choco";
+      }
       yyin = fopen(filename.c_str(),"r");
     }
     cout << endl;
