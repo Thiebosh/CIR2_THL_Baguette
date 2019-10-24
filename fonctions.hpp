@@ -8,9 +8,18 @@
 #include <string>
 #include <vector>
 
-bool folderExist(std::string folder, std::string extension);
+#define FOLDER "programFiles/"
+#define EXTENSION ".choco"
+
+
+FILE* mainContent(int argc, char **argv);
+
+bool folderExist();
 
 int menuPrincipal();
 
-std::vector<std::string> menuFichier(std::string folder, std::string filename, std::string extension);
+FILE* workFile(bool getFolder);
 
+std::vector<std::string> listeFichiers();
+
+FILE* fluxFichier(bool getFolder, std::string filename);

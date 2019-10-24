@@ -1,12 +1,10 @@
 %{
-  #include <iostream>
   #include <math.h>
   #include <map>
-  #include <string>
 
   #include "fonctions.hpp"
-  
-  using namespace std;
+
+  using namespace std;  
 
   extern int yylex ();
   int yyerror(char *s);
@@ -59,63 +57,10 @@ expr:
 
 int yyerror(char *s) {					
     cout << s << endl;
-
     return 0;
 }
 
 int main(int argc, char **argv) {
-  string folder = "programFiles/", filename, extension = ".choco";
-
-  //teste existence de dossier
-  bool getFolder = folderExist(folder, extension);
-
-  //exécute routine
-  ++argv, --argc;
-  if (!argc) {
-    switch(menuPrincipal()) {
-      case 0 :
-        yyin = stdin;
-        break;
-      case 1 :
-        if (!getFolder) exit(0);
-
-        vector<string> fileList = menuFichier(folder, filename, extension);
-        
-        int saisie;
-        cout << endl << "Votre sélection : ";
-        do cin >> saisie; while (saisie <= 0 || saisie > fileList.size());
-
-        saisie--;
-
-        //exécute fichier s'il existe
-        filename = fileList[saisie];
-        cout << filename << endl;
-        if (access((folder+filename).c_str(), F_OK) != -1) {
-          yyin = fopen((folder+filename).c_str(),"r");
-        }
-        else {
-          cout << "Echec d'accès au fichier" << endl;
-          exit(0);
-        }
-        break;
-    }
-    cout << endl;
-  }
-  else {
-    if (!getFolder) exit(0);
-
-    filename = argv[0];
-    if (filename.find(extension, filename.size() - extension.size()) ==  string::npos) {
-      filename += extension;
-    }
-    if (access((folder+filename).c_str(), F_OK) != -1) {
-      yyin = fopen((folder+filename).c_str(),"r");
-    }
-    else {
-      cout << "Ce fichier n'existe pas" << endl;
-      exit(0);
-    }
-  }
-  
+  yyin = mainContent(argc, argv);
   yyparse();
 }
