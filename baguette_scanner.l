@@ -1,6 +1,13 @@
 %{
+  #include <unistd.h>
+  #include <sys/stat.h>
+  #include <sys/types.h>
+  #include <dirent.h>
+
   #include <iostream>
   #include <string>
+  #include <vector>
+
   #include "parser.bison.hpp"
 
   using namespace std;
@@ -38,28 +45,83 @@ Sinon|else {return ELSE ;}
 int yywrap(){}
 
 int main(int argc, char **argv) {
-  ++argv, --argc;
+  string folder = "programFile/", filename, extension = ".choco";
 
-  if (!argc) {
-    cout << "0 - Interpréter la console" << endl 
-        << "1 - Interpréter un fichier" << endl;
-    int saisie;
-    cin >> saisie;
+  //teste existence de dossier
+  bool getFolder = true;
+  if (access(folder.c_str(), F_OK) == -1) {//le "/" assure que c'est un dossier
+    cout << "Dossier de programmes non trouvé : création en cours... ";
+    getFolder = false;
 
-    if (!saisie) yyin = stdin;
+    if (mkdir(folder.c_str(), 0777)) cout << "échec" << endl;
     else {
-      cout << "Nom du fichier .choco : ";
-      string filename;
-      cin >> filename;
-      if (filename.find(".choco") ==  string::npos) {
-        //faire un substring des derniers caractères puis comparer
-        filename += ".choco";
-      }
-      yyin = fopen(filename.c_str(),"r");
+      cout << "fait" << endl << "Placez votre ou vos fichiers " << extension << " dans le répertoire créé" << endl;
+      getFolder = true;
+    }
+  }
+
+  //exécute routine
+  ++argv, --argc;
+  if (!argc) {
+    cout << "0 - Interprétation en console" << endl 
+         << "1 - Interprétation en fichier" << endl;
+    int saisie;
+    do cin >> saisie; while (saisie < 0 || saisie > 1);
+
+    switch(saisie) {
+      case 0 :
+        yyin = stdin;
+        break;
+      case 1 :
+        if (!getFolder) exit(0);
+
+        //affiche fichiers du dossier
+        cout << endl << "Contenu du dossier " << folder << " :" << endl;
+        DIR *fluxFolder = opendir(folder.c_str());
+        struct dirent *fileFolder;
+        vector<string> fileList;
+        while (fileFolder = readdir(fluxFolder)) {
+          filename = (string)fileFolder->d_name;
+          if (filename.find(extension, filename.size() - extension.size()) !=  string::npos) {
+            cout << fileList.size()+1 << " - \"" << filename << "\"" << endl;
+            fileList.push_back(filename);
+          }
+        }
+        closedir (fluxFolder);
+
+        //traite entrée utilisateur
+        cout << endl << "Votre sélection : ";
+        do cin >> saisie; while (saisie <= 0 || saisie > fileList.size());
+
+        //exécute fichier s'il existe
+        filename = fileList[--saisie];
+        cout << filename << endl;
+        if (access((folder+filename).c_str(), F_OK) != -1) {
+          yyin = fopen((folder+filename).c_str(),"r");
+        }
+        else {
+          cout << "Echec d'accès au fichier" << endl;
+          exit(0);
+        }
+        break;
     }
     cout << endl;
   }
-  else yyin = fopen(argv[0],"r");
+  else {
+    if (!getFolder) exit(0);
+
+    filename = argv[0];
+    if (filename.find(extension, filename.size() - extension.size()) ==  string::npos) {
+      filename += extension;
+    }
+    if (access((folder+filename).c_str(), F_OK) != -1) {
+      yyin = fopen((folder+filename).c_str(),"r");
+    }
+    else {
+      cout << "Ce fichier n'existe pas" << endl;
+      exit(0);
+    }
+  }
 
   yyparse();
 }
