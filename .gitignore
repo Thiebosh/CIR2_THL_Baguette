@@ -9,6 +9,5 @@
 
 # Ignore choco & bison files
 *.choco
-*.bison.cpp
-*.bison.hpp
+*.bison.*
 
