@@ -7,7 +7,6 @@
 # Unignore all dirs
 !*/
 
-# Ignore choco & bison files
-*.choco
+# Ignore bison files
 *.bison.*
 

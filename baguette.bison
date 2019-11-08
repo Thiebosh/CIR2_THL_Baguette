@@ -1,4 +1,4 @@
-/*fichier bison*/
+/*fichier bison : parse*/
 %{
   #include "fonctions.hpp"
 
@@ -171,20 +171,8 @@ void run_program() {
 
 
 int main(int argc, char **argv) {
-  if ( argc > 1 ) yyin = fopen( argv[1], "r" );
-  else yyin = stdin;
-  
-  yyparse();
-  print_program();
-  run_program();
-}
-
-
-/*
-int main(int argc, char **argv) {
   yyin = mainContent(argc, argv);
   yyparse();
   print_program();
   run_program();
 }
-*/

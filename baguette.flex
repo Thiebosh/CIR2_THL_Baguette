@@ -1,4 +1,4 @@
-/*fichier flex*/
+/*fichier flex : scan*/
 %option noyywrap
 %{
   #include "parser.bison.cpp"
