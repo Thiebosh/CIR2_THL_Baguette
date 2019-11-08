@@ -14,6 +14,7 @@ améliorations :
 - tab[] = val pour allocation dynamique
 - boucles for imbriquées (Pour x+1 va de 0 à 10 et y+1 va de 0 à 10 {})
 - séparation des nombres 1_000 <=> 1000 (bonne lisibilitée)
+- interdire le while true ?
 
 conservé :
 - accolades
@@ -32,3 +33,9 @@ conservé :
 - listes //élément facilement supressible
 - dictionnaires //map associatives
 - etc (ternaires)
+
+
+
+ajouter fonction conversion intruction - code (le faire nous même pour plus de contrôle / mettre plusieurs caractères)
+
+boucle : instruction suivante saute au niveau du test
