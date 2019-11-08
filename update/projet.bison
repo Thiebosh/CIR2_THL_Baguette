@@ -11,14 +11,14 @@
   map<string, double> variables;
 
   vector<pair<int,double>> instructions;
-  int ic = 0;   // compteur instruction 
-  inline ins(int c, double d) { instructions.push_back(make_pair(c, d)); ic++;};
+  int currentInstruction = 0;   // compteur instruction 
+  inline void addInstruct(int c, double d) { instructions.push_back(make_pair(c, d)); currentInstruction++;};
 
   // structure pour stocker les adresses pour les sauts condistionnels et autres...
   typedef struct adr {
-    int ic_goto; 
-    int ic_false;
-  } t_adresse; 
+    int currentInstruction_goto; 
+    int currentInstruction_false;
+  } t_adress; 
 
 %}
 
@@ -26,7 +26,7 @@
 {
   double valeur;
   char nom[50];
-  t_adresse adresse;
+  t_adress adresse;
 }
 
 %token <valeur> NUMBER
@@ -37,8 +37,8 @@
 %token SINON
 %token FINSI
 %token REPEAT
-%token JMP 
-%token JNZ
+%token JUMP 
+%token JUMP_IF_NOT_ZERO
 %token OUT
 
 
@@ -46,33 +46,42 @@
 %left '*' '/'     /* associativité à gauche */
 
 %%
-bloc : bloc instruction '\n' 
-      |    /* Epsilon */
-      ;
-instruction : expression { ins (OUT,0);   /* imprimer le résultat de l'expression */  }
+bloc :
+    bloc instruction '\n' 
+    |    /* Epsilon */
+    ;
 
-            | SI expression '\n' { $1.ic_goto = ic;  
-                                   ins (JNZ,0);    }
-              ALORS '\n' bloc    { $1.ic_false = ic;
-                                   ins (JMP,0);
-                                   instructions[$1.ic_goto].second = ic;  
-                                  }
-              SINON '\n' bloc    { instructions[$1.ic_false].second = ic; }
-              FINSI              {   }
+instruction : 
+    expression { addInstruct(OUT,0);   /* imprimer le résultat de l'expression */  }
 
-            | REPEAT '(' expression ')' expression { /* TO DO */ }
+    | SI expression '\n'  { 
+                            $1.currentInstruction_goto = currentInstruction;  
+                            addInstruct(JUMP_IF_NOT_ZERO,0);
+                          }
+      ALORS '\n' bloc     { 
+                            $1.currentInstruction_false = currentInstruction;
+                            addInstruct(JUMP,0);
+                            instructions[$1.currentInstruction_goto].second = currentInstruction;  
+                          }
+      SINON '\n' bloc     { instructions[$1.currentInstruction_false].second = currentInstruction; }
+      FINSI               {   }
 
-            | IDENTIFIER '=' expression  { variables[$1] = $3;
-                         cout << "Affectation de " << $3 << " à " << $1 << endl;}
-            |   /* Ligne vide*/
-            ;
-expression: expression '+' expression     { ins('+', 0);}
-          | expression '-' expression     { ins('-', 0);}
-          | expression '*' expression     { ins('*', 0);}
-          | expression '/' expression     { ins('/', 0);}
+    | REPEAT '(' expression ')' expression { /* TO DO */ }
+
+    | IDENTIFIER '=' expression { 
+                                  variables[$1] = $3;
+                                  cout << "Affectation de " << $3 << " à " << $1 << endl;
+                                }
+    |   /* Ligne vide*/
+    ;
+
+expression: expression '+' expression     { addInstruct('+', 0);}
+          | expression '-' expression     { addInstruct('-', 0);}
+          | expression '*' expression     { addInstruct('*', 0);}
+          | expression '/' expression     { addInstruct('/', 0);}
           | '(' expression ')'            { }
-          | NUMBER                        { ins(NUMBER, $1);}
-          | IDENTIFIER                    { ins(IDENTIFIER, variables[$1]);}
+          | NUMBER                        { addInstruct(NUMBER, $1);}
+          | IDENTIFIER                    { addInstruct(IDENTIFIER, variables[$1]);}
           ;
 %%
 
@@ -84,8 +93,8 @@ string nom(int instruction){
    case '*'     : return "MUL";
    case NUMBER  : return "NUM";
    case OUT     : return "OUT";
-   case JNZ     : return "JNZ";   // Jump if not zero
-   case JMP     : return "JMP";   // Unconditional Jump
+   case JUMP_IF_NOT_ZERO     : return "JUMP_IF_NOT_ZERO";   // Jump if not zero
+   case JUMP     : return "JUMP";   // Unconditional Jump
    default  : return to_string (instruction);
    }
 }
@@ -93,8 +102,7 @@ string nom(int instruction){
 void print_program(){
   cout << "==== CODE GENERE ====" << endl;
   int i = 0;
-  for (auto ins : instructions )
-    cout << i++ << '\t' << nom(ins.first) << "\t" << ins.second << endl;
+  for (auto instruct : instructions ) cout << i++ << '\t' << nom(instruct.first) << "\t" << instruct.second << endl;
   cout << "=====================" << endl;  
 }
 
@@ -110,43 +118,42 @@ void run_program(){
   double x,y;
 
   cout << "===== EXECUTION =====" << endl;
-  ic = 0;
-  while ( ic < instructions.size() ){
-    auto ins = instructions[ic];
-    //cout << ic << '\t' << nom(ins.first) << "\t" << ins.second << endl;
+  currentInstruction = 0;
+  while ( currentInstruction < instructions.size() ){
+    auto instruct = instructions[currentInstruction];
+    //cout << currentInstruction << '\t' << nom(instruct.first) << "\t" << instruct.second << endl;
     
-    switch(ins.first){
+    switch(instruct.first){
       case '+':
         x = depiler(pile);
         y = depiler(pile);
         pile.push_back(y+x);
-        ic++;
+        currentInstruction++;
       break;
     
       case '*':
         x = depiler(pile);
         y = depiler(pile);
         pile.push_back(y*x);
-        ic++;
+        currentInstruction++;
       break;
     
       case NUMBER :
-        pile.push_back(ins.second);
-        ic++;
+        pile.push_back(instruct.second);
+        currentInstruction++;
       break;
     
-      case JMP :
-        ic = ins.second;
+      case JUMP :
+        currentInstruction = instruct.second;
       break;
     
-      case JNZ :
-        x = depiler(pile);
-        ic = ( x ? ic + 1 : ins.second);
+      case JUMP_IF_NOT_ZERO :
+        currentInstruction = (depiler(pile) ? currentInstruction + 1 : instruct.second);
       break;
 
       case OUT :
         cout << "Résultat : " << depiler(pile) << endl;
-        ic++;
+        currentInstruction++;
       break;
     }
   }
@@ -154,7 +161,6 @@ void run_program(){
 }
 
 int main(int argc, char **argv) {
-  
   if ( argc > 1 )
     yyin = fopen( argv[1], "r" );
   else
@@ -164,5 +170,4 @@ int main(int argc, char **argv) {
   print_program();
 
   run_program();
-
 }

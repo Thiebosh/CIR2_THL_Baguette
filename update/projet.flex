@@ -4,9 +4,9 @@
 
 // structure pour stocker les adresses pour les sauts condistionnels et autres...
 typedef struct adr {
-    int ic_goto; 
-    int ic_false;
-} t_adresse;
+    int currentInstruction_goto; 
+    int currentInstruction_false;
+} t_adress;
 
 #include "projet.bison.hpp" 
 
