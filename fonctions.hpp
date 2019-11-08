@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+//#include <math.h>
 
 #define FOLDER "programFiles/"
 #define EXTENSION ".choco"
@@ -23,3 +25,4 @@ FILE* workFile(bool getFolder);
 std::vector<std::string> listeFichiers();
 
 FILE* fluxFichier(bool getFolder, std::string filename);
+

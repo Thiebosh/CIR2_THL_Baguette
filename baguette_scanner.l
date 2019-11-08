@@ -1,12 +1,21 @@
+/*fichier flex*/
+%option noyywrap
 %{
   #include "parser.bison.cpp"
 %}
 
 %%
 
-[0-9]+(\.[0-9]*)?([Ee][0-9]+)? {  yylval.val = atof(yytext); return NUMBER; }
+[0-9]+(\.[0-9]*)?([Ee][0-9]+)? {  yylval.valeur = atof(yytext); return NUMBER; }
 
-\n          {return '\n';}
+Répéter|Réitérer { return REPEAT; }
+
+si|SI|Si 			{return SI;}
+Alors|alors|ALORS 	{return ALORS;}
+Sinon|sinon|SINON	{return SINON;}
+FinSi|finsi|FINSI	{return FINSI;}
+
+
 plus        {return '+';}
 fois        {return '*';}
 moins       {return '-';}
@@ -16,20 +25,20 @@ racine      {return SQRT ;}
 et          {return '&' ;}
 ou          {return '|' ;}
 non         {return '!' ;}
-Repeter     {return REPEAT ;}
-" "         {}
-un          {yylval.val = 1 ; return NUMBER ;}
-deux        {yylval.val = 2 ; return NUMBER ;}
+un          {yylval.valeur = 1 ; return NUMBER ;}
+deux        {yylval.valeur = 2 ; return NUMBER ;}
 sin|sinus   {return SIN ;}
 tan|tangente  {return TAN ;}
-Si|if       {return IF ;}
-Alors|then  {return THEN ;}
-Sinon|else  {return ELSE ;}
 
-[a-zA-Z_][0-9a-zA-Z_]* { strcpy(yylval.name,yytext); return IDENTIFIER; }
 
-.      { return yytext[0]; }
+[A-Za-z_][0-9A-Za-z_]*   		{ strcpy(yylval.nom,yytext); return IDENTIFIER; }
+
+\r\n  							{  return '\n'; }	
+\r								{  return '\n'; }
+\n								{  return '\n'; }
+
+[ \t]							{ }
+
+.								{  return yytext[0]; }
 
 %%
-
-int yywrap(){ return 0; }

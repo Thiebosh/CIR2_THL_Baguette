@@ -95,3 +95,5 @@ FILE* fluxFichier(bool getFolder, string filename) {
     cout << "Echec d'accès au fichier" << endl;
     exit(0);//return null;?
 }
+
+
