@@ -11,6 +11,7 @@ améliorations :
 - typage faible des variables (auto en cpp ou spécifie selon format de la variable)
 - typage fort des fonctions
 - indice -1 d'un tableau pour accéder au dernier élément
+- tab[] = val pour allocation dynamique
 - boucles for imbriquées (Pour x+1 va de 0 à 10 et y+1 va de 0 à 10 {})
 - séparation des nombres 1_000 <=> 1000 (bonne lisibilitée)
 
