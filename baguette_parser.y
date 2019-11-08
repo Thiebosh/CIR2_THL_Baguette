@@ -10,7 +10,7 @@
   int yyerror(char *s);
 
   map<string,double> variables; // table de symboles
-  vector<pair<int,double>> instructionList;
+  vector<pair<int,double>> instructions;
 %}
 
 %union{
@@ -20,89 +20,44 @@
 
 
 %token <val>NUMBER
-%type <val>expression
+%type <val>expr
 %token <name>IDENTIFIER
+%token REPEAT
 %token SIN
 %token TAN
 %token IF
 %token ELSE
 %token THEN
 %token SQRT
-%token REPEAT
 %left '+' '-'
 %left '*' '/'
 
 %%
-program:
-  program line
-  | /* Epsilon */
+program: /* empty */		
+  | program line      
 	;
 
-line: 
-  line instruction ';'
-  | '\n'
+line: '\n'
+	| expr ';' { cout << endl << "Result : " << $1 << endl; }
+  | IDENTIFIER '=' expr ';' { variables[$1] = $3; cout << $1 << " = " << $3 << endl;}
 	;
 
-instruction : 
-  expression                              { }
-  | REPEAT '(' expression ')' expression  { for (int i=0; i<$3; i++) cout << $5 << endl; }
-  | IDENTIFIER '=' expression             {  variables[$1] = $3; cout << "affectation de " << $3 << " à " << $1 << endl; }
-  ;
-
-expression : 
-  '(' expression ')'            { }
-  | expression '+' expression   { instructionList.push_back(make_pair('+',0)); }
-  | expression '-' expression   { instructionList.push_back(make_pair('-',0)); }
-  | expression '*' expression   { instructionList.push_back(make_pair('*',0)); }
-  | expression '/' expression   { instructionList.push_back(make_pair('/',0)); }
-  | NUMBER                      { instructionList.push_back(make_pair(NUMBER,$1)); }
-  | IDENTIFIER                  { instructionList.push_back(make_pair(IDENTIFIER,variables[$1])); }
-  ;
+expr:
+  NUMBER                   { $$ = $1; }
+    | IDENTIFIER              { $$ = variables.at($1); }
+    | expr '+' expr     { $$ = $1 + $3; cout << $1 << " + " << $3 << " = " << $$ << endl; }
+    | expr '-' expr     { $$ = $1 - $3; cout << $1 << " - " << $3 << " = " << $$ << endl; }
+    | expr '*' expr     { $$ = $1 * $3; cout << $1 << " * " << $3 << " = " << $$ << endl; }
+    | '(' expr ')'      { $$ = $2; }
+    | SIN '(' expr ')'  { $$ = sin($3); cout << "sin(" << $3 << ") = " << $$ << endl; }
+    | TAN '(' expr ')'  { $$ = tan($3); cout << "tan(" << $3 << ") = " << $$ << endl; }
+    | SQRT '(' expr ')' { $$ = sqrt($3); cout << "sqrt(" << $3 << ") = " << $$ << endl;}
+    ;
 %%
 
 int yyerror(char *s) {
     cout << s << endl;
     return 0;
-}
-
-
-void print_program() {
-  cout << "code généré" << endl;
-  for (auto instruct : instructionList) cout << instruct.first << "\t" << instruct.second << endl;
-  cout << "fin du code généré" << endl;
-}
-
-double depiler(vector<double> &pile) {
-  double t = pile[pile.size()-1];
-  cout << "Dépiler " << t << endl;
-  pile.pop_back();
-  return t;
-}
-
-void run_program() {
-  vector<double> pile;
-  double x,y;
-
-  cout << "exécution" << endl;
-  for (auto instruct : instructionList) {//remplacer par un while car ...
-    switch(instruct.first) {
-      case '+':
-        x = depiler(pile);
-        y = depiler(pile);
-        pile.push_back(x+y);
-        break;
-      case '*':
-        x = depiler(pile);
-        y = depiler(pile);
-        pile.push_back(x*y);
-        break;
-      case NUMBER:
-        pile.push_back(instruct.second);
-        break;
-    }
-  }
-  cout << "résultat : " << depiler(pile) << endl;
-  cout << "fin d'exécution" << endl;
 }
 
 int main(int argc, char **argv) {

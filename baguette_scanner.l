@@ -16,7 +16,7 @@ racine      {return SQRT ;}
 et          {return '&' ;}
 ou          {return '|' ;}
 non         {return '!' ;}
-Répéter     {return REPEAT ;}
+Repeter     {return REPEAT ;}
 " "         {}
 un          {yylval.val = 1 ; return NUMBER ;}
 deux        {yylval.val = 2 ; return NUMBER ;}
