@@ -19,7 +19,6 @@
 }
 
 
-%token <val>NUMBER
 %type <val>expr
 %token <name>IDENTIFIER
 %token REPEAT
@@ -49,6 +48,7 @@ expr:
     | expr '-' expr     { $$ = $1 - $3; cout << $1 << " - " << $3 << " = " << $$ << endl; }
     | expr '*' expr     { $$ = $1 * $3; cout << $1 << " * " << $3 << " = " << $$ << endl; }
     | '(' expr ')'      { $$ = $2; }
+    | REPEAT expr '{'  < { $$ = }
     | SIN '(' expr ')'  { $$ = sin($3); cout << "sin(" << $3 << ") = " << $$ << endl; }
     | TAN '(' expr ')'  { $$ = tan($3); cout << "tan(" << $3 << ") = " << $$ << endl; }
     | SQRT '(' expr ')' { $$ = sqrt($3); cout << "sqrt(" << $3 << ") = " << $$ << endl;}
@@ -63,4 +63,5 @@ int yyerror(char *s) {
 int main(int argc, char **argv) {
   yyin = mainContent(argc, argv);
   yyparse();
+  
 }

@@ -108,4 +108,6 @@ void run_program() {
 int main(int argc, char **argv) {
   yyin = mainContent(argc, argv);
   yyparse();
+  print_program();
+  run_program();
 }
