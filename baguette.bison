@@ -1,6 +1,20 @@
 /*fichier bison : parse*/
 %{
-  #include "fonctions.hpp"
+  //gestion fichiers et dossiers
+  #include <unistd.h>
+  #include <sys/stat.h>
+  #include <sys/types.h>
+  #include <dirent.h>
+
+  #include <iostream>
+  #include <iomanip>
+  #include <string>
+  #include <vector>
+  #include <map>
+  #include <cmath>
+
+  #define FOLDER "programFiles/"
+  #define EXTENSION ".choco"
 
   using namespace std;  
 
@@ -13,13 +27,26 @@
 
   vector<pair<int,double>> instructions;
   int currentInstruction = 0;   // compteur instruction 
-  inline void addInstruct(int c, double d) { instructions.push_back(make_pair(c, d)); currentInstruction++;};
+  inline void addInstruct(int command, double decimal) { instructions.push_back(make_pair(command, decimal)); currentInstruction++;};
 
   // structure pour stocker les adresses pour les sauts condistionnels et autres...
   typedef struct adr {
     int currentInstruction_goto; 
     int currentInstruction_false;
-  } t_adress; 
+  } t_adress;
+
+  //association commande / code
+  const map<string,int> commandList = {
+		{"PRINT",0},
+		{"JUMP",1},
+    {"JUMP_IF_NOT_ZERO",2},
+    {"NUMBER",3},
+    {"IDENTIFIER",4},
+    {"+",5},
+    {"-",6},
+    {"*",7},
+    {"/",8}
+  };
 %}
 
 %union{
@@ -38,7 +65,7 @@
 %token REPEAT
 %token JUMP 
 %token JUMP_IF_NOT_ZERO
-%token OUT
+%token PRINT
 %token SIN
 %token TAN
 %token SQRT
@@ -50,19 +77,20 @@
 %%
 bloc :
     bloc instruction '\n' 
+    | bloc instruction
     |    /* Epsilon */
     ;
 
 instruction : 
-    expression { addInstruct(OUT,0);   /* imprimer le résultat de l'expression */  }
+    expression { addInstruct(commandList.at("PRINT"),0);   /* imprimer le résultat de l'expression */  }
 
     | SI expression '\n'  { 
                             $1.currentInstruction_goto = currentInstruction;  
-                            addInstruct(JUMP_IF_NOT_ZERO,0);
+                            addInstruct(commandList.at("JUMP_IF_NOT_ZERO"),0);
                           }
       ALORS '\n' bloc     { 
                             $1.currentInstruction_false = currentInstruction;
-                            addInstruct(JUMP,0);
+                            addInstruct(commandList.at("JUMP"),0);
                             instructions[$1.currentInstruction_goto].second = currentInstruction;  
                           }
       SINON '\n' bloc     { instructions[$1.currentInstruction_false].second = currentInstruction; }
@@ -78,41 +106,36 @@ instruction :
     ;
 
 expression: 
-    expression '+' expression     { addInstruct('+', 0);}
-    | expression '-' expression     { addInstruct('-', 0);}
-    | expression '*' expression     { addInstruct('*', 0);}
-    | expression '/' expression     { addInstruct('/', 0);}
+    expression '+' expression     { addInstruct(commandList.at("+"), 0);}
+    | expression '-' expression     { addInstruct(commandList.at("-"), 0);}
+    | expression '*' expression     { addInstruct(commandList.at("*"), 0);}
+    | expression '/' expression     { addInstruct(commandList.at("/"), 0);}
     | '(' expression ')'            { }
-    | NUMBER                        { addInstruct(NUMBER, $1);}
-    | IDENTIFIER                    { addInstruct(IDENTIFIER, variables[$1]);}
-
-    ;
-%%
-/*
+    | NUMBER                        { addInstruct(commandList.at("NUMBER"), $1);}
+    | IDENTIFIER                    { addInstruct(commandList.at("IDENTIFIER"), variables[$1]);}
+  /*
     | SIN '(' expr ')'  { $$ = sin($3); cout << "sin(" << $3 << ") = " << $$ << endl; }
     | TAN '(' expr ')'  { $$ = tan($3); cout << "tan(" << $3 << ") = " << $$ << endl; }
     | SQRT '(' expr ')' { $$ = sqrt($3); cout << "sqrt(" << $3 << ") = " << $$ << endl;}
-*/
+  */
+    ;
+%%
 
 
-// Pour imprimer le code généré de manière plus lisible 
-string nom(int instruction) {
-  switch (instruction){
-   case '+'               : return "ADD";
-   case '*'               : return "MUL";
-   case NUMBER            : return "NUM";
-   case OUT               : return "OUT";
-   case JUMP_IF_NOT_ZERO  : return "JNZ";   // Jump if not zero
-   case JUMP              : return "JMP";   // Unconditional Jump
-   default                : return to_string (instruction);
-   }
-}
+FILE* lectureFichier(string filename) {
+  //ajoute extension si necessaire
+  if (filename.find(EXTENSION, filename.size() - ((string)EXTENSION).size()) ==  string::npos) {
+    filename += EXTENSION;
+  }
 
-void print_program() {
-  cout << "==== CODE GENERE ====" << endl;
-  int i = 0;
-  for (auto instruct : instructions ) cout << i++ << '\t' << nom(instruct.first) << "\t" << instruct.second << endl;
-  cout << "=====================" << endl;  
+  //exécute fichier s'il existe
+  cout << filename << endl;
+  if (access((FOLDER+filename).c_str(), F_OK) != -1) {
+    return fopen((FOLDER+filename).c_str(),"r");
+  }
+  
+  cout << "Echec d'accès au fichier" << endl;
+  exit(0);
 }
 
 double depiler(vector<double> &pile) {
@@ -122,57 +145,159 @@ double depiler(vector<double> &pile) {
   return t;
 }
 
-void run_program() {
-  vector<double> pile; 
-  double x,y;
+int main(int argc, char **argv) {
+  {//teste existence de dossier
+    if (access(FOLDER, F_OK) == -1) {//le "/" assure que c'est un dossier
+      cout << "Dossier de programmes non trouvé : création en cours... ";
 
-  cout << "===== EXECUTION =====" << endl;
-  currentInstruction = 0;
-  while ( currentInstruction < instructions.size() ){
-    auto instruct = instructions[currentInstruction];
-    //cout << currentInstruction << '\t' << nom(instruct.first) << "\t" << instruct.second << endl;
-    
-    switch(instruct.first){
-      case '+':
-        x = depiler(pile);
-        y = depiler(pile);
-        pile.push_back(y+x);
-        currentInstruction++;
-      break;
-    
-      case '*':
-        x = depiler(pile);
-        y = depiler(pile);
-        pile.push_back(y*x);
-        currentInstruction++;
-      break;
-    
-      case NUMBER :
-        pile.push_back(instruct.second);
-        currentInstruction++;
-      break;
-    
-      case JUMP :
-        currentInstruction = instruct.second;
-      break;
-    
-      case JUMP_IF_NOT_ZERO :
-        currentInstruction = (depiler(pile) ? currentInstruction + 1 : instruct.second);
-      break;
-
-      case OUT :
-        cout << "Résultat : " << depiler(pile) << endl;
-        currentInstruction++;
-      break;
+      if (mkdir(FOLDER, 0777)) {//échec de création
+        //ne peut pas fonctionner sans
+        cout << "Echec de création du dossier " << FOLDER << endl;
+        exit(0);
+      }
+      else {
+        cout << "fait" << endl << "Placez votre ou vos fichiers " << EXTENSION << " dans le répertoire créé" << endl;
+      }
     }
   }
-  cout << "=====================" << endl;  
-}
 
+  {//attribution du flux à traiter
+    ++argv, --argc;
+    if (argc) {
+      yyin = lectureFichier(argv[0]);
+    }
+    else {
+      int saisie;
+      cout << "0 - Interprétation en fichier" << endl
+          << "1 - Interprétation en console" << endl; 
+      do cin >> saisie; while (saisie < 0 || saisie > 1);
 
-int main(int argc, char **argv) {
-  yyin = mainContent(argc, argv);
-  yyparse();
-  print_program();
-  run_program();
+      //initialisation de variables pour cas 0
+      vector<string> fileList;
+      DIR *fluxFolder;
+      struct dirent *fileFolder;
+      string filename;
+
+      switch(saisie) {
+        case 0 :
+          //liste contenu du dossier
+          cout << endl << "Contenu du dossier " << FOLDER << " :" << endl;
+          fluxFolder = opendir(FOLDER);
+          while (fileFolder = readdir(fluxFolder)) {
+            filename = (string)fileFolder->d_name;
+            if (filename.find(EXTENSION, filename.size() - ((string)EXTENSION).size()) !=  string::npos) {
+              cout << fileList.size()+1 << " - \"" << filename << "\"" << endl;
+              fileList.push_back(filename);
+            }
+          }
+          closedir (fluxFolder);
+          
+          //choisit fichier à traiter
+          cout << endl << "Votre sélection : ";
+          do cin >> saisie; while (saisie <= 0 || saisie > fileList.size());
+
+          yyin = lectureFichier(fileList[--saisie]);
+          break;
+        default ://case 1 :
+          yyin = stdin;
+          break;
+      }
+    }
+    yyparse();
+  }
+
+  {//print_program
+    cout << endl << "==== CODE GENERE ====" << endl;
+
+    int i = 0;
+    for (auto instruct : instructions) {
+      //displayCommand - imprimer le code généré de manière plus lisible 
+      cout << "INSTRUCTION " << setw(1+(int)(log10(instructions.size()))) << i++ << " - ";
+
+      //"faux" switch
+      if (instruct.first == commandList.at("NUMBER")) cout << "GET NUM " << instruct.second;
+      
+      else if (instruct.first == commandList.at("JUMP_IF_NOT_ZERO"))  cout << "IF NOT ZERO, JUMP TO INSTRUCTION " << instruct.second;   // Jump if not zero
+      else if (instruct.first == commandList.at("JUMP"))              cout << "JUMP TO INSTRUCTION " << instruct.second;   // Unconditional Jump
+
+      //2 précédents
+      else if (instruct.first == commandList.at("+")) cout << "ADDITION OF TWO LAST NUM";
+      else if (instruct.first == commandList.at("-")) cout << "SUBSTRACTION OF TWO LAST NUM";
+      else if (instruct.first == commandList.at("*")) cout << "MULTIPLICATION OF TWO LAST NUM";
+      else if (instruct.first == commandList.at("/")) cout << "DIVISION OF TWO LAST NUM";
+
+      else if (instruct.first == commandList.at("PRINT")) cout << "PRINT RESULT";
+      
+      /*default*/ else cout << "UNKNOW COMMAND : " << instruct.first;
+
+      cout << endl;
+    }
+
+    cout << "=====================" << endl;
+  }
+
+  {//run program (similaire à de l'assembleur)
+    vector<double> pile; 
+    double x,y;
+
+    cout << endl << "===== EXECUTION =====" << endl;
+    currentInstruction = 0;
+    while ( currentInstruction < instructions.size() ){
+      auto instruct = instructions[currentInstruction];
+      //cout << currentInstruction << '\t' << displayCommand(instruct.first) << "\t" << instruct.second << endl;
+     
+      {//"faux" switch
+        if (instruct.first == commandList.at("NUMBER")) {
+          pile.push_back(instruct.second);
+          currentInstruction++;
+        }
+        //else if (instruct.first == commandList.at("IDENTIFIER"))
+
+        else if (instruct.first == commandList.at("JUMP_IF_NOT_ZERO")) {
+          currentInstruction = (depiler(pile) ? currentInstruction + 1 : instruct.second);
+        }
+        else if (instruct.first == commandList.at("JUMP")) {
+          currentInstruction = instruct.second;
+        }
+
+        else if (instruct.first == commandList.at("+")) {
+          x = depiler(pile);
+          y = depiler(pile);
+          pile.push_back(y+x);
+          currentInstruction++;
+        }
+        else if (instruct.first == commandList.at("-")) {
+          x = depiler(pile);
+          y = depiler(pile);
+          pile.push_back(y-x);
+          currentInstruction++;
+        }
+        else if (instruct.first == commandList.at("*")) {
+          x = depiler(pile);
+          y = depiler(pile);
+          pile.push_back(y*x);
+          currentInstruction++;
+        }
+        else if (instruct.first == commandList.at("/")) {
+          x = depiler(pile);
+          y = depiler(pile);
+          pile.push_back(y/x);
+          currentInstruction++;
+        }
+
+        else if (instruct.first == commandList.at("PRINT")) {
+          cout << "Résultat : " << depiler(pile) << endl;
+          currentInstruction++;
+        }
+        
+        else {//default
+          cout << "unknow command : " << instruct.first << endl;
+          currentInstruction++;
+        }
+      }
+    }
+    cout << "=====================" << endl;
+  }
+  
+  return 0;
 }

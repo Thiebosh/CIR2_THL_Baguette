@@ -2,7 +2,7 @@ compile_keep:
 	rm -rf baguette
 	bison -d baguette.bison -o parser.bison.cpp
 	flex -o scanner.lex.cpp baguette.flex
-	g++ scanner.lex.cpp fonctions.cpp -o baguette
+	g++ scanner.lex.cpp -o baguette
 
 compile:
 	make compile_keep
@@ -14,3 +14,11 @@ run:
 all:
 	make compile
 	make run
+
+
+
+compile_exemple(with extern file):
+	rm -rf baguette
+	bison -d baguette.bison -o parser.bison.cpp
+	flex -o scanner.lex.cpp baguette.flex
+	g++ scanner.lex.cpp fonctions.cpp -o baguette
