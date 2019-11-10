@@ -10,10 +10,10 @@
 
 Répéter|Réitérer { return REPEAT; }
 
-si|SI|Si 			{return SI;}
-Alors|alors|ALORS 	{return ALORS;}
-Sinon|sinon|SINON	{return SINON;}
-FinSi|finsi|FINSI	{return FINSI;}
+si|SI|Si 			{return IF;}
+Alors|alors|ALORS 	{return THEN;}
+Sinon|sinon|SINON	{return ELSE;}
+FinSi|finsi|FINSI	{return END_IF;}
 
 
 plus        {return '+';}
