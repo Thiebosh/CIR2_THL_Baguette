@@ -23,11 +23,25 @@
   int yyerror(char *s) { printf("%s\n", s); return 0; }
 
 
-  map<string,double> variables; // table de symboles
+  //liste de commandes
+  enum class Command { 
+    _PRINT_,
+		_JUMP_,
+    _JUMP_IF_ZERO_,
+    _PLUS_,
+    _MOINS_,
+    _FOIS_,
+    _DIVISE_PAR_,
+    _NUMBER_,
+    _GET_IDENTIFIER_,
+    _SET_IDENTIFIER_
+  };
 
-  vector<pair<int,double>> instructions;
+
+  //liste d'instructions (utilise liste de commandes)
   int currentInstruction = 0;   // compteur instruction 
-  inline void addInstruct(int command, double decimal) { instructions.push_back(make_pair(command, decimal)); currentInstruction++; };
+  vector<pair<Command,double>> instructions;
+  inline void addInstruct(Command command, double decimal = 0) { instructions.push_back(make_pair(command, decimal)); currentInstruction++; };
 
   // structure pour stocker les adresses pour les sauts condistionnels et autres...
   typedef struct adr {
@@ -35,19 +49,72 @@
     int currentInstruction_false;
   } t_adress;
 
-  //association commande / code
-  const map<string,int> commandList = {
-		{"PRINT",0},
-		{"JUMP",1},
-    {"JUMP_IF_ZERO",2},
-    {"+",3},
-    {"-",4},
-    {"*",5},
-    {"/",6},
-    {"NUMBER",7},
-    {"GET_IDENTIFIER",8},
-    {"SET_IDENTIFIER",9}
+
+  map<string,double> variables; // table de symboles
+
+
+  //exécution liée aux commandes (utilise liste de commandes et currentInstruction)
+  double depiler(vector<double> &pile) {
+    double t = 0;
+    if (pile.size() > 0) {
+      t = pile[pile.size()-1];
+      //cout << "Dépiler " << t << endl; 
+      pile.pop_back();
+    }
+    return t;
+  }
+
+  typedef void (*functionPointer)(pair<Command, double> &instructionContent, vector<double>& pile);
+  
+  const map<Command, functionPointer> executeCommand = {
+    {Command::_PRINT_,          
+      [](pair<Command, double>& instructionContent, vector<double>& pile) { 
+        cout << "Résultat : " << depiler(pile) << endl;
+      }},
+
+    {Command::_JUMP_,           
+      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+        currentInstruction = (int)instructionContent.second;
+      }},
+    {Command::_JUMP_IF_ZERO_,   
+      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+        currentInstruction = (depiler(pile) ? currentInstruction + 1 : (int)instructionContent.second);
+      }},
+
+    {Command::_PLUS_,           
+      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+        pile.push_back(depiler(pile) + depiler(pile));
+      }},
+    {Command::_MOINS_,          
+      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+        double tmp = depiler(pile);
+        pile.push_back(depiler(pile) - tmp);
+      }},
+    {Command::_FOIS_,           
+      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+        pile.push_back(depiler(pile) * depiler(pile));
+      }},
+    {Command::_DIVISE_PAR_,     
+      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+        double tmp = depiler(pile);
+        pile.push_back(depiler(pile) / tmp);
+      }},
+
+    {Command::_NUMBER_,         
+      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+        pile.push_back(instructionContent.second);
+      }},
+    {Command::_GET_IDENTIFIER_, 
+      [](pair<Command, double> &instructionContent, vector<double>& pile) { 
+        pile.push_back(instructionContent.second);
+      }},
+    {Command::_SET_IDENTIFIER_, 
+      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+        /*variables[setVariables[currentInstruction]] = depiler(pile);*/ 
+      }}
   };
+
+
 %}
 
 %union{
@@ -83,15 +150,15 @@ bloc :
     ;
 
 instruction : 
-    expression { addInstruct(commandList.at("PRINT"),0);   /* imprimer le résultat de l'expression */  }
+    expression { addInstruct(Command::_PRINT_);   /* imprimer le résultat de l'expression */  }
 
     | IF expression '\n'  { 
                             $1.currentInstruction_goto = currentInstruction;  
-                            addInstruct(commandList.at("JUMP_IF_ZERO"),0);
+                            addInstruct(Command::_JUMP_IF_ZERO_);
                           }
       THEN '\n' bloc     { 
                             $1.currentInstruction_false = currentInstruction;
-                            addInstruct(commandList.at("JUMP"),0);
+                            addInstruct(Command::_JUMP_);
                             instructions[$1.currentInstruction_goto].second = currentInstruction;  
                           }
       ELSE '\n' bloc     { instructions[$1.currentInstruction_false].second = currentInstruction; }
@@ -101,19 +168,19 @@ instruction :
 
     | IDENTIFIER '=' expression { 
                                   variables[$1] = $3; 
-                                  addInstruct(commandList.at("SET_IDENTIFIER"), $3); 
+                                  addInstruct(Command::_SET_IDENTIFIER_, $3); 
                                 }
     |   /* Ligne vide*/
     ;
 
 expression: 
-    expression '+' expression     { addInstruct(commandList.at("+"), 0);}
-    | expression '-' expression     { addInstruct(commandList.at("-"), 0);}
-    | expression '*' expression     { addInstruct(commandList.at("*"), 0);}
-    | expression '/' expression     { addInstruct(commandList.at("/"), 0);}
+    expression '+' expression     { addInstruct(Command::_PLUS_);}
+    | expression '-' expression     { addInstruct(Command::_MOINS_);}
+    | expression '*' expression     { addInstruct(Command::_FOIS_);}
+    | expression '/' expression     { addInstruct(Command::_DIVISE_PAR_);}
     | '(' expression ')'            { }
-    | NUMBER                        { addInstruct(commandList.at("NUMBER"), $1);}
-    | IDENTIFIER                    { addInstruct(commandList.at("GET_IDENTIFIER"), variables[$1]);}
+    | NUMBER                        { addInstruct(Command::_NUMBER_, $1);}
+    | IDENTIFIER                    { addInstruct(Command::_GET_IDENTIFIER_, variables[$1]);}
   /*
     | SIN '(' expr ')'  { $$ = sin($3); cout << "sin(" << $3 << ") = " << $$ << endl; }
     | TAN '(' expr ')'  { $$ = tan($3); cout << "tan(" << $3 << ") = " << $$ << endl; }
@@ -148,7 +215,7 @@ int main(int argc, char **argv) {
 
 
 bool folderExist() {
-  if (access(FOLDER, F_OK) == -1) {//le "/" assure que c'est un dossier
+  if (access(FOLDER, F_OK) == -1) {//le _DIVISE_PAR_ assure que c'est un dossier
     cout << "Dossier de programmes non trouvé : création en cours... ";
 
     if (mkdir(FOLDER, 0777)) {//échec de création
@@ -232,27 +299,27 @@ void displayGeneratedProgram() {
   cout << endl << "==== CODE GENERE ====" << endl;
 
   int i = 0;
-  for (auto instruct : instructions) {
+  for (auto instructionContent : instructions) {
     //displayCommand - imprimer le code généré de manière plus lisible 
     cout << "INSTRUCTION " << setw(1+(int)(log10(instructions.size()))) << i++ << " - ";
 
     //"faux" switch
-    if (instruct.first == commandList.at("NUMBER")) cout << "GET NUM " << instruct.second;
-    else if (instruct.first == commandList.at("SET_IDENTIFIER")) cout << "SET NUM " << instruct.second << " IN MEMORY";//instruct.second ne comprend que la première valeur de l'expression donnée à la variable
-    else if (instruct.first == commandList.at("GET_IDENTIFIER")) cout << "GET NUM " << instruct.second << " IN MEMORY";//instruct.second ne comprend que la première valeur de l'expression donnée à la variable
+    if (instructionContent.first == Command::_NUMBER_) cout << "GET NUM " << instructionContent.second;
+    else if (instructionContent.first == Command::_SET_IDENTIFIER_) cout << "SET NUM " << instructionContent.second << " IN MEMORY";//instructionContent.second ne comprend que la première valeur de l'expression donnée à la variable
+    else if (instructionContent.first == Command::_GET_IDENTIFIER_) cout << "GET NUM " << instructionContent.second << " IN MEMORY";//instructionContent.second ne comprend que la première valeur de l'expression donnée à la variable
     
-    else if (instruct.first == commandList.at("JUMP_IF_ZERO"))  cout << "IF ZERO, JUMP TO INSTRUCTION " << instruct.second;   // Jump if not zero
-    else if (instruct.first == commandList.at("JUMP"))              cout << "JUMP TO INSTRUCTION " << instruct.second;   // Unconditional Jump
+    else if (instructionContent.first == Command::_JUMP_IF_ZERO_)  cout << "IF ZERO, JUMP TO INSTRUCTION " << instructionContent.second;   // Jump if not zero
+    else if (instructionContent.first == Command::_JUMP_)              cout << "JUMP TO INSTRUCTION " << instructionContent.second;   // Unconditional Jump
 
     //2 précédents
-    else if (instruct.first == commandList.at("+")) cout << "ADDITION OF TWO LAST NUM";
-    else if (instruct.first == commandList.at("-")) cout << "SUBSTRACTION OF TWO LAST NUM";
-    else if (instruct.first == commandList.at("*")) cout << "MULTIPLICATION OF TWO LAST NUM";
-    else if (instruct.first == commandList.at("/")) cout << "DIVISION OF TWO LAST NUM";
+    else if (instructionContent.first == Command::_PLUS_) cout << "ADDITION OF TWO LAST NUM";
+    else if (instructionContent.first == Command::_MOINS_) cout << "SUBSTRACTION OF TWO LAST NUM";
+    else if (instructionContent.first == Command::_FOIS_) cout << "MULTIPLICATION OF TWO LAST NUM";
+    else if (instructionContent.first == Command::_DIVISE_PAR_) cout << "DIVISION OF TWO LAST NUM";
 
-    else if (instruct.first == commandList.at("PRINT")) cout << "PRINT RESULT";
+    else if (instructionContent.first == Command::_PRINT_) cout << "PRINT RESULT";
     
-    /*default*/ else cout << "UNKNOW COMMAND : " << instruct.first;
+    /*default*/ else cout << "UNKNOW COMMAND : " << (int)instructionContent.first;
 
     cout << endl;
   }
@@ -260,8 +327,6 @@ void displayGeneratedProgram() {
   cout << "=====================" << endl;
 }
 
-
-double depiler(vector<double> &pile);
 void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
   vector<double> pile; 
   double x,y;
@@ -269,74 +334,16 @@ void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
   cout << endl << "===== EXECUTION =====" << endl;
   currentInstruction = 0;
   while ( currentInstruction < instructions.size() ){
-    auto instruct = instructions[currentInstruction];
-    //cout << currentInstruction << '\t' << displayCommand(instruct.first) << "\t" << instruct.second << endl;
+    auto instructionContent = instructions[currentInstruction];
+    //cout << currentInstruction << '\t' << displayCommand(instructionContent.first) << "\t" << instructionContent.second << endl;
     
-    {//"faux" switch
-      if (instruct.first == commandList.at("NUMBER")) {
-        pile.push_back(instruct.second);
-        currentInstruction++;
-      }
-      else if (instruct.first == commandList.at("+")) {
-        x = depiler(pile);
-        y = depiler(pile);
-        pile.push_back(y+x);
-        currentInstruction++;
-      }
-      else if (instruct.first == commandList.at("-")) {
-        x = depiler(pile);
-        y = depiler(pile);
-        pile.push_back(y-x);
-        currentInstruction++;
-      }
-      else if (instruct.first == commandList.at("*")) {
-        x = depiler(pile);
-        y = depiler(pile);
-        pile.push_back(y*x);
-        currentInstruction++;
-      }
-      else if (instruct.first == commandList.at("/")) {
-        x = depiler(pile);
-        y = depiler(pile);
-        pile.push_back(y/x);
-        currentInstruction++;
-      }
-
-      else if (instruct.first == commandList.at("GET_IDENTIFIER")) {
-        pile.push_back(instruct.second);
-        currentInstruction++;
-      }
-      else if (instruct.first == commandList.at("SET_IDENTIFIER")) {
-        //variables[setVariables[currentInstruction]] = depiler(pile);//recupère résultat
-        currentInstruction++;
-      }
-
-      else if (instruct.first == commandList.at("JUMP_IF_ZERO")) {
-        currentInstruction = (depiler(pile) ? currentInstruction + 1 : instruct.second);
-      }
-      else if (instruct.first == commandList.at("JUMP")) {
-        currentInstruction = instruct.second;
-      }
-
-      else if (instruct.first == commandList.at("PRINT")) {
-        cout << "Résultat : " << depiler(pile) << endl;
-        currentInstruction++;
-      }
-      
-      else {//default
-        cout << "unknow command : " << instruct.first << endl;
-        currentInstruction++;
-      }
+    currentInstruction++;
+    if (executeCommand.find(instructionContent.first) != executeCommand.end()) {
+      (*(executeCommand.at(instructionContent.first)))(instructionContent, pile);
+    }
+    else {
+      cout << "unknow command : " << (int)instructionContent.first << endl;
     }
   }
   cout << "=====================" << endl;
-}
-double depiler(vector<double> &pile) {
-  double t = 0;
-  if (pile.size() > 0) {
-    t = pile[pile.size()-1];
-    //cout << "Dépiler " << t << endl; 
-    pile.pop_back();
-  }
-  return t;
 }
