@@ -333,7 +333,7 @@ void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
 }
 double depiler(vector<double> &pile) {
   double t = 0;
-  if (pile.size() > 1) {
+  if (pile.size() > 0) {
     t = pile[pile.size()-1];
     //cout << "Dépiler " << t << endl; 
     pile.pop_back();
