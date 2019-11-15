@@ -260,11 +260,10 @@ void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
     currentInstruction = 0;
     while ( currentInstruction < instructions.size() ){
         auto instructionContent = instructions[currentInstruction];
-        //cout << currentInstruction << '\t' << displayCommand(instructionContent.first) << "\t" << instructionContent.second << endl;
         
         currentInstruction++;
         if (executeCommand.find(instructionContent.first) != executeCommand.end()) {
-            (*(executeCommand.at(instructionContent.first)))(instructionContent, pile);
+            (*(executeCommand.at(instructionContent.first))) (instructionContent, pile);
         }
         else {
             cout << "unknow command : " << (int)instructionContent.first << endl;
