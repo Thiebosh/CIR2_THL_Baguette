@@ -16,7 +16,7 @@
   #define FOLDER "programFiles/"
   #define EXTENSION ".choco"
 
-  using namespace std;  
+  using namespace std;
 
   extern FILE *yyin;
   extern int yylex ();
@@ -24,7 +24,7 @@
 
 
   //liste de commandes
-  enum class Command { 
+  enum class Command {
     _PRINT_,
 		_JUMP_,
     _JUMP_IF_ZERO_,
@@ -64,53 +64,53 @@
     return t;
   }
 
-  typedef void (*functionPointer)(pair<Command, double> &instructionContent, vector<double>& pile);
+  typedef void (*functionPointer)(pair<Command, double> &instructionContent, vector<double> &pile);
   
   const map<Command, functionPointer> executeCommand = {
     {Command::_PRINT_,          
-      [](pair<Command, double>& instructionContent, vector<double>& pile) { 
+      [](pair<Command, double> &instructionContent, vector<double> &pile) { 
         cout << "Résultat : " << depiler(pile) << endl;
       }},
 
     {Command::_JUMP_,           
-      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+      [](pair<Command, double> &instructionContent, vector<double> &pile) {
         currentInstruction = (int)instructionContent.second;
       }},
     {Command::_JUMP_IF_ZERO_,   
-      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+      [](pair<Command, double> &instructionContent, vector<double> &pile) {
         currentInstruction = (depiler(pile) ? currentInstruction + 1 : (int)instructionContent.second);
       }},
 
     {Command::_PLUS_,           
-      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+      [](pair<Command, double> &instructionContent, vector<double> &pile) {
         pile.push_back(depiler(pile) + depiler(pile));
       }},
     {Command::_MOINS_,          
-      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+      [](pair<Command, double> &instructionContent, vector<double> &pile) {
         double tmp = depiler(pile);
         pile.push_back(depiler(pile) - tmp);
       }},
     {Command::_FOIS_,           
-      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+      [](pair<Command, double> &instructionContent, vector<double> &pile) {
         pile.push_back(depiler(pile) * depiler(pile));
       }},
     {Command::_DIVISE_PAR_,     
-      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+      [](pair<Command, double> &instructionContent, vector<double> &pile) {
         double tmp = depiler(pile);
         pile.push_back(depiler(pile) / tmp);
       }},
 
     {Command::_NUMBER_,         
-      [](pair<Command, double> &instructionContent, vector<double>& pile) {
+      [](pair<Command, double> &instructionContent, vector<double> &pile) {
         pile.push_back(instructionContent.second);
       }},
     {Command::_GET_IDENTIFIER_, 
-      [](pair<Command, double> &instructionContent, vector<double>& pile) { 
+      [](pair<Command, double> &instructionContent, vector<double> &pile) { 
         pile.push_back(instructionContent.second);
       }},
     {Command::_SET_IDENTIFIER_, 
-      [](pair<Command, double> &instructionContent, vector<double>& pile) {
-        /*variables[setVariables[currentInstruction]] = depiler(pile);*/ 
+      [](pair<Command, double> &instructionContent, vector<double> &pile) {
+        //variables[setVariables[currentInstruction]] = depiler(pile);
       }}
   };
 
