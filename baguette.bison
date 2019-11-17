@@ -43,16 +43,16 @@ instruction :
     expression { addInstruct(Command::_PRINT_);   /* imprimer le résultat de l'expression */  }
 
     | IF expression '\n'  { 
-                            $1.currentInstruction_goto = currentInstruction;  
+                            $1.currentInstruction_goto = currentInstruction;/*enregistre position*/
                             addInstruct(Command::_JUMP_IF_ZERO_);
                           }
-      THEN '\n' bloc     { 
+      THEN '\n' bloc      { 
                             $1.currentInstruction_false = currentInstruction;
                             addInstruct(Command::_JUMP_);
-                            instructions[$1.currentInstruction_goto].second = currentInstruction;  
+                            instructions[$1.currentInstruction_goto].second = currentInstruction;/*enregistre position*/
                           }
-      ELSE '\n' bloc     { instructions[$1.currentInstruction_false].second = currentInstruction; }
-      END_IF               {   }
+      ELSE '\n' bloc      { instructions[$1.currentInstruction_false].second = currentInstruction;/*enregistre position*/ }
+      END_IF              {   }
 
     | REPEAT '(' expression ')' expression { /* TO DO */ }
 
