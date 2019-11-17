@@ -224,37 +224,6 @@ void setVarContent(string name, int intVal, double doubleVal, string stringVal) 
 }
 */
 
-//sauts conditionnels
-typedef struct {//renommer champs
-	int indexInstruction_goto;
-	int indexInstruction_false;
-} t_adress;
-
-
-//I. Mémoire
-map<string,double> variables; // table de symboles
-
-
-// structure pour stocker les adresses pour les sauts condistionnels et autres...
-typedef struct {
-    int currentInstruction_goto; 
-    int currentInstruction_false;
-} t_adress;
-
-
-vector<double> pile; 
-
-
-double depiler() {
-    double t = 0;
-    if (pile.size() > 0) {
-        t = pile[pile.size()-1];
-        pile.pop_back();
-    }
-    return t;
-}
-
-
 
 //II. Execution
 //déclaration des commandes
@@ -283,6 +252,12 @@ void addInstruct(command command, valAccess val = { valType::_int_,-1 }) {
 	instructionList.push_back({ command, val }); 
 	indexInstruction++; //necessaire pour enregistrer position
 };
+//sauts conditionnels
+typedef struct {
+	int jumpToInstruct;
+	int jumpToInstructIfFalse;
+} t_adress;
+
 
 //execution des commandes selon les instructions
 typedef void (*functionPointer)(instruction& instructContent);
