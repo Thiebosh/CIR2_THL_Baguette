@@ -37,7 +37,8 @@ deque<int> intList;
 deque<double> doubleList;
 deque<string> stringList;
 
-void printVal(valAccess val) {
+void printVal(string beginMessage, valAccess val, string endMessage) {
+    cout << beginMessage;
 	switch (val.type) {
 	case valType::_int_:
 		cout << intList[val.index];
@@ -49,6 +50,7 @@ void printVal(valAccess val) {
 		cout << stringList[val.index];
 		break;
 	}
+    cout << endMessage;
 }
 
 //valeurs en utilisation
@@ -286,9 +288,7 @@ const map<command, functionPointer> executeCommand = {
 		[](instruction& instructContent) {
 			valAccess val = depiler();
 			//if (val.index != -1)
-			cout << "Résultat : ";
-			printVal(val);
-			cout << endl;
+			printVal("Résultat : ",val,"\n");
 		}},
 
 	{command::_JUMP_,
@@ -457,27 +457,20 @@ void displayGeneratedProgram() {
 
 		switch (instructContent.first) {
 		case command::_NUMBER_:
-			cout << "GET NUM ";
-			printVal(instructContent.second);
+			printVal("GET NUM ",instructContent.second,"");
 			break;
 		case command::_SET_IDENTIFIER_:
-			cout << "SET NUM ";
-			printVal(instructContent.second);
-			cout << " IN MEMORY";//instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
+			printVal("SET NUM ",instructContent.second," IN MEMORY"); //instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
 			break;
 		case command::_GET_IDENTIFIER_:
-			cout << "GET NUM ";
-			printVal(instructContent.second);
-			cout << " IN MEMORY";//instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
+			printVal("GET NUM ",instructContent.second," IN MEMORY"); //instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
 			break;
 
 		case command::_JUMP_IF_ZERO_:
-			cout << "IF ZERO, JUMP TO INSTRUCTION ";
-			printVal(instructContent.second);
+			printVal("IF ZERO, JUMP TO INSTRUCTION ",instructContent.second);
 			break;
 		case command::_JUMP_:
-			cout << "JUMP TO INSTRUCTION ";
-			printVal(instructContent.second);
+			printVal("JUMP TO INSTRUCTION ",instructContent.second);
 			break;
 
 		case command::_PLUS_:
