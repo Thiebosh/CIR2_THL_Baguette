@@ -38,7 +38,7 @@ deque<double> doubleList;
 deque<string> stringList;
 
 void printVal(string beginMessage, valAccess val, string endMessage = "") {
-    cout << beginMessage;
+	cout << beginMessage;
 	switch (val.type) {
 	case valType::_int_:
 		cout << intList[val.tabPos];
@@ -50,7 +50,7 @@ void printVal(string beginMessage, valAccess val, string endMessage = "") {
 		cout << stringList[val.tabPos];
 		break;
 	}
-    cout << endMessage;
+	cout << endMessage;
 }
 
 //valeurs en utilisation
@@ -63,10 +63,6 @@ valAccess depiler() {
 		pile.pop();
 	}
 	return var;//controler tabPos != -1
-}
-
-void delVal(valAccess val) {
-	//implémenter
 }
 
 enum class operation {//fixe operations
@@ -150,7 +146,7 @@ void executeOperation(operation operation) {
 		//?
 	}
 	else {//string + int ou double
-		//erreur?
+		//erreur? "tostring"?
 	}
 }
 
@@ -158,27 +154,56 @@ void executeOperation(operation operation) {
 //variables
 map<string, valAccess> variables;
 
-void delVar(string name) {
-	for (auto var : variables) {
-		if (var.second.type == variables[name].type && var.second.tabPos > variables[name].tabPos) variables[var.first].tabPos--;
+void delVal(valAccess val) {
+	//PILE : decremente references tableau des valeurs suivantes
+	stack<valAccess> reversePile;
+	while (!pile.empty()) {
+		valAccess pileVal = depiler();
+		if (pileVal.type == val.type) {//tableau de suppression
+			if (pileVal.tabPos < val.tabPos) reversePile.push(pileVal); //index inferieur : modifie pas
+			else if (pileVal.tabPos > val.tabPos) {//index > index_supprime, decremente
+				pileVal.tabPos--;
+				reversePile.push(pileVal);//stocke result
+			}
+			//else, valeur a supprimer : la "retire" de la pile en ne l'ajoutant pas
+		}
+		else reversePile.push(pileVal);//autre tableau : touche pas
 	}
-	//delVal
-	switch (variables[name].type) {
+	while (!reversePile.empty()) {
+		pile.push(reversePile.top());
+		reversePile.pop();
+	}
+
+	//VARIABLES : decremente references tableau des valeurs suivantes
+	for (auto var : variables) {
+		if (var.second.type == val.type && var.second.tabPos > val.tabPos) {
+			variables[var.first].tabPos--;
+		}
+	}
+
+	//supprimer la valeur du tableau
+	switch (val.type) {
 	case valType::_int_:
-		intList.erase(intList.begin() + variables[name].tabPos);
+		intList.erase(intList.begin() + val.tabPos);
 		break;
 	case valType::_double_:
-		doubleList.erase(doubleList.begin() + variables[name].tabPos);
+		doubleList.erase(doubleList.begin() + val.tabPos);
 		break;
 	case valType::_string_:
-		stringList.erase(stringList.begin() + variables[name].tabPos);
+		stringList.erase(stringList.begin() + val.tabPos);
 		break;
 	}
-	//fin delVal
+}
+
+void delVar(string name) {
+	//decremente references tableau des valeurs suivantes dans la pile et la liste de variables + supprime valeur du tableau
+	delVal(variables[name]);
+
+	//supprime variable
 	variables.erase(name);
 }
 /*
-void addVar(valType type, string name, int intVal, double doubleVal, string stringVal) {
+void addVar(valType type, string name, int intVal, double doubleVal = 0, string stringVal = "") {
 	int tabPos = 0;
 	switch (type) {
 	case valType::_int_:
@@ -211,7 +236,7 @@ void getVarContent(string name, int& intVal, double& doubleVal, string& stringVa
 	}
 }
 
-void setVarContent(string name, int intVal, double doubleVal, string stringVal) {
+void setVarContent(string name, int intVal, double doubleVal = 0, string stringVal = "") {
 	switch (variables[name].type) {
 	case valType::_int_:
 		intList[variables[name].tabPos] = intVal;
@@ -249,9 +274,9 @@ enum class command {
 typedef pair<command, valAccess> instruction;
 deque<instruction> instructionList;
 
-int indexInstruction = 0;   // compteur instruction 
+unsigned int indexInstruction = 0;   // compteur instruction 
 void addInstruct(command command, valAccess val = { valType::_int_,-1 }) {
-	instructionList.push_back({ command, val }); 
+	instructionList.push_back({ command, val });
 	indexInstruction++; //necessaire pour enregistrer position
 };
 //sauts conditionnels
@@ -344,12 +369,11 @@ const map<command, functionPointer> executeCommand = {
 };
 
 
-
 //III. fonctions du main
 
 //fonction 1
 bool folderExist() {
-  if (access(FOLDER, F_OK) == -1) {//le _DIVISE_PAR_ assure que c'est un dossier
+  if (access(FOLDER, F_OK) == -1) {//le / assure que c'est un dossier
     cout << "Dossier de programmes non trouvé : création en cours... ";
 
     if (mkdir(FOLDER, 0777)) {//échec de création
@@ -434,24 +458,24 @@ void displayGeneratedProgram() {
 
 	int i = 0;
 	for (auto instructContent : instructionList) {
-		cout << "INSTRUCTION " << setw(1 + log10(instructionList.size())) << i++ << " - ";
+		cout << "INSTRUCTION " << setw((streamsize)(1 + log10(instructionList.size()))) << i++ << " - ";
 
 		switch (instructContent.first) {
 		case command::_NUMBER_:
-			printVal("GET NUM ",instructContent.second);
+			printVal("GET NUM ", instructContent.second);
 			break;
 		case command::_SET_IDENTIFIER_:
-			printVal("SET NUM ",instructContent.second," IN MEMORY"); //instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
+			printVal("SET NUM ", instructContent.second, " IN MEMORY"); //instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
 			break;
 		case command::_GET_IDENTIFIER_:
-			printVal("GET NUM ",instructContent.second," IN MEMORY"); //instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
+			printVal("GET NUM ", instructContent.second, " IN MEMORY"); //instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
 			break;
 
 		case command::_JUMP_IF_ZERO_:
-			printVal("IF ZERO, JUMP TO INSTRUCTION ",instructContent.second);
+			printVal("IF ZERO, JUMP TO INSTRUCTION ", instructContent.second);
 			break;
 		case command::_JUMP_:
-			printVal("JUMP TO INSTRUCTION ",instructContent.second);
+			printVal("JUMP TO INSTRUCTION ", instructContent.second);
 			break;
 
 		case command::_PLUS_:
