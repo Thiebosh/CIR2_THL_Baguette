@@ -30,30 +30,26 @@ enum class valType {//fixe types
 
 typedef struct {//initialiser dans ordre de déclaration
 	valType type = valType::_int_;
-	int index = -1;//valeur par defaut : flag d'invalidation
+	int tabPos = -1;//valeur par defaut : flag d'invalidation
 } valAccess;
 
 deque<int> intList;
 deque<double> doubleList;
 deque<string> stringList;
 
-void printVal(valAccess val) {
-	switch (val.type) {
-	case valType::_int_:
-		cout << intList[val.index];
-		break;
-	case valType::_double_:
-		cout << doubleList[val.index];
-		break;
-	case valType::_string_:
-		cout << stringList[val.index];
-		break;
-	}
-}
-
 void printVal(string beginMessage, valAccess val, string endMessage = "") {
     cout << beginMessage;
-    printVal(val);
+	switch (val.type) {
+	case valType::_int_:
+		cout << intList[val.tabPos];
+		break;
+	case valType::_double_:
+		cout << doubleList[val.tabPos];
+		break;
+	case valType::_string_:
+		cout << stringList[val.tabPos];
+		break;
+	}
     cout << endMessage;
 }
 
@@ -66,7 +62,11 @@ valAccess depiler() {
 		var = pile.top();
 		pile.pop();
 	}
-	return var;//controler index != -1
+	return var;//controler tabPos != -1
+}
+
+void delVal(valAccess val) {
+	//implémenter
 }
 
 enum class operation {//fixe operations
@@ -86,24 +86,24 @@ void executeOperation(operation operation) {
 
 	switch (val1.type) {
 	case valType::_int_:
-		val1Int = intList[val1.index];
+		val1Int = intList[val1.tabPos];
 		break;
 	case valType::_double_:
-		val1Double = doubleList[val1.index];
+		val1Double = doubleList[val1.tabPos];
 		break;
 	case valType::_string_:
-		val1String = stringList[val1.index];
+		val1String = stringList[val1.tabPos];
 		break;
 	}
 	switch (val2.type) {
 	case valType::_int_:
-		val2Int = intList[val2.index];
+		val2Int = intList[val2.tabPos];
 		break;
 	case valType::_double_:
-		val2Double = doubleList[val2.index];
+		val2Double = doubleList[val2.tabPos];
 		break;
 	case valType::_string_:
-		val2String = stringList[val2.index];
+		val2String = stringList[val2.tabPos];
 		break;
 	}
 
@@ -160,51 +160,53 @@ map<string, valAccess> variables;
 
 void delVar(string name) {
 	for (auto var : variables) {
-		if (var.second.type == variables[name].type && var.second.index > variables[name].index) variables[var.first].index--;
+		if (var.second.type == variables[name].type && var.second.tabPos > variables[name].tabPos) variables[var.first].tabPos--;
 	}
+	//delVal
 	switch (variables[name].type) {
 	case valType::_int_:
-		intList.erase(intList.begin() + variables[name].index);
+		intList.erase(intList.begin() + variables[name].tabPos);
 		break;
 	case valType::_double_:
-		doubleList.erase(doubleList.begin() + variables[name].index);
+		doubleList.erase(doubleList.begin() + variables[name].tabPos);
 		break;
 	case valType::_string_:
-		stringList.erase(stringList.begin() + variables[name].index);
+		stringList.erase(stringList.begin() + variables[name].tabPos);
 		break;
 	}
+	//fin delVal
 	variables.erase(name);
 }
 /*
 void addVar(valType type, string name, int intVal, double doubleVal, string stringVal) {
-	int index = 0;
+	int tabPos = 0;
 	switch (type) {
 	case valType::_int_:
-		index = intList.size();
+		tabPos = intList.size();
 		intList.push_back(intVal);
 		break;
 	case valType::_double_:
-		index = doubleList.size();
+		tabPos = doubleList.size();
 		doubleList.push_back(doubleVal);
 		break;
 	case valType::_string_:
-		index = stringList.size();
+		tabPos = stringList.size();
 		stringList.push_back(stringVal);
 		break;
 	}
-	variables.insert({ name,valAccess{ type, index } });
+	variables.insert({ name,valAccess{ type, tabPos } });
 }
 
 void getVarContent(string name, int& intVal, double& doubleVal, string& stringVal) {//recupere valeur dans variable donnee en parametre
 	switch (variables[name].type) {
 	case valType::_int_:
-		intVal = intList[variables[name].index];
+		intVal = intList[variables[name].tabPos];
 		break;
 	case valType::_double_:
-		doubleVal = doubleList[variables[name].index];
+		doubleVal = doubleList[variables[name].tabPos];
 		break;
 	case valType::_string_:
-		stringVal = stringList[variables[name].index];
+		stringVal = stringList[variables[name].tabPos];
 		break;
 	}
 }
@@ -212,13 +214,13 @@ void getVarContent(string name, int& intVal, double& doubleVal, string& stringVa
 void setVarContent(string name, int intVal, double doubleVal, string stringVal) {
 	switch (variables[name].type) {
 	case valType::_int_:
-		intList[variables[name].index] = intVal;
+		intList[variables[name].tabPos] = intVal;
 		break;
 	case valType::_double_:
-		doubleList[variables[name].index] = doubleVal;
+		doubleList[variables[name].tabPos] = doubleVal;
 		break;
 	case valType::_string_:
-		stringList[variables[name].index] = stringVal;
+		stringList[variables[name].tabPos] = stringVal;
 		break;
 	}
 }
@@ -256,7 +258,7 @@ void addInstruct(command command, valAccess val = { valType::_int_,-1 }) {
 typedef struct {
 	int jumpToInstruct;
 	int jumpToInstructIfFalse;
-} t_adress;
+} idInstruct;
 
 
 //execution des commandes selon les instructions
@@ -266,21 +268,21 @@ const map<command, functionPointer> executeCommand = {
 	{command::_PRINT_,
 		[](instruction& instructContent) {
 			valAccess val = depiler();
-			//if (val.index != -1)
+			//if (val.tabPos != -1)
 			printVal("Résultat : ",val,"\n");
 		}},
 
 	{command::_JUMP_,
 		[](instruction& instructContent) {
 			//tester instructContent? liste d'adresse?
-			indexInstruction = intList[instructContent.second.index];
+			indexInstruction = intList[instructContent.second.tabPos];
 		}},
 	{command::_JUMP_IF_ZERO_,
 		[](instruction& instructContent) {
 			//tester instructContent? liste d'adresse?
 			valAccess testResult = depiler();
-			if (testResult.index != -1 && testResult.type == valType::_int_ && intList[testResult.index] == 0) {
-				indexInstruction = intList[instructContent.second.index];//cas if not 0 : incrementation prealable
+			if (testResult.tabPos != -1 && testResult.type == valType::_int_ && intList[testResult.tabPos] == 0) {
+				indexInstruction = intList[instructContent.second.tabPos];//cas if not 0 : incrementation prealable
 			}
 		}},
 
@@ -307,7 +309,7 @@ const map<command, functionPointer> executeCommand = {
 		}},
 	{command::_ADD_IDENTIFIER_,
 		[](instruction& instructContent) {//bison (type name = expression) : instructContent = valAccess{ $1,stringList.size() }; stringList.push_back($2);
-			string name = stringList[instructContent.second.index];
+			string name = stringList[instructContent.second.tabPos];
 			//supprimer string du tableau
 
 			//verif types?
@@ -318,7 +320,7 @@ const map<command, functionPointer> executeCommand = {
 		}},
 	{command::_DEL_IDENTIFIER_,
 		[](instruction& instructContent) {//bison (delete name) : instructContent = valAccess{ string,stringList.size() }; stringList.push_back($1);
-			string name = stringList[instructContent.second.index];
+			string name = stringList[instructContent.second.tabPos];
 			//supprimer string du tableau
 
 			if (variables.find(name) != variables.end()) delVar(name);
@@ -329,11 +331,11 @@ const map<command, functionPointer> executeCommand = {
 	{command::_GET_IDENTIFIER_,
 		[](instruction& instructContent) {//bison : instructContent = variables[$1];
 			pile.push(instructContent.second);
-			//sinon : pile.push(variables[stringList[instructContent.second.index]]);
+			//sinon : pile.push(variables[stringList[instructContent.second.tabPos]]);
 		}},
 	{command::_SET_IDENTIFIER_,
 		[](instruction& instructContent) {//bison (name = expression) : instructContent = valAccess{ string,stringList.size() }; stringList.push_back($1);
-			string name = stringList[instructContent.second.index];
+			string name = stringList[instructContent.second.tabPos];
 			//supprimer string du tableau
 
 			if (variables.find(name) != variables.end()) variables[name] = depiler();

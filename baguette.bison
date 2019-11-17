@@ -10,7 +10,7 @@
 %union{
   double valeur;
   char nom[50];
-  t_adress adresse;
+  idInstruct adresse;
 }
 
 %token <valeur> NUMBER
@@ -43,15 +43,15 @@ instruction :
     expression { addInstruct(Command::_PRINT_);   /* imprimer le résultat de l'expression */  }
 
     | IF expression '\n'  { 
-                            $1.currentInstruction_goto = currentInstruction;/*enregistre position*/
+                            $1.jumpToInstruct = indexInstruction;/*enregistre position*/
                             addInstruct(Command::_JUMP_IF_ZERO_);
                           }
       THEN '\n' bloc      { 
-                            $1.currentInstruction_false = currentInstruction;
+                            $1.jumpToInstructIfFalse = indexInstruction;
                             addInstruct(Command::_JUMP_);
-                            instructions[$1.currentInstruction_goto].second = currentInstruction;/*enregistre position*/
+                            instructionList[$1.jumpToInstruct].second = indexInstruction;/*enregistre position*/
                           }
-      ELSE '\n' bloc      { instructions[$1.currentInstruction_false].second = currentInstruction;/*enregistre position*/ }
+      ELSE '\n' bloc      { instructionList[$1.jumpToInstructIfFalse].second = indexInstruction;/*enregistre position*/ }
       END_IF              {   }
 
     | REPEAT '(' expression ')' expression { /* TO DO */ }
