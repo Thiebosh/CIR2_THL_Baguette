@@ -467,10 +467,10 @@ void displayGeneratedProgram() {
 			break;
 
 		case command::_JUMP_IF_ZERO_:
-			printVal("IF ZERO, JUMP TO INSTRUCTION ",instructContent.second);
+			printVal("IF ZERO, JUMP TO INSTRUCTION ",instructContent.second,"");
 			break;
 		case command::_JUMP_:
-			printVal("JUMP TO INSTRUCTION ",instructContent.second);
+			printVal("JUMP TO INSTRUCTION ",instructContent.second,"");
 			break;
 
 		case command::_PLUS_:
