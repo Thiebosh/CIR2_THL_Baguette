@@ -37,8 +37,7 @@ deque<int> intList;
 deque<double> doubleList;
 deque<string> stringList;
 
-void printVal(string beginMessage, valAccess val, string endMessage) {
-    cout << beginMessage;
+void printVal(valAccess val) {
 	switch (val.type) {
 	case valType::_int_:
 		cout << intList[val.index];
@@ -50,6 +49,11 @@ void printVal(string beginMessage, valAccess val, string endMessage) {
 		cout << stringList[val.index];
 		break;
 	}
+}
+
+void printVal(string beginMessage, valAccess val, string endMessage = "") {
+    cout << beginMessage;
+    printVal(val);
     cout << endMessage;
 }
 
@@ -457,7 +461,7 @@ void displayGeneratedProgram() {
 
 		switch (instructContent.first) {
 		case command::_NUMBER_:
-			printVal("GET NUM ",instructContent.second,"");
+			printVal("GET NUM ",instructContent.second);
 			break;
 		case command::_SET_IDENTIFIER_:
 			printVal("SET NUM ",instructContent.second," IN MEMORY"); //instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
@@ -467,10 +471,10 @@ void displayGeneratedProgram() {
 			break;
 
 		case command::_JUMP_IF_ZERO_:
-			printVal("IF ZERO, JUMP TO INSTRUCTION ",instructContent.second,"");
+			printVal("IF ZERO, JUMP TO INSTRUCTION ",instructContent.second);
 			break;
 		case command::_JUMP_:
-			printVal("JUMP TO INSTRUCTION ",instructContent.second,"");
+			printVal("JUMP TO INSTRUCTION ",instructContent.second);
 			break;
 
 		case command::_PLUS_:
