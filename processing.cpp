@@ -19,9 +19,20 @@
 
 using namespace std;
 
+/********************************************************/
+/*														*/
+/*	PARTIE I : GESTION DE LA MEMOIRE					*/
+/*		SOUS PARTIE 1 : STOCKAGE DE VALEURS TYPEES		*/
+/*		SOUS PARTIE 2 : PILE DE VALEURS	EN UTILISATION	*/
+/*		SOUS PARTIE 3 : OPERATION SUR LES VALEURS		*/
+/*		SOUS PARTIE 4 : UTILISATION DES VARIABLES		*/
+/*		SOUS PARTIE 5 : PILE DE BLOCS MEMOIRE			*/
+/*														*/
+/********************************************************/
 
-//I. Memoire
-//valeurs
+/********************************************************/
+/*		SOUS PARTIE 1 : STOCKAGE DE VALEURS TYPEES		*/
+/********************************************************/
 enum class valType {//fixe types
 	_int_,
 	_double_,
@@ -33,9 +44,9 @@ typedef struct {//initialiser dans ordre de déclaration
 	int tabPos = -1;//valeur par defaut : flag d'invalidation
 } valAccess;
 
-deque<int> intList;
-deque<double> doubleList;
-deque<string> stringList;
+deque<int>		intList;
+deque<double>	doubleList;
+deque<string>	stringList;
 
 void printVal(string beginMessage, valAccess val, string endMessage = "") {
 	cout << beginMessage;
@@ -53,7 +64,9 @@ void printVal(string beginMessage, valAccess val, string endMessage = "") {
 	cout << endMessage;
 }
 
-//valeurs en utilisation
+/********************************************************/
+/*		SOUS PARTIE 2 : PILE DE VALEURS	EN UTILISATION	*/
+/********************************************************/
 stack<valAccess> pile;
 
 valAccess depiler() {
@@ -65,6 +78,9 @@ valAccess depiler() {
 	return var;//controler tabPos != -1
 }
 
+/********************************************************/
+/*		SOUS PARTIE 3 : OPERATION SUR LES VALEURS		*/
+/********************************************************/
 enum class operation {//fixe operations
 	_plus_,
 	_moins_,
@@ -73,6 +89,7 @@ enum class operation {//fixe operations
 };
 
 void executeOperation(operation operation) {
+	//recupere valeurs
 	valAccess val2 = depiler();
 	valAccess val1 = depiler();
 
@@ -103,6 +120,7 @@ void executeOperation(operation operation) {
 		break;
 	}
 
+	//execute operation et enregistre nouvelle valeur
 	if (val1.type == valType::_int_ && val2.type == valType::_int_) {//même type
 		int result(0);
 		switch (operation) {
@@ -143,35 +161,57 @@ void executeOperation(operation operation) {
 		doubleList.push_back(result);
 	}
 	else if (val1.type == valType::_string_ && val2.type == valType::_string_) {
-		//?
+		string result("");
+		switch (operation) {
+		case operation::_plus_://concatenation
+			result = val1String + val2String;
+			break;
+			/* reste?
+		case operation::_moins_:
+			result = (val1Int ? val1Int : val1Double) - (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			break;
+		case operation::_fois_:
+			result = (val1Int ? val1Int : val1Double) * (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			break;
+		case operation::_divisePar_:
+			result = (val1Int ? val1Int : val1Double) / (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			break;
+			*/
+		}
+		pile.push(valAccess({ valType::_double_,(int)doubleList.size() }));
+		stringList.push_back(result);
 	}
 	else {//string + int ou double
-		//erreur? "tostring"?
+		//erreur? "tostring"? repetition?
 	}
 }
 
-
-//variables
+/********************************************************/
+/*		SOUS PARTIE 4 : UTILISATION DES VARIABLES		*/
+/********************************************************/
 map<string, valAccess> variables;
 
 void delVal(valAccess val) {
-	//PILE : decremente references tableau des valeurs suivantes
-	stack<valAccess> reversePile;
-	while (!pile.empty()) {
-		valAccess pileVal = depiler();
-		if (pileVal.type == val.type) {//tableau de suppression
-			if (pileVal.tabPos < val.tabPos) reversePile.push(pileVal); //index inferieur : modifie pas
-			else if (pileVal.tabPos > val.tabPos) {//index > index_supprime, decremente
-				pileVal.tabPos--;
-				reversePile.push(pileVal);//stocke result
+	if (val.type == pile.top().type && val.tabPos == pile.top().tabPos) pile.pop();//dernier element? le retire
+	else {
+		//PILE : decremente references tableau des valeurs suivantes
+		stack<valAccess> reversePile;
+		while (!pile.empty()) {
+			valAccess pileVal = depiler();
+			if (pileVal.type == val.type) {//tableau subissant suppression
+				if (pileVal.tabPos < val.tabPos) reversePile.push(pileVal); //index inferieur : modifie pas
+				else if (pileVal.tabPos > val.tabPos) {//index > index_supprime, decremente
+					pileVal.tabPos--;
+					reversePile.push(pileVal);//stocke result
+				}
+				//else, valeur a supprimer : la "retire" de la pile (ne l'ajoute pas)
 			}
-			//else, valeur a supprimer : la "retire" de la pile en ne l'ajoutant pas
+			else reversePile.push(pileVal);//autre tableau : touche pas
 		}
-		else reversePile.push(pileVal);//autre tableau : touche pas
-	}
-	while (!reversePile.empty()) {
-		pile.push(reversePile.top());
-		reversePile.pop();
+		while (!reversePile.empty()) {//retablit ordre de la pile
+			pile.push(reversePile.top());
+			reversePile.pop();
+		}
 	}
 
 	//VARIABLES : decremente references tableau des valeurs suivantes
@@ -184,13 +224,16 @@ void delVal(valAccess val) {
 	//supprimer la valeur du tableau
 	switch (val.type) {
 	case valType::_int_:
-		intList.erase(intList.begin() + val.tabPos);
+		if (val.tabPos == intList.size() - 1) intList.pop_back();
+		else intList.erase(intList.begin() + val.tabPos);
 		break;
 	case valType::_double_:
-		doubleList.erase(doubleList.begin() + val.tabPos);
+		if (val.tabPos == doubleList.size() - 1) doubleList.pop_back();
+		else doubleList.erase(doubleList.begin() + val.tabPos);
 		break;
 	case valType::_string_:
-		stringList.erase(stringList.begin() + val.tabPos);
+		if (val.tabPos == stringList.size() - 1) stringList.pop_back();
+		else stringList.erase(stringList.begin() + val.tabPos);
 		break;
 	}
 }
@@ -251,9 +294,56 @@ void setVarContent(string name, int intVal, double doubleVal = 0, string stringV
 }
 */
 
+/********************************************************/
+/*		SOUS PARTIE 5 : PILE DE BLOCS MEMOIRE			*/
+/********************************************************/
+typedef struct {
+	unsigned int intListSize = 0;
+	unsigned int doubleListSize = 0;
+	unsigned int stringListSize = 0;
+} memoryState;
 
-//II. Execution
-//déclaration des commandes
+stack<memoryState> memoryLayer;
+
+void enterMemoryLayer() {
+	memoryLayer.push(memoryState{ intList.size(),doubleList.size(),stringList.size() });
+}
+
+void exitMemoryLayer() {
+	memoryState initial;
+	if (!memoryLayer.empty()) {//pas besoin de declarer nouvel espace memoire au demarrage
+		initial = memoryLayer.top();
+		memoryLayer.pop();
+	}
+
+	map<string, valAccess> oldVariables = variables;
+	for (auto var : oldVariables) {//supprime variables declarees dans le bloc
+		if ((var.second.type == valType::_int_		&& (unsigned)var.second.tabPos >= initial.intListSize) ||
+			(var.second.type == valType::_double_	&& (unsigned)var.second.tabPos >= initial.doubleListSize) ||
+			(var.second.type == valType::_string_	&& (unsigned)var.second.tabPos >= initial.stringListSize)) {
+			delVar(var.first);
+		}
+	}
+
+	//supprime valeurs (non affectees a des variables) declarees dans le bloc (supprime par la fin pour + d'efficacite (deque) et de surete)
+	while (intList.size() > initial.intListSize)		delVal(valAccess{ valType::_int_,	(int)intList.size() - 1 });
+	while (doubleList.size() > initial.doubleListSize)	delVal(valAccess{ valType::_double_,(int)doubleList.size() - 1 });
+	while (stringList.size() > initial.stringListSize)	delVal(valAccess{ valType::_string_,(int)stringList.size() - 1 });
+}
+
+
+/********************************************************/
+/*														*/
+/*	PARTIE II : GESTION DES COMMANDES					*/
+/*		SOUS PARTIE 1 : DECLARATION DES COMMANDES		*/
+/*		SOUS PARTIE 2 : GESTION DES INSTRUCTIONS		*/
+/*		SOUS PARTIE 3 : EXECUTION SELON LES COMMANDES	*/
+/*														*/
+/********************************************************/
+
+/********************************************************/
+/*		SOUS PARTIE 1 : DECLARATION DES COMMANDES		*/
+/********************************************************/
 enum class command {
 	_PRINT_,
 	_JUMP_,
@@ -265,12 +355,12 @@ enum class command {
 	_NUMBER_,
 	_GET_IDENTIFIER_,
 	_ADD_IDENTIFIER_,
-	_SET_IDENTIFIER_,
-	_DEL_IDENTIFIER_
+	_SET_IDENTIFIER_
 };
 
-
-//utilisation des instructions
+/********************************************************/
+/*		SOUS PARTIE 2 : GESTION DES INSTRUCTIONS		*/
+/********************************************************/
 typedef pair<command, valAccess> instruction;
 deque<instruction> instructionList;
 
@@ -286,7 +376,10 @@ typedef struct {
 } idInstruct;
 
 
-//execution des commandes selon les instructions
+
+/********************************************************/
+/*		SOUS PARTIE 3 : EXECUTION SELON LES COMMANDES	*/
+/********************************************************/
 typedef void (*functionPointer)(instruction& instructContent);
 
 const map<command, functionPointer> executeCommand = {
@@ -340,18 +433,6 @@ const map<command, functionPointer> executeCommand = {
 			//verif types?
 			if (variables.find(name) == variables.end()) variables.insert({name,depiler()});
 			//else ?
-
-			//bison incomplet (var = number) : addVar($1,$2,$3,$3,$3);
-		}},
-	{command::_DEL_IDENTIFIER_,
-		[](instruction& instructContent) {//bison (delete name) : instructContent = valAccess{ string,stringList.size() }; stringList.push_back($1);
-			string name = stringList[instructContent.second.tabPos];
-			//supprimer string du tableau
-
-			if (variables.find(name) != variables.end()) delVar(name);
-			//else?
-
-			//a appeler aussi en fin de fonction... automatiser?
 		}},
 	{command::_GET_IDENTIFIER_,
 		[](instruction& instructContent) {//bison : instructContent = variables[$1];
@@ -369,7 +450,12 @@ const map<command, functionPointer> executeCommand = {
 };
 
 
-//III. fonctions du main
+
+/********************************************************/
+/*														*/
+/*	PARTIE III : MAIN FONCTIONS							*/
+/*														*/
+/********************************************************/
 
 //fonction 1
 bool folderExist() {
