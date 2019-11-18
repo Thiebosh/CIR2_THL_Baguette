@@ -1,5 +1,6 @@
 /*fichier bison : parse*/
 %{
+  #include "storage.cpp"
   #include "processing.cpp"
 
   extern FILE *yyin;
@@ -40,15 +41,15 @@ bloc :
     ;
 
 instruction : 
-    expression { addInstruct(Command::_PRINT_);   /* imprimer le résultat de l'expression */  }
+    expression { addInstruct(command::_PRINT_);   /* imprimer le résultat de l'expression */  }
 
     | IF expression '\n'  { 
                             $1.jumpToInstruct = indexInstruction;/*enregistre position*/
-                            addInstruct(Command::_JUMP_IF_ZERO_);
+                            addInstruct(command::_JUMP_IF_ZERO_);
                           }
       THEN '\n' bloc      { 
                             $1.jumpToInstructIfFalse = indexInstruction;
-                            addInstruct(Command::_JUMP_);
+                            addInstruct(command::_JUMP_);
                             instructionList[$1.jumpToInstruct].second = indexInstruction;/*enregistre position*/
                           }
       ELSE '\n' bloc      { instructionList[$1.jumpToInstructIfFalse].second = indexInstruction;/*enregistre position*/ }
@@ -58,19 +59,19 @@ instruction :
 
     | IDENTIFIER '=' expression { 
                                   variables[$1] = $3; 
-                                  addInstruct(Command::_SET_IDENTIFIER_, $3); 
+                                  addInstruct(command::_SET_IDENTIFIER_, $3); 
                                 }
     |   /* Ligne vide*/
     ;
 
 expression: 
-    expression '+' expression     { addInstruct(Command::_PLUS_);}
-    | expression '-' expression     { addInstruct(Command::_MOINS_);}
-    | expression '*' expression     { addInstruct(Command::_FOIS_);}
-    | expression '/' expression     { addInstruct(Command::_DIVISE_PAR_);}
+    expression '+' expression     { addInstruct(command::_PLUS_);}
+    | expression '-' expression     { addInstruct(command::_MOINS_);}
+    | expression '*' expression     { addInstruct(command::_FOIS_);}
+    | expression '/' expression     { addInstruct(command::_DIVISE_PAR_);}
     | '(' expression ')'            { }
-    | NUMBER                        { addInstruct(Command::_NUMBER_, $1);}
-    | IDENTIFIER                    { addInstruct(Command::_GET_IDENTIFIER_, variables[$1]);}
+    | NUMBER                        { addInstruct(command::_NUMBER_, $1);}
+    | IDENTIFIER                    { addInstruct(command::_GET_IDENTIFIER_, variables[$1]);}
   /*
     | SIN '(' expr ')'  { $$ = sin($3); cout << "sin(" << $3 << ") = " << $$ << endl; }
     | TAN '(' expr ')'  { $$ = tan($3); cout << "tan(" << $3 << ") = " << $$ << endl; }
