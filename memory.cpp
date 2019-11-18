@@ -14,9 +14,11 @@ using namespace std;
 /*		SOUS PARTIE 2 : PILE DE VALEURS	EN UTILISATION	*/
 /*		SOUS PARTIE 3 : OPERATION SUR LES VALEURS		*/
 /*		SOUS PARTIE 4 : UTILISATION DES VARIABLES		*/
-/*		SOUS PARTIE 5 : PILE DE BLOCS MEMOIRE			*/
+/*		SOUS PARTIE 5 : LIBERATION DE MEMOIRE	    	*/
+/*		SOUS PARTIE 6 : PILE DE BLOCS MEMOIRE			*/
 /*														*/
 /********************************************************/
+
 
 /********************************************************/
 /*		SOUS PARTIE 1 : STOCKAGE DE VALEURS TYPEES		*/
@@ -52,19 +54,21 @@ void printVal(string beginMessage, valAccess val, string endMessage = "") {
 	cout << endMessage;
 }
 
+
 /********************************************************/
 /*		SOUS PARTIE 2 : PILE DE VALEURS	EN UTILISATION	*/
 /********************************************************/
-stack<valAccess> pile;
+stack<valAccess> executionPile;
 
 valAccess depiler() {
 	valAccess var;
-	if (pile.size() > 0) {
-		var = pile.top();
-		pile.pop();
+	if (executionPile.size() > 0) {
+		var = executionPile.top();
+		executionPile.pop();
 	}
 	return var;//controler tabPos != -1
 }
+
 
 /********************************************************/
 /*		SOUS PARTIE 3 : OPERATION SUR LES VALEURS		*/
@@ -125,7 +129,7 @@ void executeOperation(operation operation) {
 			result = val1Int / val2Int;
 			break;
 		}
-		pile.push(valAccess({ valType::_int_,(int)intList.size() }));
+		executionPile.push(valAccess({ valType::_int_,(int)intList.size() }));
 		intList.push_back(result);
 	}
 	else if ((val1.type == valType::_int_ || val1.type == valType::_double_) &&
@@ -145,7 +149,7 @@ void executeOperation(operation operation) {
 			result = (val1Int ? val1Int : val1Double) / (val2Int ? val2Int : val2Double);//variables initialisees a 0
 			break;
 		}
-		pile.push(valAccess({ valType::_double_,(int)doubleList.size() }));
+		executionPile.push(valAccess({ valType::_double_,(int)doubleList.size() }));
 		doubleList.push_back(result);
 	}
 	else if (val1.type == valType::_string_ && val2.type == valType::_string_) {
@@ -166,7 +170,7 @@ void executeOperation(operation operation) {
 			break;
 			*/
 		}
-		pile.push(valAccess({ valType::_double_,(int)doubleList.size() }));
+		executionPile.push(valAccess({ valType::_double_,(int)doubleList.size() }));
 		stringList.push_back(result);
 	}
 	else {//string + int ou double
@@ -174,32 +178,35 @@ void executeOperation(operation operation) {
 	}
 }
 
+
 /********************************************************/
 /*		SOUS PARTIE 4 : DECLARATION DES VARIABLES		*/
 /********************************************************/
 map<string, valAccess> variables;
 
-/********************************************************/
-/*		SOUS PARTIE 5 : LIBERATION DE BLOCS MEMOIRE		*/
-/********************************************************/
+//stockage tableau a part : doit preserver valeur ajoutee dans couche memoire (voir part 5) differente de celle supportant la declaration
 typedef struct {
-	unsigned int intListSize = 0;
-	unsigned int doubleListSize = 0;
-	unsigned int stringListSize = 0;
-} memoryState;
+	int memoryLayer;
+	valType type;
+	deque<int> valuesPos;
+} tabAccess;
 
-stack<memoryState> memoryLayer;
+deque<int>		intArray;
+deque<double>	doubleArray;
+deque<string>	stringArray;
 
-void enterMemoryLayer() {
-	memoryLayer.push(memoryState{ (unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
-}
+map<string, tabAccess> tableaux;
 
+
+/********************************************************/
+/*		SOUS PARTIE 5 : LIBERATION DE MEMOIRE	    	*/
+/********************************************************/
 void delVal(valAccess val) {
-	if (val.type == pile.top().type && val.tabPos == pile.top().tabPos) pile.pop();//dernier element? le retire
+	if (val.type == executionPile.top().type && val.tabPos == executionPile.top().tabPos) executionPile.pop();//dernier element? le retire
 	else {
 		//PILE : decremente references tableau des valeurs suivantes
 		stack<valAccess> reversePile;
-		while (!pile.empty()) {
+		while (!executionPile.empty()) {
 			valAccess pileVal = depiler();
 			if (pileVal.type == val.type) {//tableau subissant suppression
 				if (pileVal.tabPos < val.tabPos) reversePile.push(pileVal); //index inferieur : modifie pas
@@ -212,7 +219,7 @@ void delVal(valAccess val) {
 			else reversePile.push(pileVal);//autre tableau : touche pas
 		}
 		while (!reversePile.empty()) {//retablit ordre de la pile
-			pile.push(reversePile.top());
+			executionPile.push(reversePile.top());
 			reversePile.pop();
 		}
 	}
@@ -241,6 +248,36 @@ void delVal(valAccess val) {
 	}
 }
 
+void delVar(string name) {
+	//decremente references tableau des valeurs suivantes dans la pile et la liste de variables + supprime valeur du tableau
+	delVal(variables[name]);
+	variables.erase(name);
+}
+/*
+void delTabVal(valAccess val) {
+
+}
+
+void delTab(valAccess val) {
+
+}
+*/
+
+/********************************************************/
+/*		SOUS PARTIE 6 : PILE DE BLOCS MEMOIRE			*/
+/********************************************************/
+typedef struct {
+	unsigned int intListSize = 0;
+	unsigned int doubleListSize = 0;
+	unsigned int stringListSize = 0;
+} memoryState;
+
+stack<memoryState> memoryLayer;
+
+void enterMemoryLayer() {
+	memoryLayer.push(memoryState{ (unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
+}
+
 void exitMemoryLayer() {
 	memoryState initial;
 	if (!memoryLayer.empty()) {//pas besoin de declarer nouvel espace memoire au demarrage
@@ -248,19 +285,26 @@ void exitMemoryLayer() {
 		memoryLayer.pop();
 	}
 
+	//supprime tableaux declares dans le bloc
+	map<string, tabAccess> tableauxCopy = tableaux;
+	for (auto tab : tableauxCopy) {
+		if (tab.second.memoryLayer == memoryLayer.size()) {
+			//delTab(tab.second);
+		}
+	}
+
+	//supprime variables declarees dans le bloc
 	map<string, valAccess> variablesCopy = variables;
-	for (auto var : variablesCopy) {//supprime variables declarees dans le bloc
-		if ((var.second.type == valType::_int_		&& (unsigned)var.second.tabPos >= initial.intListSize) ||
-			(var.second.type == valType::_double_	&& (unsigned)var.second.tabPos >= initial.doubleListSize) ||
-			(var.second.type == valType::_string_	&& (unsigned)var.second.tabPos >= initial.stringListSize)) {
-			//decremente references tableau des valeurs suivantes dans la pile et la liste de variables + supprime valeur du tableau
-			delVal(variables[var.first]);
-			variables.erase(var.first);
+	for (auto var : variablesCopy) {
+		if ((var.second.type == valType::_int_ && (unsigned)var.second.tabPos >= initial.intListSize) ||
+			(var.second.type == valType::_double_ && (unsigned)var.second.tabPos >= initial.doubleListSize) ||
+			(var.second.type == valType::_string_ && (unsigned)var.second.tabPos >= initial.stringListSize)) {
+			delVar(var.first);
 		}
 	}
 
 	//supprime valeurs (non affectees a des variables) declarees dans le bloc (supprime par la fin pour + d'efficacite (deque) et de surete)
-	while (intList.size()	 > initial.intListSize)		delVal(valAccess{ valType::_int_,	(int)intList.size() - 1 });
+	while (intList.size() > initial.intListSize)		delVal(valAccess{ valType::_int_,	(int)intList.size() - 1 });
 	while (doubleList.size() > initial.doubleListSize)	delVal(valAccess{ valType::_double_,(int)doubleList.size() - 1 });
 	while (stringList.size() > initial.stringListSize)	delVal(valAccess{ valType::_string_,(int)stringList.size() - 1 });
 }

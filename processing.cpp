@@ -17,21 +17,34 @@ using namespace std;
 /*														*/
 /********************************************************/
 
+
 /********************************************************/
 /*		SOUS PARTIE 1 : DECLARATION DES COMMANDES		*/
 /********************************************************/
 enum class command {
-	_PRINT_,
+	//SAUTS (conditions, boucles, fonctions)
 	_JUMP_,
 	_JUMP_IF_ZERO_,
+
+	//DECLARATION (valeur, variable, tableau)
+	_EMPILE_VALUE_,
+	_CREATE_VARIABLE_,
+	_EMPILE_VARIABLE_,
+	_UPDATE_VARIABLE_,
+	_CREATE_VAR_TABLE_,
+	_EMPILE_VAR_TABLE_,
+	_EMPILE_VAR_TABLE_ELEMENT_,
+	_UPDATE_VAR_TABLE_ELEMENT_,
+	_REMOVE_VAR_TABLE_ELEMENT_,
+
+	//OPERATIONS (var to var)
 	_PLUS_,
 	_MOINS_,
 	_FOIS_,
 	_DIVISE_PAR_,
-	_NUMBER_,
-	_ADD_IDENTIFIER_,
-	_SET_IDENTIFIER_,
-	_GET_IDENTIFIER_
+
+	//ENTREE SORTIE
+	_PRINT_
 };
 
 
@@ -59,13 +72,6 @@ typedef struct {
 typedef void (*functionPointer)(instruction& instructContent);
 
 const map<command, functionPointer> executeCommand = {
-	{command::_PRINT_,
-		[](instruction& instructContent) {
-			valAccess val = depiler();
-			//if (val.tabPos != -1)
-			printVal("Résultat : ",val,"\n");
-		}},
-
 	{command::_JUMP_,
 		[](instruction& instructContent) {
 			//tester instructContent? liste d'adresse?
@@ -79,6 +85,144 @@ const map<command, functionPointer> executeCommand = {
 				indexInstruction = intList[instructContent.second.tabPos];//cas if not 0 : incrementation prealable
 			}
 		}},
+
+
+	{command::_EMPILE_VALUE_,
+		[](instruction& instructContent) {//bison : (déterminer type); instructContent = valAccess{ type,listType.size() }; listType.push_back($1);
+			executionPile.push(instructContent.second);
+		}},
+	{command::_CREATE_VARIABLE_,
+		[](instruction& instructContent) {//bison (type name = expression) : instructContent = valAccess{ $1 (type var),stringList.size() }; stringList.push_back($2);
+			string name = stringList[instructContent.second.tabPos];
+			delVal(varAccess{ varType::_string_,instructContent.second.tabPos});//supprimer string du tableau
+
+			//verif types?
+			if (variables.find(name) == variables.end()) variables.insert({name,depiler()});
+			//else ?
+		}},
+	{command::_EMPILE_VARIABLE_,
+		[](instruction& instructContent) {//bison (name) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1);
+			string name = stringList[instructContent.second.tabPos];
+			delVal(instructContent.second);//supprimer string du tableau
+			
+			if (variables.find(name) != variables.end()) executionPile.push(variables[name]);
+		}},
+	{command::_UPDATE_VARIABLE_,
+		[](instruction& instructContent) {//bison (name = expression) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1);
+			string name = stringList[instructContent.second.tabPos];
+			delVal(instructContent.second);//supprimer string du tableau
+
+			if (variables.find(name) != variables.end()) variables[name] = depiler();
+			//else?
+		}},
+	{command::_CREATE_VAR_TABLE_,
+		[](instruction& instructContent) {//bison (tab<type> name) = expression (optionnelle mais doit empiler un varAccess pour le type)) : instructContent = valAccess{ $1 (type var),stringList.size() }; stringList.push_back($2);
+			string name = stringList[instructContent.second.tabPos];
+			delVal(varAccess{ varType::_string_,instructContent.second.tabPos});//supprimer string du tableau
+
+			//verif types?
+			if (tableaux.find(name) == tableaux.end()) {
+				varAccess value = depiler();
+				tabAccess declaration = {memoryLayer.size(), value.type};//ordre de declaration
+
+				if (value.tabPos != -1) {
+					switch(value.type) {
+					case valType::_int_:
+						declaration.valuesPos.push_back(intArray.size());
+						intArray.push_back(intList[value.tabPos]);
+						break;
+					case valType::_double_:
+						declaration.valuesPos.push_back(doubleArray.size());
+						doubleArray.push_back(doubleList[value.tabPos]);
+						break;
+					case valType::_string_:
+						declaration.valuesPos.push_back(stringArray.size());
+						stringArray.push_back(stringList[value.tabPos]);
+						break;
+					}
+				}
+
+				tableaux.insert({name,declaration});
+			}
+			//else ?
+		}},
+	{command::_EMPILE_VAR_TABLE_SIZE_,
+		[](instruction& instructContent) {//bison (SIZE name) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1);
+			string name = stringList[instructContent.second.tabPos];
+			delVal(instructContent.second);//supprimer string du tableau
+
+			if (tableaux.find(name) != tableaux.end()) executionPile.push(valAccess{ valType::_int_,tableaux[name].valuesPos.size() });
+			//else?
+		}},
+	{command::_EMPILE_VAR_TABLE_ELEMENT_,
+		[](instruction& instructContent) {//bison (name[indice]) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1)
+			string name = stringList[instructContent.second.tabPos];
+			delVal(instructContent.second);//supprimer string du tableau
+			
+			if (tableaux.find(name) != tableaux.end()) {
+				int tabPos = intList[depiler().tabPos];
+
+				if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+					tabPos = tableaux[name].valuesPos[tabPos];
+
+					switch(tableaux[name].type) {
+					case valType::_int_:
+						executionPile.push(valAccess{ typeVar::_int_,intList.size() });
+						intList.push_back(intArray[tabPos]);
+						break;
+					case valType::_double_:
+						executionPile.push(valAccess{ typeVar::_double_,doubleList.size() });
+						doubleList.push_back(doubleArray[tabPos]);
+						break;
+					case valType::_string_:
+						executionPile.push(valAccess{ typeVar::_string_,stringList.size() });
+						stringList.push_back(stringArray[tabPos]);
+						break;
+					}
+				}
+			}
+		}},
+	{command::_UPDATE_VAR_TABLE_ELEMENT_,
+		[](instruction& instructContent) {//bison (name[indice] = expression) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1), executionPile.push(valAccess{valType::_int_,$2});
+			string name = stringList[instructContent.second.tabPos];
+			delVal(instructContent.second);//supprimer string du tableau
+			
+			if (tableaux.find(name) != tableaux.end()) {
+				int tabPos = intList[depiler().tabPos];
+
+				if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+					tabPos = tableaux[name].valuesPos[tabPos];
+
+					switch(tableaux[name].type) {
+					case valType::_int_:
+						intArray[tabPos] = depiler();
+						break;
+					case valType::_double_:
+						doubleArray[tabPos] = depiler();
+						break;
+					case valType::_string_:
+						stringArray[tabPos] = depiler();
+						break;
+					}
+				}
+			}
+		}},
+	{command::_REMOVE_VAR_TABLE_ELEMENT_,
+		[](instruction& instructContent) {//bison (DELETE name[indice]) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1); executionPile.push(valAccess{valType::_int_,$2});
+			string name = stringList[instructContent.second.tabPos];
+			delVal(instructContent.second);//supprimer string du tableau
+			
+			if (tableaux.find(name) != tableaux.end()) {
+				int tabPos = intList[depiler().tabPos];
+
+				if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+					tabPos = tableaux[name].valuesPos[tabPos];
+
+					//delTabVal()
+				}
+			}
+		}},
+
 
 	{command::_PLUS_,
 		[](instruction& instructContent) {
@@ -97,32 +241,14 @@ const map<command, functionPointer> executeCommand = {
 			executeOperation(operation::_divisePar_);
 		}},
 
-	{command::_NUMBER_,
-		[](instruction& instructContent) {//bison : (déterminer type); instructContent = valAccess{ type,listType.size() }; listType.push_back($1);
-			pile.push(instructContent.second);
-		}},
-	{command::_ADD_IDENTIFIER_,
-		[](instruction& instructContent) {//bison (type name = expression) : instructContent = valAccess{ $1,stringList.size() }; stringList.push_back($2);
-			string name = stringList[instructContent.second.tabPos];
-			//supprimer string du tableau
 
-			//verif types?
-			if (variables.find(name) == variables.end()) variables.insert({name,depiler()});
-			//else ?
-		}},
-	{command::_SET_IDENTIFIER_,
-		[](instruction& instructContent) {//bison (name = expression) : instructContent = valAccess{ string,stringList.size() }; stringList.push_back($1);
-			string name = stringList[instructContent.second.tabPos];
-			//supprimer string du tableau
-
-			if (variables.find(name) != variables.end()) variables[name] = depiler();
-			//else?
-		}},
-	{command::_GET_IDENTIFIER_,
-		[](instruction& instructContent) {//bison : instructContent = variables[$1];
-			pile.push(instructContent.second);
-			//sinon : pile.push(variables[stringList[instructContent.second.tabPos]]);
+	{command::_PRINT_,//sortie
+		[](instruction& instructContent) {
+			valAccess val = depiler();
+			//if (val.tabPos != -1)
+			printVal("Résultat : ",val,"\n");
 		}}
+	//entree
 };
 
 
