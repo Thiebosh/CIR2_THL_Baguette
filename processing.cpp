@@ -22,6 +22,10 @@ using namespace std;
 /*		SOUS PARTIE 1 : DECLARATION DES COMMANDES		*/
 /********************************************************/
 enum class command {
+	//MEMOIRE
+	_ENTER_BLOCK_,
+	_EXIT_BLOCK_,
+
 	//SAUTS (conditions, boucles, fonctions)
 	_JUMP_,
 	_JUMP_IF_ZERO_,
@@ -72,14 +76,22 @@ typedef struct {
 typedef void (*functionPointer)(instruction& instructContent);
 
 const map<command, functionPointer> executeCommand = {
+	{command::_ENTER_BLOCK_,//pas des le debut
+		[](instruction& instructContent) {
+			enterMemoryLayer();
+		}},
+	{command::_EXIT_BLOCK_,
+		[](instruction& instructContent) {
+			exitMemoryLayer();
+		}},
+
+
 	{command::_JUMP_,
 		[](instruction& instructContent) {
-			//tester instructContent? liste d'adresse?
 			indexInstruction = intList[instructContent.second.tabPos];
 		}},
 	{command::_JUMP_IF_ZERO_,
 		[](instruction& instructContent) {
-			//tester instructContent? liste d'adresse?
 			valAccess testResult = depiler();
 			if (testResult.tabPos != -1 && testResult.type == valType::_int_ && intList[testResult.tabPos] == 0) {
 				indexInstruction = intList[instructContent.second.tabPos];//cas if not 0 : incrementation prealable

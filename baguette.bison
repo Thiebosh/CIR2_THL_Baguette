@@ -21,6 +21,7 @@
 %token THEN
 %token ELSE
 %token END_IF
+%token END_FILE
 %token REPEAT
 %token JUMP 
 %token JUMP_IF_ZERO
@@ -61,6 +62,7 @@ instruction :
                                   variables[$1] = $3; 
                                   addInstruct(command::_SET_IDENTIFIER_, $3); 
                                 }
+    | END_FILE            { addInstruct(command::_EXIT_BLOCK_); }
     |   /* Ligne vide*/
     ;
 

@@ -15,6 +15,8 @@ Alors|alors|ALORS 	{return THEN;}
 Sinon|sinon|SINON	{return ELSE;}
 FinSi|finsi|FINSI	{return END_IF;}
 
+FINFICHIER	{return END_FILE;}
+
 
 plus        {return '+';}
 fois        {return '*';}
