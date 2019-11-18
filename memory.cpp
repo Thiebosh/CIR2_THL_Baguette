@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <string>
 #include <deque>
 #include <stack>
@@ -173,9 +175,24 @@ void executeOperation(operation operation) {
 }
 
 /********************************************************/
-/*		SOUS PARTIE 4 : UTILISATION DES VARIABLES		*/
+/*		SOUS PARTIE 4 : DECLARATION DES VARIABLES		*/
 /********************************************************/
 map<string, valAccess> variables;
+
+/********************************************************/
+/*		SOUS PARTIE 5 : LIBERATION DE BLOCS MEMOIRE		*/
+/********************************************************/
+typedef struct {
+	unsigned int intListSize = 0;
+	unsigned int doubleListSize = 0;
+	unsigned int stringListSize = 0;
+} memoryState;
+
+stack<memoryState> memoryLayer;
+
+void enterMemoryLayer() {
+	memoryLayer.push(memoryState{ (unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
+}
 
 void delVal(valAccess val) {
 	if (val.type == pile.top().type && val.tabPos == pile.top().tabPos) pile.pop();//dernier element? le retire
@@ -222,42 +239,6 @@ void delVal(valAccess val) {
 		else stringList.erase(stringList.begin() + val.tabPos);
 		break;
 	}
-}
-
-/*
-void addVar(valType type, string name, int intVal, double doubleVal = 0, string stringVal = "") {
-	int tabPos = 0;
-	switch (type) {
-	case valType::_int_:
-		tabPos = intList.size();
-		intList.push_back(intVal);
-		break;
-	case valType::_double_:
-		tabPos = doubleList.size();
-		doubleList.push_back(doubleVal);
-		break;
-	case valType::_string_:
-		tabPos = stringList.size();
-		stringList.push_back(stringVal);
-		break;
-	}
-	variables.insert({ name,valAccess{ type, tabPos } });
-}
-*/
-
-/********************************************************/
-/*		SOUS PARTIE 5 : LIBERATION DE BLOCS MEMOIRE		*/
-/********************************************************/
-typedef struct {
-	unsigned int intListSize = 0;
-	unsigned int doubleListSize = 0;
-	unsigned int stringListSize = 0;
-} memoryState;
-
-stack<memoryState> memoryLayer;
-
-void enterMemoryLayer() {
-	memoryLayer.push(memoryState{ intList.size(),doubleList.size(),stringList.size() });
 }
 
 void exitMemoryLayer() {

@@ -5,7 +5,7 @@
 
   extern FILE *yyin;
   extern int yylex ();
-  int yyerror(char *s) { printf("%s\n", s); return 0; }
+  int yyerror(char const *s) { fprintf (stderr, "%s\n", s); return 1; }//preciser erreurs? https://www.gnu.org/software/bison/manual/html_node/Error-Reporting.html
 %}
 
 %union{

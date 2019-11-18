@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <cmath>
 
-//gestion mémoire
 #include "memory.cpp"
 
 
