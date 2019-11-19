@@ -1,11 +1,11 @@
-1+2
+AFFICHER 1+2
 
-2*3+4*6
+AFFICHER (2*3+4*6)
 
 a = 6
 b = 3
 c = a*b-15
-c
+AFFICHER c
 
 delta = b*b
-delta
+AFFICHER delta

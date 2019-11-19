@@ -2,15 +2,15 @@ si 1 + 2
 alors
 	si 0
 	alors
-		3 + 4
+		AFFICHER 3 + 4
 	sinon
-		5 * 6
-		7 + 8
+		AFFICHER 5 * 6
+		AFFICHER 7 + 8
 	finsi
 sinon
-	9 * 10
+	AFFICHER 9 * 10
 finsi
 
-11 + 12
+AFFICHER 11 + 12
 
 

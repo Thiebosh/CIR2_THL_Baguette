@@ -37,6 +37,7 @@ enum class command {
 	_UPDATE_VARIABLE_,
 	_CREATE_VAR_TABLE_,
 	_EMPILE_VAR_TABLE_,
+	_EMPILE_VAR_TABLE_SIZE_,
 	_EMPILE_VAR_TABLE_ELEMENT_,
 	_UPDATE_VAR_TABLE_ELEMENT_,
 	_REMOVE_VAR_TABLE_ELEMENT_,
@@ -100,27 +101,27 @@ const map<command, functionPointer> executeCommand = {
 
 
 	{command::_EMPILE_VALUE_,
-		[](instruction& instructContent) {//bison : (déterminer type); instructContent = valAccess{ type,listType.size() }; listType.push_back($1);
+		[](instruction& instructContent) {
 			executionPile.push(instructContent.second);
 		}},
 	{command::_CREATE_VARIABLE_,
-		[](instruction& instructContent) {//bison (type name = expression) : instructContent = valAccess{ $1 (type var),stringList.size() }; stringList.push_back($2);
+		[](instruction& instructContent) {
 			string name = stringList[instructContent.second.tabPos];
-			delVal(varAccess{ varType::_string_,instructContent.second.tabPos});//supprimer string du tableau
+			delVal(valAccess{ valType::_string_,instructContent.second.tabPos});//supprimer string du tableau
 
 			//verif types?
 			if (variables.find(name) == variables.end()) variables.insert({name,depiler()});
 			//else ?
 		}},
 	{command::_EMPILE_VARIABLE_,
-		[](instruction& instructContent) {//bison (name) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1);
+		[](instruction& instructContent) {
 			string name = stringList[instructContent.second.tabPos];
 			delVal(instructContent.second);//supprimer string du tableau
 			
 			if (variables.find(name) != variables.end()) executionPile.push(variables[name]);
 		}},
 	{command::_UPDATE_VARIABLE_,
-		[](instruction& instructContent) {//bison (name = expression) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1);
+		[](instruction& instructContent) {
 			string name = stringList[instructContent.second.tabPos];
 			delVal(instructContent.second);//supprimer string du tableau
 
@@ -128,14 +129,14 @@ const map<command, functionPointer> executeCommand = {
 			//else?
 		}},
 	{command::_CREATE_VAR_TABLE_,
-		[](instruction& instructContent) {//bison (tab<type> name) = expression (optionnelle mais doit empiler un varAccess pour le type)) : instructContent = valAccess{ $1 (type var),stringList.size() }; stringList.push_back($2);
+		[](instruction& instructContent) {//bison (tab<type> name) = expression (optionnelle mais doit empiler un valAccess pour le type)) : instructContent = valAccess{ $1 (type var),stringList.size() }; stringList.push_back($2);
 			string name = stringList[instructContent.second.tabPos];
-			delVal(varAccess{ varType::_string_,instructContent.second.tabPos});//supprimer string du tableau
+			delVal(valAccess{ valType::_string_,instructContent.second.tabPos});//supprimer string du tableau
 
 			//verif types?
 			if (tableaux.find(name) == tableaux.end()) {
-				varAccess value = depiler();
-				tabAccess declaration = {memoryLayer.size(), value.type};//ordre de declaration
+				valAccess value = depiler();
+				tabAccess declaration = {(unsigned)memoryLayer.size(), value.type};//ordre de declaration
 
 				if (value.tabPos != -1) {
 					switch(value.type) {
@@ -159,15 +160,15 @@ const map<command, functionPointer> executeCommand = {
 			//else ?
 		}},
 	{command::_EMPILE_VAR_TABLE_SIZE_,
-		[](instruction& instructContent) {//bison (SIZE name) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1);
+		[](instruction& instructContent) {//bison (SIZE name) : instructContent = valAccess{ valType::_string_,stringList.size() }; stringList.push_back($1);
 			string name = stringList[instructContent.second.tabPos];
 			delVal(instructContent.second);//supprimer string du tableau
 
-			if (tableaux.find(name) != tableaux.end()) executionPile.push(valAccess{ valType::_int_,tableaux[name].valuesPos.size() });
+			if (tableaux.find(name) != tableaux.end()) executionPile.push(valAccess{ valType::_int_,(int)tableaux[name].valuesPos.size() });
 			//else?
 		}},
 	{command::_EMPILE_VAR_TABLE_ELEMENT_,
-		[](instruction& instructContent) {//bison (name[indice]) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1)
+		[](instruction& instructContent) {
 			string name = stringList[instructContent.second.tabPos];
 			delVal(instructContent.second);//supprimer string du tableau
 			
@@ -179,15 +180,15 @@ const map<command, functionPointer> executeCommand = {
 
 					switch(tableaux[name].type) {
 					case valType::_int_:
-						executionPile.push(valAccess{ typeVar::_int_,intList.size() });
+						executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
 						intList.push_back(intArray[tabPos]);
 						break;
 					case valType::_double_:
-						executionPile.push(valAccess{ typeVar::_double_,doubleList.size() });
+						executionPile.push(valAccess{ valType::_double_,(int)doubleList.size() });
 						doubleList.push_back(doubleArray[tabPos]);
 						break;
 					case valType::_string_:
-						executionPile.push(valAccess{ typeVar::_string_,stringList.size() });
+						executionPile.push(valAccess{ valType::_string_,(int)stringList.size() });
 						stringList.push_back(stringArray[tabPos]);
 						break;
 					}
@@ -195,7 +196,7 @@ const map<command, functionPointer> executeCommand = {
 			}
 		}},
 	{command::_UPDATE_VAR_TABLE_ELEMENT_,
-		[](instruction& instructContent) {//bison (name[indice] = expression) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1), executionPile.push(valAccess{valType::_int_,$2});
+		[](instruction& instructContent) {//bison (name[indice] = expression) : instructContent = valAccess{ valType::_string_,stringList.size() }; stringList.push_back($1), executionPile.push(valAccess{valType::_int_,$2});
 			string name = stringList[instructContent.second.tabPos];
 			delVal(instructContent.second);//supprimer string du tableau
 			
@@ -205,32 +206,32 @@ const map<command, functionPointer> executeCommand = {
 				if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
 					tabPos = tableaux[name].valuesPos[tabPos];
 
+					valAccess value = depiler();
+					delVal(value);
 					switch(tableaux[name].type) {
 					case valType::_int_:
-						intArray[tabPos] = depiler();
+						intArray[tabPos] = intList[value.tabPos];
 						break;
 					case valType::_double_:
-						doubleArray[tabPos] = depiler();
+						doubleArray[tabPos] = doubleList[value.tabPos];
 						break;
 					case valType::_string_:
-						stringArray[tabPos] = depiler();
+						stringArray[tabPos] = stringList[value.tabPos];
 						break;
 					}
 				}
 			}
 		}},
 	{command::_REMOVE_VAR_TABLE_ELEMENT_,
-		[](instruction& instructContent) {//bison (DELETE name[indice]) : instructContent = valAccess{ typeVar::_string_,stringList.size() }; stringList.push_back($1); executionPile.push(valAccess{valType::_int_,$2});
+		[](instruction& instructContent) {//bison (DELETE name[indice]) : instructContent = valAccess{ valType::_string_,stringList.size() }; stringList.push_back($1); executionPile.push(valAccess{valType::_int_,$2});
 			string name = stringList[instructContent.second.tabPos];
 			delVal(instructContent.second);//supprimer string du tableau
 			
 			if (tableaux.find(name) != tableaux.end()) {
-				int tabPos = intList[depiler().tabPos];
+				int tabCase = intList[depiler().tabPos];
 
-				if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
-					tabPos = tableaux[name].valuesPos[tabPos];
-
-					//delTabVal()
+				if (tabCase > -1 && tabCase < tableaux[name].valuesPos.size()) {
+					delTabVal(name,tabCase);
 				}
 			}
 		}},
@@ -270,6 +271,7 @@ const map<command, functionPointer> executeCommand = {
 /*														*/
 /********************************************************/
 //fonction 3
+/*
 void displayGeneratedProgram() {
 	cout << endl << "==== CODE GENERE ====" << endl;
 
@@ -319,7 +321,7 @@ void displayGeneratedProgram() {
 	}
 
 	cout << "=====================" << endl;
-}
+}*/
 
 
 //fonction 4

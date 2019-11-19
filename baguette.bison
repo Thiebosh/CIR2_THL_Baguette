@@ -8,72 +8,134 @@
   int yyerror(char const *s) { fprintf (stderr, "%s\n", s); return 1; }//preciser erreurs? https://www.gnu.org/software/bison/manual/html_node/Error-Reporting.html
 %}
 
-%union{
-  double valeur;
+%union{//variables
+  int intValeur;
+  double doubleValeur;
+  char* stringValeur;
   char nom[50];
   idInstruct adresse;
 }
 
-%token <valeur> NUMBER
-%token <nom> IDENTIFIER
-%type <valeur> expression
+%token <intValeur>    INT_VALUE
+%token <doubleValeur> DOUBLE_VALUE
+%token <stringValeur> STRING_VALUE
+
+%token INT
+%token DOUBLE
+%token STRING
+%token <nom> VARIABLE_NAME
+
+//conserver?
+%token SIN
+%token TAN
+%token SQRT
+//fin conserver ?
+
+%token DISPLAY
+
+%token JUMP 
+%token JUMP_IF_ZERO
+
 %token <adresse> IF
 %token THEN
 %token ELSE
 %token END_IF
-%token END_FILE
+
 %token REPEAT
-%token JUMP 
-%token JUMP_IF_ZERO
-%token PRINT
-%token SIN
-%token TAN
-%token SQRT
+
+%token END_PRGM
 
 %left '+' '-'     /* associativité à gauche */
 %left '*' '/'     /* associativité à gauche */
 
 
 %%
+programme :
+    bloc '\n'
+    | END_PRGM            { 
+                            addInstruct(command::_EXIT_BLOCK_);
+                            exit(0);
+                          }
+    | /* vide */
+    ;
+
 bloc :
-    bloc instruction '\n' 
-    | bloc instruction
+    bloc instruction '\n' //pas dans l'autre sens? 
     |    /* Epsilon */
     ;
 
 instruction : 
-    expression { addInstruct(command::_PRINT_);   /* imprimer le résultat de l'expression */  }
+    attribution //':' ?
 
-    | IF expression '\n'  { 
-                            $1.jumpToInstruct = indexInstruction;/*enregistre position*/
-                            addInstruct(command::_JUMP_IF_ZERO_);
+    | DISPLAY expression { addInstruct(command::_PRINT_);   /* imprimer le résultat de l'expression */  }
+
+    | IF expression '\n'  { //refaire clairement (ajouter comparaison?)
+                            addInstruct(command::_ENTER_BLOCK_);
+
+                            $1.jumpToInstruct = indexInstruction; //enregistre position dans le IF
+                            addInstruct(command::_JUMP_IF_ZERO_); //saute si prochaine valeur empilee (expression) vaut 0
                           }
       THEN '\n' bloc      { 
-                            $1.jumpToInstructIfFalse = indexInstruction;
+                            $1.jumpToInstructIfFalse = indexInstruction; // toujours le IF
                             addInstruct(command::_JUMP_);
-                            instructionList[$1.jumpToInstruct].second = indexInstruction;/*enregistre position*/
+                            instructionList[$1.jumpToInstruct].second = { valType::_int_,(int)intList.size() }; /*enregistre position*/
+                            intList.push_back(indexInstruction);
                           }
-      ELSE '\n' bloc      { instructionList[$1.jumpToInstructIfFalse].second = indexInstruction;/*enregistre position*/ }
-      END_IF              {   }
+      ELSE '\n' bloc      { 
+                            instructionList[$1.jumpToInstructIfFalse].second = { valType::_int_,(int)intList.size() }; /*enregistre position*/
+                            intList.push_back(indexInstruction);
+                          }
+      END_IF              { addInstruct(command::_EXIT_BLOCK_); }
 
-    | REPEAT '(' expression ')' expression { /* TO DO */ }
+    | REPEAT '(' expression ')' bloc { /* TO DO */ }
 
-    | IDENTIFIER '=' expression { 
-                                  variables[$1] = $3; 
-                                  addInstruct(command::_SET_IDENTIFIER_, $3); 
-                                }
-    | END_FILE            { addInstruct(command::_EXIT_BLOCK_); }
     |   /* Ligne vide*/
     ;
 
-expression: 
-    expression '+' expression     { addInstruct(command::_PLUS_);}
+attribution :
+      INT    VARIABLE_NAME '=' expression { addInstruct(command::_CREATE_VARIABLE_, { valType::_int_,   (int)stringList.size() }); stringList.push_back($2); }
+    | DOUBLE VARIABLE_NAME '=' expression { addInstruct(command::_CREATE_VARIABLE_, { valType::_double_,(int)stringList.size() }); stringList.push_back($2); }
+    | STRING VARIABLE_NAME '=' expression { addInstruct(command::_CREATE_VARIABLE_, { valType::_string_,(int)stringList.size() }); stringList.push_back($2); }
+    
+    | VARIABLE_NAME '=' expression  { addInstruct(command::_UPDATE_VARIABLE_, { valType::_string_,(int)stringList.size() }); stringList.push_back($1); }
+    
+    //tableaux
+    ;
+
+expression :
+    '(' expression ')'   { } //reduit expression
+
+    | expression '+' expression     { addInstruct(command::_PLUS_);}
     | expression '-' expression     { addInstruct(command::_MOINS_);}
     | expression '*' expression     { addInstruct(command::_FOIS_);}
     | expression '/' expression     { addInstruct(command::_DIVISE_PAR_);}
-    | '(' expression ')'            { }
-    | NUMBER                        { addInstruct(command::_NUMBER_, $1);}
-    | IDENTIFIER                    { addInstruct(command::_GET_IDENTIFIER_, variables[$1]);}
+    
+    | INT_VALUE       { 
+                        addInstruct(command::_EMPILE_VALUE_, { valType::_int_,   (int)intList.size() });
+                        intList.push_back($1);
+                        }
+    | DOUBLE_VALUE    { 
+                        addInstruct(command::_EMPILE_VALUE_, { valType::_double_,(int)doubleList.size() }); 
+                        doubleList.push_back($1); 
+                      }
+    | STRING_VALUE    { 
+                        addInstruct(command::_EMPILE_VALUE_, { valType::_string_,(int)stringList.size() }); 
+                        stringList.push_back($1); 
+                      }
+    
+    | VARIABLE_NAME   { 
+                        addInstruct(command::_EMPILE_VARIABLE_, { valType::_string_,(int)stringList.size() });
+                        stringList.push_back($1); 
+                      }
+    
+    //tableaux
+    | VARIABLE_NAME'['INT_VALUE']'    { 
+                                        addInstruct(command::_EMPILE_VAR_TABLE_ELEMENT_, { valType::_string_,(int)stringList.size() });
+                                        stringList.push_back($1);
+                                        addInstruct(command::_EMPILE_VALUE_, { valType::_int_,   (int)intList.size() });
+                                        intList.push_back($3);
+                                      }
+
   /*
     | SIN '(' expr ')'  { $$ = sin($3); cout << "sin(" << $3 << ") = " << $$ << endl; }
     | TAN '(' expr ')'  { $$ = tan($3); cout << "tan(" << $3 << ") = " << $$ << endl; }
@@ -89,7 +151,7 @@ int main(int argc, char **argv) {
   if ((yyin = programGeneration(argc, argv)) == NULL) exit(0);//ne peut pas fonctionner sans
   yyparse();
 
-  displayGeneratedProgram();
+  //displayGeneratedProgram();
 
   executeGeneratedProgram();
   

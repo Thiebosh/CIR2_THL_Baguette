@@ -186,8 +186,8 @@ map<string, valAccess> variables;
 
 //stockage tableau a part : doit preserver valeur ajoutee dans couche memoire (voir part 5) differente de celle supportant la declaration
 typedef struct {
-	int memoryLayer;
-	valType type;
+	unsigned int memoryLayer = 0;
+	valType type = valType::_int_;
 	deque<int> valuesPos;
 } tabAccess;
 
@@ -202,9 +202,9 @@ map<string, tabAccess> tableaux;
 /*		SOUS PARTIE 5 : LIBERATION DE MEMOIRE	    	*/
 /********************************************************/
 void delVal(valAccess val) {
+	//PILE : decremente references tableau des valeurs suivantes
 	if (val.type == executionPile.top().type && val.tabPos == executionPile.top().tabPos) executionPile.pop();//dernier element? le retire
 	else {
-		//PILE : decremente references tableau des valeurs suivantes
 		stack<valAccess> reversePile;
 		while (!executionPile.empty()) {
 			valAccess pileVal = depiler();
@@ -253,15 +253,79 @@ void delVar(string name) {
 	delVal(variables[name]);
 	variables.erase(name);
 }
-/*
-void delTabVal(valAccess val) {
 
+void delTabVal(string tabName, int tabCase) {
+	//decaler les adresses superieures a l'adresse a supprimer
+	for (auto tab : tableaux) {//parcourt tous les tableaux
+		if (tab.second.type == tableaux[tabName].type) {//si tableau est du type impacte
+			for (int tabPos = 0; tabPos < tab.second.valuesPos.size(); ++tabPos) {//checke toutes ses adresses
+				if (tab.second.valuesPos[tabPos] > tableaux[tabName].valuesPos[tabCase]) {//si adresse au dela de celle supprimee
+					tableaux[tab.first].valuesPos[tabPos]--;//reduit d'un (1 valeur supprimee)
+				}
+			}
+		}
+	}
+
+	//supprimer le stockage de l'adresse
+	tableaux[tabName].valuesPos.erase(tableaux[tabName].valuesPos.begin() + tabCase);
+
+	//supprimer le stockage de la valeur
+	switch (tableaux[tabName].type) {
+	case valType::_int_:
+		if (tabCase == intArray.size() - 1) intArray.pop_back();
+		else intArray.erase(intArray.begin() + tabCase);
+		break;
+	case valType::_double_:
+		if (tabCase == doubleArray.size() - 1) doubleArray.pop_back();
+		else doubleArray.erase(doubleArray.begin() + tabCase);
+		break;
+	case valType::_string_:
+		if (tabCase == stringArray.size() - 1) stringArray.pop_back();
+		else stringArray.erase(stringArray.begin() + tabCase);
+		break;
+	}
 }
 
-void delTab(valAccess val) {
+void delTab(string tabName) {
+	switch (tableaux[tabName].type) {
+	case valType::_int_:
+		while (tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
+			//supprime la valeur
+			int tabPos = tableaux[tabName].valuesPos[tableaux[tabName].valuesPos.size() - 1];
+			if (tabPos == intArray.size() - 1) intArray.pop_back();
+			else intArray.erase(intArray.begin() + tabPos);
 
+			//supprime l'adresse
+			tableaux[tabName].valuesPos.pop_back();
+		}
+		break;
+	case valType::_double_:
+		while (tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
+			//supprime la valeur
+			int tabPos = tableaux[tabName].valuesPos[tableaux[tabName].valuesPos.size() - 1];
+			if (tabPos == doubleArray.size() - 1) doubleArray.pop_back();
+			else doubleArray.erase(doubleArray.begin() + tabPos);
+
+			//supprime l'adresse
+			tableaux[tabName].valuesPos.pop_back();
+		}
+		break;
+	case valType::_string_:
+		while (tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
+			//supprime la valeur
+			int tabPos = tableaux[tabName].valuesPos[tableaux[tabName].valuesPos.size() - 1];
+			if (tabPos == stringArray.size() - 1) stringArray.pop_back();
+			else stringArray.erase(stringArray.begin() + tabPos);
+
+			//supprime l'adresse
+			tableaux[tabName].valuesPos.pop_back();
+		}
+		break;
+	}
+	//supprime tableau
+	tableaux.erase(tabName);
 }
-*/
+
 
 /********************************************************/
 /*		SOUS PARTIE 6 : PILE DE BLOCS MEMOIRE			*/
@@ -279,24 +343,24 @@ void enterMemoryLayer() {
 }
 
 void exitMemoryLayer() {
+	//supprime tableaux declares dans le bloc
+	map<string, tabAccess> tableauxCopy = tableaux;
+	for (auto tab : tableauxCopy) {
+		if (tab.second.memoryLayer == memoryLayer.size()) {
+			delTab(tab.first);
+		}
+	}
+
 	memoryState initial;
 	if (!memoryLayer.empty()) {//pas besoin de declarer nouvel espace memoire au demarrage
 		initial = memoryLayer.top();
 		memoryLayer.pop();
 	}
 
-	//supprime tableaux declares dans le bloc
-	map<string, tabAccess> tableauxCopy = tableaux;
-	for (auto tab : tableauxCopy) {
-		if (tab.second.memoryLayer == memoryLayer.size()) {
-			//delTab(tab.second);
-		}
-	}
-
 	//supprime variables declarees dans le bloc
 	map<string, valAccess> variablesCopy = variables;
 	for (auto var : variablesCopy) {
-		if ((var.second.type == valType::_int_ && (unsigned)var.second.tabPos >= initial.intListSize) ||
+		if ((var.second.type == valType::_int_	  && (unsigned)var.second.tabPos >= initial.intListSize) ||
 			(var.second.type == valType::_double_ && (unsigned)var.second.tabPos >= initial.doubleListSize) ||
 			(var.second.type == valType::_string_ && (unsigned)var.second.tabPos >= initial.stringListSize)) {
 			delVar(var.first);
