@@ -12,6 +12,7 @@
 entier                      { return INT; }
 virgule                     { return DOUBLE; }
 texte                       { return STRING; }
+liste                       { return TAB; }
 "[A-Za-z_][0-9A-Za-z_]*"   	{ strcpy(yylval.stringValeur,yytext);    return STRING_VALUE; }//OK car guillemets + tester fputs(yytext, yyout) : https://stackoverflow.com/questions/48013348/bison-yacc-yyerror-doesnt-work?rq=1
 
 

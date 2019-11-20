@@ -14,7 +14,8 @@ using namespace std;
 /*		SOUS PARTIE 1 : OPERATION SUR LES VALEURS		*/
 /*		SOUS PARTIE 2 : DECLARATION DES COMMANDES		*/
 /*		SOUS PARTIE 3 : GESTION DES INSTRUCTIONS		*/
-/*		SOUS PARTIE 4 : EXECUTION SELON LES COMMANDES	*/
+/*		SOUS PARTIE 4 : GESTION DES TABLEAUX			*/
+/*		SOUS PARTIE 5 : EXECUTION SELON LES COMMANDES	*/
 /*														*/
 /********************************************************/
 
@@ -186,7 +187,224 @@ typedef struct {
 
 
 /********************************************************/
-/*		SOUS PARTIE 4 : EXECUTION SELON LES COMMANDES	*/
+/*		SOUS PARTIE 4 : GESTION DES TABLEAUX			*/
+/********************************************************/
+enum class tabAction {//fixe operations
+	_empile_size_,
+	_empile_case_,
+	_create_,
+	_update_,
+	_remove_
+};
+
+void executeTabAction(instruction& instructContent, tabAction action) {
+	string name = stringList[instructContent.second.tabPos];
+	delVal(instructContent.second);//string recupere : peut supprimer du tableau
+
+	if ((action == tabAction::_create_ && tableaux.find(name) == tableaux.end()) ||//tab est bien nouveau
+		(action != tabAction::_create_ && tableaux.find(name) != tableaux.end())) {//tab existe bien
+		int tabPos;
+		valAccess value;
+		tabAccess declaration;
+		switch (action) {
+		case tabAction::_empile_size_:
+			executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
+			intList.push_back(tableaux[name].valuesPos.size());//name
+			break;
+			
+		case tabAction::_empile_case_:
+			value = depiler();
+			tabPos = intList[value.tabPos];//recupere val associee a adresse
+			delVal(value);
+
+			if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+				tabPos = tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
+
+				switch(tableaux[name].type) {
+				case valType::_int_:
+					executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
+					intList.push_back(intArray[tabPos]);
+					break;
+				case valType::_double_:
+					executionPile.push(valAccess{ valType::_double_,(int)doubleList.size() });
+					doubleList.push_back(doubleArray[tabPos]);
+					break;
+				case valType::_string_:
+					executionPile.push(valAccess{ valType::_string_,(int)stringList.size() });
+					stringList.push_back(stringArray[tabPos]);
+					break;
+				}
+			}
+			break;
+
+		case tabAction::_create_:
+			value = depiler();//supprime pas : besoin de transmettre valeur associee
+
+			if (instructContent.second.type == value.type /*&& value.tabPos != -1*/) {//verif types
+				declaration = {(unsigned)memoryLayer.size(), value.type};//ordre de declaration
+
+				switch(value.type) {
+				case valType::_int_:
+					declaration.valuesPos.push_back(intArray.size());
+					intArray.push_back(intList[value.tabPos]);
+					break;
+				case valType::_double_:
+					declaration.valuesPos.push_back(doubleArray.size());
+					doubleArray.push_back(doubleList[value.tabPos]);
+					break;
+				case valType::_string_:
+					declaration.valuesPos.push_back(stringArray.size());
+					stringArray.push_back(stringList[value.tabPos]);
+					break;
+				}
+
+				tableaux.insert({name,declaration});
+			}
+			//else ? cast here
+
+			delVal(value);//stocke en typeArray
+			break;
+
+		case tabAction::_update_:
+			value = depiler();
+			tabPos = intList[value.tabPos];//recupere val associee a adresse
+			delVal(value);
+
+			if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+				tabPos = tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
+
+				valAccess value = depiler();//supprime pas : besoin de transmettre valeur associee
+				if (tableaux[name].type == value.type) {
+					switch(value.type) {
+					case valType::_int_:
+						intArray[tabPos] = intList[value.tabPos];
+						break;
+					case valType::_double_:
+						doubleArray[tabPos] = doubleList[value.tabPos];
+						break;
+					case valType::_string_:
+						stringArray[tabPos] = stringList[value.tabPos];
+						break;
+					}
+				}
+				//else ? cast here
+
+				delVal(value);//stocke en typeArray
+			}
+			break;
+
+		case tabAction::_remove_:
+			value = depiler();
+			tabPos = intList[value.tabPos];//recupere val associee a adresse
+			delVal(value);
+
+			if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+				delTabVal(name,tabPos);
+			}
+			break;
+		}
+	}
+	//else : pb
+}
+
+/*
+void executeTabAction(instruction& instructContent, tabAction action) {
+	string name = stringList[instructContent.second.tabPos];
+	delVal(instructContent.second);//string recupere : peut supprimer du tableau
+
+	if ((action == tabAction::_create_ && tableaux.find(name) == tableaux.end()) ||//tab est bien nouveau
+		(action != tabAction::_create_ && tableaux.find(name) != tableaux.end())) {//tab existe bien
+		int tabPos;
+		valAccess value;
+		tabAccess declaration;
+
+		if (action == tabAction::_empile_size_) {
+			executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
+			intList.push_back(tableaux[name].valuesPos.size());//name
+		}
+		else {
+			value = depiler();
+			if (action != tabAction::_create_) {//supprime pas : besoin de transmettre valeur associee
+				tabPos = intList[value.tabPos];//recupere val associee a adresse
+				delVal(value);
+			}
+
+			if (action == tabAction::_create_) {
+				if (instructContent.second.type == value.type /*&& value.tabPos != -1* /) {//verif types
+					declaration = {(unsigned)memoryLayer.size(), value.type};//ordre de declaration
+
+					switch(value.type) {
+					case valType::_int_:
+						declaration.valuesPos.push_back(intArray.size());
+						intArray.push_back(intList[value.tabPos]);
+						break;
+					case valType::_double_:
+						declaration.valuesPos.push_back(doubleArray.size());
+						doubleArray.push_back(doubleList[value.tabPos]);
+						break;
+					case valType::_string_:
+						declaration.valuesPos.push_back(stringArray.size());
+						stringArray.push_back(stringList[value.tabPos]);
+						break;
+					}
+
+					tableaux.insert({name,declaration});
+				}
+				//else ? cast here
+
+				delVal(value);//stocke en typeArray
+			}
+
+			else if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+				if (action == tabAction::_remove_) delTabVal(name,tabPos);
+				else {
+					tabPos = tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
+
+					if (action == tabAction::_empile_case_) {
+						switch(tableaux[name].type) {
+						case valType::_int_:
+							executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
+							intList.push_back(intArray[tabPos]);
+							break;
+						case valType::_double_:
+							executionPile.push(valAccess{ valType::_double_,(int)doubleList.size() });
+							doubleList.push_back(doubleArray[tabPos]);
+							break;
+						case valType::_string_:
+							executionPile.push(valAccess{ valType::_string_,(int)stringList.size() });
+							stringList.push_back(stringArray[tabPos]);
+							break;
+						}
+					}
+					else {//(action == tabAction::_update_)
+						value = depiler();//supprime pas : besoin de transmettre valeur associee
+						if (tableaux[name].type == value.type) {
+							switch(value.type) {
+							case valType::_int_:
+								intArray[tabPos] = intList[value.tabPos];
+								break;
+							case valType::_double_:
+								doubleArray[tabPos] = doubleList[value.tabPos];
+								break;
+							case valType::_string_:
+								stringArray[tabPos] = stringList[value.tabPos];
+								break;
+							}
+						}
+						//else ? cast here
+
+						delVal(value);//stocke en typeArray
+					}
+				}
+			}
+		}
+	}
+	//else : pb
+}
+*/
+
+/********************************************************/
+/*		SOUS PARTIE 5 : EXECUTION SELON LES COMMANDES	*/
 /********************************************************/
 typedef void (*functionPointer)(instruction& instructContent);
 
@@ -216,44 +434,11 @@ const map<command, functionPointer> executeCommand = {
 		}},
 	{command::_EMPILE_TABLE_SIZE_,
 		[](instruction& instructContent) {
-			string name = stringList[instructContent.second.tabPos];
-			delVal(instructContent.second);//string recupere : peut supprimer du tableau
-
-			if (tableaux.find(name) != tableaux.end()) {//tab existe bien
-				executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
-				intList.push_back(tableaux[name].valuesPos.size());
-			}
-			//else?
+			executeTabAction(instructContent, tabAction::_empile_size_);
 		}},
 	{command::_EMPILE_TABLE_ELEMENT_,
 		[](instruction& instructContent) {
-			string name = stringList[instructContent.second.tabPos];
-			delVal(instructContent.second);//string recupere : peut supprimer du tableau
-			
-			if (tableaux.find(name) != tableaux.end()) {//tab existe bien
-				valAccess index = depiler();
-				int tabPos = intList[index.tabPos];//recupere val associee a adresse
-				delVal(index);
-
-				if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
-					tabPos = tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
-
-					switch(tableaux[name].type) {
-					case valType::_int_:
-						executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
-						intList.push_back(intArray[tabPos]);
-						break;
-					case valType::_double_:
-						executionPile.push(valAccess{ valType::_double_,(int)doubleList.size() });
-						doubleList.push_back(doubleArray[tabPos]);
-						break;
-					case valType::_string_:
-						executionPile.push(valAccess{ valType::_string_,(int)stringList.size() });
-						stringList.push_back(stringArray[tabPos]);
-						break;
-					}
-				}
-			}
+			executeTabAction(instructContent, tabAction::_empile_case_);
 		}},
 
 
@@ -289,7 +474,7 @@ const map<command, functionPointer> executeCommand = {
 		}},
 
 
-	{command::_CREATE_VARIABLE_,//ok
+	{command::_CREATE_VARIABLE_,
 		[](instruction& instructContent) {
 			string name = stringList[instructContent.second.tabPos];
 			delVal(valAccess{ valType::_string_,instructContent.second.tabPos});//supprimer string du tableau
@@ -316,88 +501,17 @@ const map<command, functionPointer> executeCommand = {
 		}},
 
 
-	{command::_CREATE_VAR_TABLE_,//ok
+	{command::_CREATE_VAR_TABLE_,
 		[](instruction& instructContent) {
-			string name = stringList[instructContent.second.tabPos];
-			delVal(instructContent.second);//string recupere : peut supprimer du tableau
-
-			if (tableaux.find(name) == tableaux.end()) {//tab est bien nouveau
-				valAccess value = depiler();//supprime pas : besoin de transmettre valeur associee
-
-				if (instructContent.second.type == value.type /*&& value.tabPos != -1*/) {//verif types
-					tabAccess declaration = {(unsigned)memoryLayer.size(), value.type};//ordre de declaration
-
-					switch(value.type) {
-					case valType::_int_:
-						declaration.valuesPos.push_back(intArray.size());
-						intArray.push_back(intList[value.tabPos]);
-						break;
-					case valType::_double_:
-						declaration.valuesPos.push_back(doubleArray.size());
-						doubleArray.push_back(doubleList[value.tabPos]);
-						break;
-					case valType::_string_:
-						declaration.valuesPos.push_back(stringArray.size());
-						stringArray.push_back(stringList[value.tabPos]);
-						break;
-					}
-
-					tableaux.insert({name,declaration});
-				}
-				//else ? cast here
-
-				delVal(value);//stocke en typeArray
-			}
-			//else ?
+			executeTabAction(instructContent, tabAction::_create_);
 		}},
-	{command::_UPDATE_TABLE_ELEMENT_,//ok
+	{command::_UPDATE_TABLE_ELEMENT_,
 		[](instruction& instructContent) {
-			string name = stringList[instructContent.second.tabPos];
-			delVal(instructContent.second);//string recupere : peut supprimer du tableau
-			
-			if (tableaux.find(name) != tableaux.end()) {//tab existe bien
-				valAccess index = depiler();
-				int tabPos = intList[index.tabPos];//recupere val associee a adresse
-				delVal(index);
-
-				if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
-					tabPos = tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
-
-					valAccess value = depiler();//supprime pas : besoin de transmettre valeur associee
-					if (tableaux[name].type == value.type) {
-						switch(value.type) {
-						case valType::_int_:
-							intArray[tabPos] = intList[value.tabPos];
-							break;
-						case valType::_double_:
-							doubleArray[tabPos] = doubleList[value.tabPos];
-							break;
-						case valType::_string_:
-							stringArray[tabPos] = stringList[value.tabPos];
-							break;
-						}
-					}
-					//else ? cast here
-
-					delVal(value);//stocke en typeArray
-				}
-			}
+			executeTabAction(instructContent, tabAction::_update_);
 		}},
-	{command::_REMOVE_TABLE_ELEMENT_,//ok
+	{command::_REMOVE_TABLE_ELEMENT_,
 		[](instruction& instructContent) {
-			string name = stringList[instructContent.second.tabPos];
-			delVal(instructContent.second);//string recupere : peut supprimer du tableau
-			
-			if (tableaux.find(name) != tableaux.end()) {//tab existe bien
-				valAccess index = depiler();
-				int tabCase = intList[index.tabPos];//recupere val associee a adresse
-				delVal(index);
-
-				if (tabCase > -1 && tabCase < tableaux[name].valuesPos.size()) {
-					delTabVal(name,tabCase);
-				}
-
-			}
+			executeTabAction(instructContent, tabAction::_remove_);
 		}},
 
 
