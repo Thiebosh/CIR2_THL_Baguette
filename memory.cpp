@@ -12,10 +12,9 @@ using namespace std;
 /*	PARTIE I : GESTION DE LA MEMOIRE					*/
 /*		SOUS PARTIE 1 : STOCKAGE DE VALEURS TYPEES		*/
 /*		SOUS PARTIE 2 : PILE DE VALEURS	EN UTILISATION	*/
-/*		SOUS PARTIE 3 : OPERATION SUR LES VALEURS		*/
-/*		SOUS PARTIE 4 : UTILISATION DES VARIABLES		*/
-/*		SOUS PARTIE 5 : LIBERATION DE MEMOIRE	    	*/
-/*		SOUS PARTIE 6 : PILE DE BLOCS MEMOIRE			*/
+/*		SOUS PARTIE 3 : UTILISATION DES VARIABLES		*/
+/*		SOUS PARTIE 4 : LIBERATION DE MEMOIRE	    	*/
+/*		SOUS PARTIE 5 : PILE DE BLOCS MEMOIRE			*/
 /*														*/
 /********************************************************/
 
@@ -71,116 +70,7 @@ valAccess depiler() {
 
 
 /********************************************************/
-/*		SOUS PARTIE 3 : OPERATION SUR LES VALEURS		*/
-/********************************************************/
-enum class operation {//fixe operations
-	_plus_,
-	_moins_,
-	_fois_,
-	_divisePar_
-};
-
-void executeOperation(operation operation) {
-	//recupere valeurs
-	valAccess val2 = depiler();
-	valAccess val1 = depiler();
-
-	int val1Int(0), val2Int(0);
-	double val1Double(0), val2Double(0);
-	string val1String(""), val2String("");
-
-	switch (val1.type) {
-	case valType::_int_:
-		val1Int = intList[val1.tabPos];
-		break;
-	case valType::_double_:
-		val1Double = doubleList[val1.tabPos];
-		break;
-	case valType::_string_:
-		val1String = stringList[val1.tabPos];
-		break;
-	}
-	switch (val2.type) {
-	case valType::_int_:
-		val2Int = intList[val2.tabPos];
-		break;
-	case valType::_double_:
-		val2Double = doubleList[val2.tabPos];
-		break;
-	case valType::_string_:
-		val2String = stringList[val2.tabPos];
-		break;
-	}
-
-	//execute operation et enregistre nouvelle valeur
-	if (val1.type == valType::_int_ && val2.type == valType::_int_) {//même type
-		int result(0);
-		switch (operation) {
-		case operation::_plus_:
-			result = val1Int + val2Int;
-			break;
-		case operation::_moins_:
-			result = val1Int - val2Int;
-			break;
-		case operation::_fois_:
-			result = val1Int * val2Int;
-			break;
-		case operation::_divisePar_:
-			result = val1Int / val2Int;
-			break;
-		}
-		executionPile.push(valAccess({ valType::_int_,(int)intList.size() }));
-		intList.push_back(result);
-	}
-	else if ((val1.type == valType::_int_ || val1.type == valType::_double_) &&
-		(val2.type == valType::_int_ || val2.type == valType::_double_)) {//int et double ou deux doubles
-		double result(0);
-		switch (operation) {
-		case operation::_plus_:
-			result = (val1Int ? val1Int : val1Double) + (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case operation::_moins_:
-			result = (val1Int ? val1Int : val1Double) - (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case operation::_fois_:
-			result = (val1Int ? val1Int : val1Double) * (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case operation::_divisePar_:
-			result = (val1Int ? val1Int : val1Double) / (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		}
-		executionPile.push(valAccess({ valType::_double_,(int)doubleList.size() }));
-		doubleList.push_back(result);
-	}
-	else if (val1.type == valType::_string_ && val2.type == valType::_string_) {
-		string result("");
-		switch (operation) {
-		case operation::_plus_://concatenation
-			result = val1String + val2String;
-			break;
-			/* reste?
-		case operation::_moins_:
-			result = (val1Int ? val1Int : val1Double) - (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case operation::_fois_:
-			result = (val1Int ? val1Int : val1Double) * (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case operation::_divisePar_:
-			result = (val1Int ? val1Int : val1Double) / (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-			*/
-		}
-		executionPile.push(valAccess({ valType::_double_,(int)doubleList.size() }));
-		stringList.push_back(result);
-	}
-	else {//string + int ou double
-		//erreur? "tostring"? repetition?
-	}
-}
-
-
-/********************************************************/
-/*		SOUS PARTIE 4 : DECLARATION DES VARIABLES		*/
+/*		SOUS PARTIE 3 : DECLARATION DES VARIABLES		*/
 /********************************************************/
 map<string, valAccess> variables;
 
@@ -199,7 +89,7 @@ map<string, tabAccess> tableaux;
 
 
 /********************************************************/
-/*		SOUS PARTIE 5 : LIBERATION DE MEMOIRE	    	*/
+/*		SOUS PARTIE 4 : LIBERATION DE MEMOIRE	    	*/
 /********************************************************/
 void delVal(valAccess val) {
 	//PILE : decremente references tableau des valeurs suivantes
@@ -328,7 +218,7 @@ void delTab(string tabName) {
 
 
 /********************************************************/
-/*		SOUS PARTIE 6 : PILE DE BLOCS MEMOIRE			*/
+/*		SOUS PARTIE 5 : PILE DE BLOCS MEMOIRE			*/
 /********************************************************/
 typedef struct {
 	unsigned int intListSize = 0;

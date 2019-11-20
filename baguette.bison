@@ -23,7 +23,13 @@
 %token INT
 %token DOUBLE
 %token STRING
+%token INT_TAB
+%token DOUBLE_TAB
+%token STRING_TAB
 %token <nom> VARIABLE_NAME
+
+%token SIZE
+%token DELETE
 
 //conserver?
 %token SIN
@@ -65,7 +71,7 @@ bloc :
     ;
 
 instruction : 
-    attribution //':' ?
+    alterVariables //':' ?
 
     | DISPLAY expression { addInstruct(command::_PRINT_);   /* imprimer le résultat de l'expression */  }
 
@@ -92,14 +98,59 @@ instruction :
     |   /* Ligne vide*/
     ;
 
-attribution :
-      INT    VARIABLE_NAME '=' expression { addInstruct(command::_CREATE_VARIABLE_, { valType::_int_,   (int)stringList.size() }); stringList.push_back($2); }
-    | DOUBLE VARIABLE_NAME '=' expression { addInstruct(command::_CREATE_VARIABLE_, { valType::_double_,(int)stringList.size() }); stringList.push_back($2); }
-    | STRING VARIABLE_NAME '=' expression { addInstruct(command::_CREATE_VARIABLE_, { valType::_string_,(int)stringList.size() }); stringList.push_back($2); }
+alterVariables :
+      INT    VARIABLE_NAME '=' expression { 
+                                            //var name forcement string donc passe en type l'expression (type de var) pour savoir quel tableau checker
+                                            addInstruct(command::_CREATE_VARIABLE_, { valType::_int_,   (int)stringList.size() });
+                                            stringList.push_back($2);
+                                          }
+    | DOUBLE VARIABLE_NAME '=' expression { 
+                                            addInstruct(command::_CREATE_VARIABLE_, { valType::_double_,(int)stringList.size() }); 
+                                            stringList.push_back($2); 
+                                          }
+    | STRING VARIABLE_NAME '=' expression { 
+                                            addInstruct(command::_CREATE_VARIABLE_, { valType::_string_,(int)stringList.size() }); 
+                                            stringList.push_back($2); 
+                                          }
     
-    | VARIABLE_NAME '=' expression  { addInstruct(command::_UPDATE_VARIABLE_, { valType::_string_,(int)stringList.size() }); stringList.push_back($1); }
+    | VARIABLE_NAME '=' expression  { 
+                                      addInstruct(command::_UPDATE_VARIABLE_, { valType::_string_,(int)stringList.size() }); 
+                                      stringList.push_back($1); 
+                                    }
     
     //tableaux
+    | INT_TAB     VARIABLE_NAME   '=' expression  { 
+                                                    addInstruct(command::_CREATE_VAR_TABLE_, { valType::_int_,(int)stringList.size() });
+                                                    stringList.push_back($2);
+                                                  }
+    | DOUBLE_TAB  VARIABLE_NAME   '=' expression  { 
+                                                    addInstruct(command::_CREATE_VAR_TABLE_, { valType::_double_,(int)stringList.size() });
+                                                    stringList.push_back($2);
+                                                  }
+    | STRING_TAB  VARIABLE_NAME   '=' expression  { 
+                                                    addInstruct(command::_CREATE_VAR_TABLE_, { valType::_string_,(int)stringList.size() });
+                                                    stringList.push_back($2);
+                                                  }
+    
+    | VARIABLE_NAME'['INT_VALUE']' '=' expression  { 
+                                                    //index tab
+                                                    addInstruct(command::_EMPILE_VALUE_, { valType::_int_,   (int)intList.size() });
+                                                    intList.push_back($3);
+
+                                                    //nom var + contenu expression (index dispo dans pile)
+                                                    addInstruct(command::_UPDATE_TABLE_ELEMENT_, { valType::_string_,(int)stringList.size() }); 
+                                                    stringList.push_back($1);
+                                                  }
+    
+    | DELETE VARIABLE_NAME'['INT_VALUE']'         { 
+                                                    //index tab
+                                                    addInstruct(command::_EMPILE_VALUE_, { valType::_int_,   (int)intList.size() });
+                                                    intList.push_back($4);
+
+                                                    //nom var
+                                                    addInstruct(command::_REMOVE_TABLE_ELEMENT_, { valType::_string_,(int)stringList.size() });
+                                                    stringList.push_back($2);
+                                                  }
     ;
 
 expression :
@@ -113,7 +164,7 @@ expression :
     | INT_VALUE       { 
                         addInstruct(command::_EMPILE_VALUE_, { valType::_int_,   (int)intList.size() });
                         intList.push_back($1);
-                        }
+                      }
     | DOUBLE_VALUE    { 
                         addInstruct(command::_EMPILE_VALUE_, { valType::_double_,(int)doubleList.size() }); 
                         doubleList.push_back($1); 
@@ -128,12 +179,19 @@ expression :
                         stringList.push_back($1); 
                       }
     
-    //tableaux
+    | SIZE VARIABLE_NAME    { 
+                              //nom var
+                              addInstruct(command::_EMPILE_TABLE_SIZE_, { valType::_string_,(int)stringList.size() });
+                              stringList.push_back($2);
+                            }
     | VARIABLE_NAME'['INT_VALUE']'    { 
-                                        addInstruct(command::_EMPILE_VAR_TABLE_ELEMENT_, { valType::_string_,(int)stringList.size() });
-                                        stringList.push_back($1);
+                                        //index tab
                                         addInstruct(command::_EMPILE_VALUE_, { valType::_int_,   (int)intList.size() });
                                         intList.push_back($3);
+
+                                        //nom var
+                                        addInstruct(command::_EMPILE_TABLE_ELEMENT_, { valType::_string_,(int)stringList.size() });
+                                        stringList.push_back($1);
                                       }
 
   /*
