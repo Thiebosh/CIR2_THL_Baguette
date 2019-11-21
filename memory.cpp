@@ -229,7 +229,7 @@ typedef struct {
 stack<memoryState> memoryLayer;
 
 void enterMemoryLayer() {
-	memoryLayer.push(memoryState{ (unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
+	memoryLayer.push({ (unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
 }
 
 void exitMemoryLayer() {
@@ -258,7 +258,7 @@ void exitMemoryLayer() {
 	}
 
 	//supprime valeurs (non affectees a des variables) declarees dans le bloc (supprime par la fin pour + d'efficacite (deque) et de surete)
-	while (intList.size() > initial.intListSize)		delVal(valAccess{ valType::_int_,	(int)intList.size() - 1 });
-	while (doubleList.size() > initial.doubleListSize)	delVal(valAccess{ valType::_double_,(int)doubleList.size() - 1 });
-	while (stringList.size() > initial.stringListSize)	delVal(valAccess{ valType::_string_,(int)stringList.size() - 1 });
+	while (intList.size() > initial.intListSize)		delVal({ valType::_int_,	(int)intList.size() - 1 });
+	while (doubleList.size() > initial.doubleListSize)	delVal({ valType::_double_,(int)doubleList.size() - 1 });
+	while (stringList.size() > initial.stringListSize)	delVal({ valType::_string_,(int)stringList.size() - 1 });
 }

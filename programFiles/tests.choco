@@ -2,4 +2,11 @@ AFFICHER 1
 AFFICHER 1.14
 AFFICHER -2
 
+si 1
+alors
+	AFFICHER 1
+sinon
+	AFFICHER 2
+finsi
+
 TERMINER

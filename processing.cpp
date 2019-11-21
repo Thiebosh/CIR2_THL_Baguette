@@ -151,15 +151,16 @@ enum class command {
 	_DIVISE_PAR_,
 
 	//SAUTS (conditions, boucles, fonctions)
-	_JUMP_,
-	_JUMP_IF_ZERO_,
+	_GOTO_,
+	_GOTO_TEST_,
 
 	//VARIABLES
 	_CREATE_VARIABLE_,
 	_UPDATE_VARIABLE_,
 
 	//TABLEAUX
-	_CREATE_VAR_TABLE_,
+	_CREATE_TABLE_,
+	_ADD_TABLE_ELEMENT_,
 	_UPDATE_TABLE_ELEMENT_,
 	_REMOVE_TABLE_ELEMENT_,
 
@@ -174,16 +175,11 @@ enum class command {
 typedef pair<command, valAccess> instruction;
 deque<instruction> instructionList;
 
-unsigned int indexInstruction = 0;   // compteur instruction 
-void addInstruct(command command, valAccess val = { valType::_int_,-1 }) {
-	instructionList.push_back({ command, val });
-	indexInstruction++; //necessaire pour enregistrer position
+void addInstruct(command command, int tabPos = -1, valType type = valType::_int_) {
+	instructionList.push_back({ command, { type,tabPos } });
 };
-//sauts conditionnels
-typedef struct {
-	int jumpToInstruct;
-	int jumpToInstructIfFalse;
-} idInstruct;
+
+unsigned int indexInstruction = 0;   // compteur instruction 
 
 
 /********************************************************/
@@ -193,6 +189,7 @@ enum class tabAction {//fixe operations
 	_empile_size_,
 	_empile_case_,
 	_create_,
+	_add_,
 	_update_,
 	_remove_
 };
@@ -208,7 +205,7 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 		tabAccess declaration;
 		switch (action) {
 		case tabAction::_empile_size_:
-			executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
+			executionPile.push({ valType::_int_,(int)intList.size() });
 			intList.push_back(tableaux[name].valuesPos.size());//name
 			break;
 			
@@ -222,15 +219,15 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 
 				switch(tableaux[name].type) {
 				case valType::_int_:
-					executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
+					executionPile.push({ valType::_int_,(int)intList.size() });
 					intList.push_back(intArray[tabPos]);
 					break;
 				case valType::_double_:
-					executionPile.push(valAccess{ valType::_double_,(int)doubleList.size() });
+					executionPile.push({ valType::_double_,(int)doubleList.size() });
 					doubleList.push_back(doubleArray[tabPos]);
 					break;
 				case valType::_string_:
-					executionPile.push(valAccess{ valType::_string_,(int)stringList.size() });
+					executionPile.push({ valType::_string_,(int)stringList.size() });
 					stringList.push_back(stringArray[tabPos]);
 					break;
 				}
@@ -259,6 +256,29 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 				}
 
 				tableaux.insert({name,declaration});
+			}
+			//else ? cast here
+
+			delVal(value);//stocke en typeArray
+			break;
+
+		case tabAction::_add_:
+			value = depiler();//supprime pas : besoin de transmettre valeur associee
+			if (tableaux[name].type == value.type) {
+				switch(value.type) {
+				case valType::_int_:
+					tableaux[name].valuesPos.push_back(intArray.size());
+					intArray.push_back(intList[value.tabPos]);
+					break;
+				case valType::_double_:
+					tableaux[name].valuesPos.push_back(doubleArray.size());
+					doubleArray.push_back(doubleList[value.tabPos]);
+					break;
+				case valType::_string_:
+					tableaux[name].valuesPos.push_back(doubleArray.size());
+					stringArray.push_back(stringList[value.tabPos]);
+					break;
+				}
 			}
 			//else ? cast here
 
@@ -319,12 +339,12 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 		tabAccess declaration;
 
 		if (action == tabAction::_empile_size_) {
-			executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
+			executionPile.push({ valType::_int_,(int)intList.size() });
 			intList.push_back(tableaux[name].valuesPos.size());//name
 		}
 		else {
 			value = depiler();
-			if (action != tabAction::_create_) {//supprime pas : besoin de transmettre valeur associee
+			if (action != tabAction::_create_ && action != tabAction::_add_) {//supprime pas : besoin de transmettre valeur associee
 				tabPos = intList[value.tabPos];//recupere val associee a adresse
 				delVal(value);
 			}
@@ -355,6 +375,28 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 				delVal(value);//stocke en typeArray
 			}
 
+			else if (action == tabAction::_add_) {
+				if (tableaux[name].type == value.type) {
+					switch(value.type) {
+					case valType::_int_:
+						tableaux[name].valuesPos.push_back(intArray.size());
+						intArray.push_back(intList[value.tabPos]);
+						break;
+					case valType::_double_:
+						tableaux[name].valuesPos.push_back(doubleArray.size());
+						doubleArray.push_back(doubleList[value.tabPos]);
+						break;
+					case valType::_string_:
+						tableaux[name].valuesPos.push_back(doubleArray.size());
+						stringArray.push_back(stringList[value.tabPos]);
+						break;
+					}
+				}
+				//else ? cast here
+
+				delVal(value);//stocke en typeArray
+			}
+
 			else if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
 				if (action == tabAction::_remove_) delTabVal(name,tabPos);
 				else {
@@ -363,15 +405,15 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 					if (action == tabAction::_empile_case_) {
 						switch(tableaux[name].type) {
 						case valType::_int_:
-							executionPile.push(valAccess{ valType::_int_,(int)intList.size() });
+							executionPile.push({ valType::_int_,(int)intList.size() });
 							intList.push_back(intArray[tabPos]);
 							break;
 						case valType::_double_:
-							executionPile.push(valAccess{ valType::_double_,(int)doubleList.size() });
+							executionPile.push({ valType::_double_,(int)doubleList.size() });
 							doubleList.push_back(doubleArray[tabPos]);
 							break;
 						case valType::_string_:
-							executionPile.push(valAccess{ valType::_string_,(int)stringList.size() });
+							executionPile.push({ valType::_string_,(int)stringList.size() });
 							stringList.push_back(stringArray[tabPos]);
 							break;
 						}
@@ -460,15 +502,17 @@ const map<command, functionPointer> executeCommand = {
 		}},
 
 
-	{command::_JUMP_,
+	{command::_GOTO_,
 		[](instruction& instructContent) {
-			indexInstruction = intList[instructContent.second.tabPos];
+			indexInstruction = instructContent.second.tabPos;//instruction est entier naturel
 		}},
-	{command::_JUMP_IF_ZERO_,
+	{command::_GOTO_TEST_,
 		[](instruction& instructContent) {
 			valAccess testResult = depiler();
-			if (testResult.tabPos != -1 && testResult.type == valType::_int_ && intList[testResult.tabPos] == 0) {
-				indexInstruction = intList[instructContent.second.tabPos];//cas if not 0 : incrementation prealable
+			if (testResult.tabPos != -1 && 
+				(testResult.type == valType::_int_ && intList[testResult.tabPos] == 0) ||
+				(testResult.type == valType::_double_ && doubleList[testResult.tabPos] == 0)) {
+				indexInstruction = instructContent.second.tabPos;//cas if not 0 : incrementation prealable
 			}
 			delVal(testResult);
 		}},
@@ -477,7 +521,7 @@ const map<command, functionPointer> executeCommand = {
 	{command::_CREATE_VARIABLE_,
 		[](instruction& instructContent) {
 			string name = stringList[instructContent.second.tabPos];
-			delVal(valAccess{ valType::_string_,instructContent.second.tabPos});//supprimer string du tableau
+			delVal({ valType::_string_,instructContent.second.tabPos});//supprimer string du tableau
 
 			if (variables.find(name) == variables.end()) {//var est bien nouvelle
 				valAccess value = depiler();//supprime pas : transmet adresse
@@ -501,9 +545,13 @@ const map<command, functionPointer> executeCommand = {
 		}},
 
 
-	{command::_CREATE_VAR_TABLE_,
+	{command::_CREATE_TABLE_,
 		[](instruction& instructContent) {
 			executeTabAction(instructContent, tabAction::_create_);
+		}},
+	{command::_ADD_TABLE_ELEMENT_,
+		[](instruction& instructContent) {
+			executeTabAction(instructContent, tabAction::_add_);
 		}},
 	{command::_UPDATE_TABLE_ELEMENT_,
 		[](instruction& instructContent) {
@@ -550,10 +598,10 @@ void displayGeneratedProgram() {
 			printVal("GET NUM ", instructContent.second, " IN MEMORY"); //instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
 			break;
 
-		case command::_JUMP_IF_ZERO_:
+		case command::_GOTO_TEST_:
 			printVal("IF ZERO, JUMP TO INSTRUCTION ", instructContent.second);
 			break;
-		case command::_JUMP_:
+		case command::_GOTO_:
 			printVal("JUMP TO INSTRUCTION ", instructContent.second);
 			break;
 
