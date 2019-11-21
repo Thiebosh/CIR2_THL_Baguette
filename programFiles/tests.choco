@@ -14,7 +14,7 @@ sinon
 	AFFICHER 2
 finsi
 
-AFFICHER "texte
+AFFICHER "texte"
 
 var = 1
 AFFICHER var

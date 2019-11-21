@@ -247,7 +247,7 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 		case tabAction::_create_:
 			value = depiler();//supprime pas : besoin de transmettre valeur associee
 
-			if (instructContent.second.type == value.type /*&& value.tabPos != -1*/) {//verif types
+			if (instructContent.second.type == value.type) {//verif types
 				declaration = {(unsigned)memoryLayer.size(), value.type};//ordre de declaration
 
 				switch(value.type) {
@@ -715,43 +715,68 @@ void displayGeneratedProgram() {
 			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
 			break;
 
-/*
+
 		case command::_CREATE_TABLE_:
 			name = stringList[instructContent.second.tabPos];
-
-			if (variables.find(name) != variables.end()) {//var existe bien
-				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
+			if (tableaux.find(name) == tableaux.end()) {
+				value = executionPile.top();
+				
+				if (instructContent.second.type == value.type) {
+					printVal("INITIALISE TABLEAU " + name + " AVEC ",value);
+				}
+				else cout << "ERREUR : TYPES DIFFERENTS";
 			}
-			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+			else cout << "ERREUR : TABLEAU " << name << " EXISTE DEJA";
 			break;
 		case command::_ADD_TABLE_ELEMENT_:
 			name = stringList[instructContent.second.tabPos];
-
-			if (variables.find(name) != variables.end()) {//var existe bien
-				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
+			if (tableaux.find(name) != tableaux.end()) {
+				value = executionPile.top();
+				
+				if (instructContent.second.type == value.type) {
+					printVal("PROLONGE TABLEAU " + name + " AVEC ",value);
+				}
+				else cout << "ERREUR : TYPES DIFFERENTS";
 			}
-			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
 			break;
 		case command::_UPDATE_TABLE_ELEMENT_:
 			name = stringList[instructContent.second.tabPos];
-
-			if (variables.find(name) != variables.end()) {//var existe bien
-				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
+			if (tableaux.find(name) != tableaux.end()) {
+				value = executionPile.top();
+				tabPos = intList[value.tabPos];
+				
+				if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+					tabPos = tableaux[name].valuesPos[tabPos];
+					value = executionPile.top();
+					if (instructContent.second.type == value.type) {
+						cout << "MODIFIE INDICE " << tabPos << " DU TABLEAU " << name;
+						printVal(" AVEC ",value);
+					}
+					else cout << "ERREUR : TYPES DIFFERENTS";
+				}
+				else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";
 			}
-			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
 			break;
 		case command::_REMOVE_TABLE_ELEMENT_:
 			name = stringList[instructContent.second.tabPos];
-
-			if (variables.find(name) != variables.end()) {//var existe bien
-				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
+			if (tableaux.find(name) != tableaux.end()) {
+				value = executionPile.top();
+				tabPos = intList[value.tabPos];
+				
+				if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+					tabPos = tableaux[name].valuesPos[tabPos];
+					cout << "SUPPRIME INDICE " << tabPos << " DU TABLEAU " << name;
+				}
+				else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";
 			}
-			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
 			break;
-*/
+
 
 		case command::_PRINT_:
-			cout << "PRINT RESULT";
+			cout << "AFFICHE RESULTAT";
 			break;
 
 		default:
