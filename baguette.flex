@@ -6,8 +6,8 @@
 
 %%
 
--?[0-9]+                      { yylval.intValeur = atoi(yytext); return INT_VALUE; }
--?[0-9]+[,.][0-9]*              { yylval.doubleValeur = atof(yytext); return DOUBLE_VALUE; }
+-?[0-9]+               { yylval.intValeur = atoi(yytext); return INT_VALUE; }
+-?[0-9]+[\.][0-9]*     { yylval.doubleValeur = atof(yytext); return DOUBLE_VALUE; }
 
 entier                      { return INT; }
 virgule                     { return DOUBLE; }

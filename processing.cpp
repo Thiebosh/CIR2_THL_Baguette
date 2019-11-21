@@ -205,7 +205,17 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 		tabAccess declaration;
 		switch (action) {
 		case tabAction::_empile_size_:
-			executionPile.push({ valType::_int_,(int)intList.size() });
+			switch(tableaux[name].type) {
+			case valType::_int_:
+				executionPile.push({ valType::_int_,(int)intList.size() });
+				break;
+			case valType::_double_:
+				executionPile.push({ valType::_int_,(int)doubleList.size() });
+				break;
+			case valType::_string_:
+				executionPile.push({ valType::_int_,(int)stringList.size() });
+				break;
+			}
 			intList.push_back(tableaux[name].valuesPos.size());//name
 			break;
 			
@@ -339,7 +349,17 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 		tabAccess declaration;
 
 		if (action == tabAction::_empile_size_) {
-			executionPile.push({ valType::_int_,(int)intList.size() });
+			switch(tableaux[name].type) {
+			case valType::_int_:
+				executionPile.push({ valType::_int_,(int)intList.size() });
+				break;
+			case valType::_double_:
+				executionPile.push({ valType::_int_,(int)doubleList.size() });
+				break;
+			case valType::_string_:
+				executionPile.push({ valType::_int_,(int)stringList.size() });
+				break;
+			}
 			intList.push_back(tableaux[name].valuesPos.size());//name
 		}
 		else {
@@ -579,44 +599,153 @@ const map<command, functionPointer> executeCommand = {
 /*														*/
 /********************************************************/
 //fonction 3
-/*
 void displayGeneratedProgram() {
 	cout << endl << "==== CODE GENERE ====" << endl;
 
 	int i = 0;
+	string name;
+	int size;
+	int tabPos;
+	valAccess value;
 	for (auto instructContent : instructionList) {
 		cout << "INSTRUCTION " << setw((streamsize)(1 + log10(instructionList.size()))) << i++ << " - ";
 
 		switch (instructContent.first) {
-		case command::_NUMBER_:
-			printVal("GET NUM ", instructContent.second);
+		case command::_ENTER_BLOCK_:
+			cout << "AJOUTE STRATE MEMOIRE";
 			break;
-		case command::_SET_IDENTIFIER_:
-			printVal("SET NUM ", instructContent.second, " IN MEMORY"); //instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
-			break;
-		case command::_GET_IDENTIFIER_:
-			printVal("GET NUM ", instructContent.second, " IN MEMORY"); //instructContent.second ne comprend que la première valeur de l'expression donnée à la variable
+		case command::_EXIT_BLOCK_:
+			cout << "SUPPRIME STRATE MEMOIRE";
 			break;
 
-		case command::_GOTO_TEST_:
-			printVal("IF ZERO, JUMP TO INSTRUCTION ", instructContent.second);
+		case command::_EMPILE_VALUE_:
+			printVal("AJOUTE ", instructContent.second, " A LA PILE");
 			break;
-		case command::_GOTO_:
-			printVal("JUMP TO INSTRUCTION ", instructContent.second);
+		case command::_EMPILE_VARIABLE_:
+			name = stringList[instructContent.second.tabPos];
+			if (variables.find(name) != variables.end()) {//var existe bien
+				printVal("AJOUTE ", variables[name]," A LA PILE");
+			}
+			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
 			break;
+		case command::_EMPILE_TABLE_SIZE_:
+			name = stringList[instructContent.second.tabPos];
+			if (tableaux.find(name) != tableaux.end()) {//var existe bien
+				switch(tableaux[name].type) {
+				case valType::_int_:
+					size = intList.size();
+					break;
+				case valType::_double_:
+					size = doubleList.size();
+					break;
+				case valType::_string_:
+					size = stringList.size();
+					break;
+				}
+				cout << "AJOUTE " << size << " A LA PILE";
+			}
+			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+			break;
+		case command::_EMPILE_TABLE_ELEMENT_:
+			name = stringList[instructContent.second.tabPos];
+			tabPos = intList[executionPile.top().tabPos];//recupere val associee a adresse
+
+			if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+				tabPos = tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
+				switch(tableaux[name].type) {
+				case valType::_int_:
+					cout << "AJOUTE ", intArray[tabPos]," A LA PILE";
+					break;
+				case valType::_double_:
+					cout << "AJOUTE ", doubleArray[tabPos]," A LA PILE";
+					break;
+				case valType::_string_:
+					cout << "AJOUTE ", stringArray[tabPos]," A LA PILE";
+					break;
+				}
+			}
+			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+			break;
+
 
 		case command::_PLUS_:
-			cout << "ADDITION OF TWO LAST NUM";
+			cout << "ADDITIONNE DEUX DERNIERES VALEURS";
 			break;
 		case command::_MOINS_:
-			cout << "SUBSTRACTION OF TWO LAST NUM";
+			cout << "SOUSTRAIT DEUX DERNIERES VALEURS";
 			break;
 		case command::_FOIS_:
-			cout << "MULTIPLICATION OF TWO LAST NUM";
+			cout << "MULTIPLIE DEUX DERNIERES VALEURS";
 			break;
 		case command::_DIVISE_PAR_:
-			cout << "DIVISION OF TWO LAST NUM";
+			cout << "DIVISE DEUX DERNIERES VALEURS";
 			break;
+
+
+		case command::_GOTO_:
+			cout << "CONTINUER A L'INSTRUCTION " << instructContent.second.tabPos;
+			break;
+		case command::_GOTO_TEST_:
+			cout << "SI DERNIERE VALEUR VAUT 0, CONTINUER A L'INSTRUCTION " << instructContent.second.tabPos;
+			break;
+
+
+		case command::_CREATE_VARIABLE_:
+			name = stringList[instructContent.second.tabPos];
+
+			if (variables.find(name) == variables.end()) {//var est bien nouvelle
+				value = executionPile.top();
+				
+				if (instructContent.second.type == value.type) {
+					printVal("INITIALISE VARIABLE " + name + " AVEC ",value);
+				}
+				else cout << "ERREUR : TYPES DIFFERENTS";
+			}
+			else cout << "ERREUR : VARIABLE " << name << " EXISTE DEJA";
+			break;
+		case command::_UPDATE_VARIABLE_:
+			name = stringList[instructContent.second.tabPos];
+
+			if (variables.find(name) != variables.end()) {//var existe bien
+				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
+			}
+			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+			break;
+
+/*
+		case command::_CREATE_TABLE_:
+			name = stringList[instructContent.second.tabPos];
+
+			if (variables.find(name) != variables.end()) {//var existe bien
+				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
+			}
+			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+			break;
+		case command::_ADD_TABLE_ELEMENT_:
+			name = stringList[instructContent.second.tabPos];
+
+			if (variables.find(name) != variables.end()) {//var existe bien
+				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
+			}
+			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+			break;
+		case command::_UPDATE_TABLE_ELEMENT_:
+			name = stringList[instructContent.second.tabPos];
+
+			if (variables.find(name) != variables.end()) {//var existe bien
+				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
+			}
+			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+			break;
+		case command::_REMOVE_TABLE_ELEMENT_:
+			name = stringList[instructContent.second.tabPos];
+
+			if (variables.find(name) != variables.end()) {//var existe bien
+				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
+			}
+			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+			break;
+*/
 
 		case command::_PRINT_:
 			cout << "PRINT RESULT";
@@ -629,7 +758,7 @@ void displayGeneratedProgram() {
 	}
 
 	cout << "=====================" << endl;
-}*/
+}
 
 
 //fonction 4

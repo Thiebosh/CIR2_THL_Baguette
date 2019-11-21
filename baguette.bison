@@ -58,19 +58,15 @@
 %left '+' '-'     /* associativité à gauche */
 %left '*' '/'     /* associativité à gauche */
 
-
 %%
-programme :
-    bloc '\n'
-    | END_PRGM            { 
+
+program : bloc END_PRGM { 
+                            cout << "Program" << endl;
                             addInstruct(command::_EXIT_BLOCK_);
-                            exit(0);
-                          }
-    | /* vide */
-    ;
+                        };
 
 bloc :
-    bloc instruction '\n' //pas dans l'autre sens? 
+    bloc instruction '\n' 
     |    /* Epsilon */
     ;
 
@@ -213,7 +209,7 @@ int main(int argc, char **argv) {
   if ((yyin = programGeneration(argc, argv)) == NULL) exit(0);//ne peut pas fonctionner sans
   yyparse();
 
-  //displayGeneratedProgram();
+  displayGeneratedProgram();
 
   executeGeneratedProgram();
   
