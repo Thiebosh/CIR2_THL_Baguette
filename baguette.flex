@@ -28,12 +28,20 @@ tan|tangente  {return TAN ;}
 
 AFFICHER	{return DISPLAY;}
 
+
+
 si|SI|Si 			{return IF;}
-Alors|alors|ALORS 	{return THEN;}
 Sinon|sinon|SINON	{return ELSE;}
 FinSi|finsi|FINSI	{return END_IF;}
 
-Répéter|Réitérer { return REPEAT; }
+tantque 		{return WHILE;}
+FinTantque	{return END_WHILE;}
+
+Répéter { return REPEAT; }
+finRépéter { return END_REPEAT; }
+
+parcourir { return FOREACH; }
+finParcourir { return END_FOREACH; }
 
 TERMINER	{return END_PRGM;}
 

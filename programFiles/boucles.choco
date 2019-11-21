@@ -1,0 +1,16 @@
+tantque 1+1
+    "val ou calcul n'est pas un bloc"
+finTantque
+
+TERMINER
+
+si 1+4
+	AFFICHER 1
+sinon
+	AFFICHER 2
+finsi
+
+si 0
+    AFFICHER 3
+sinon
+finsi
