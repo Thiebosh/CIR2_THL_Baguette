@@ -4,11 +4,10 @@ AFFICHER -2
 AFFICHER 0
 AFFICHER 014
 
-AFFICHER (12+5)
+var = 1
+afficher var
 
-
-
-si 1+1
+si 1
 alors
 	AFFICHER 1
 sinon

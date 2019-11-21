@@ -43,9 +43,6 @@
 
 %token DISPLAY
 
-%token JUMP 
-%token JUMP_IF_ZERO
-
 %token <adresse> IF
 %token THEN
 %token ELSE
@@ -60,10 +57,7 @@
 
 %%
 
-program : bloc END_PRGM { 
-                            cout << "Program" << endl;
-                            addInstruct(command::_EXIT_BLOCK_);
-                        };
+program : bloc END_PRGM { addInstruct(command::_EXIT_BLOCK_); };
 
 bloc :
     bloc instruction '\n' 

@@ -559,9 +559,12 @@ const map<command, functionPointer> executeCommand = {
 			delVal(instructContent.second);//supprimer string du tableau
 
 			if (variables.find(name) != variables.end()) {//var existe bien
-				variables[name] = depiler();//ne supprime pas : transmet adresse
+				if (instructContent.second.type == variables[name].type) {
+					variables[name] = depiler();//ne supprime pas : transmet adresse
+				}
+				//else? cast here
 			}
-			//else? cast here
+			//else ?
 		}},
 
 

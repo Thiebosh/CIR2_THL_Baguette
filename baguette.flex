@@ -16,12 +16,7 @@ liste                       { return TAB; }
 "[A-Za-z_][0-9A-Za-z_]*"   	{ strcpy(yylval.stringValeur,yytext);    return STRING_VALUE; }//OK car guillemets + tester fputs(yytext, yyout) : https://stackoverflow.com/questions/48013348/bison-yacc-yyerror-doesnt-work?rq=1
 
 
-plus        {return '+';}//bloc a conserver?
-fois        {return '*';}
-moins       {return '-';}
-divise      {return '/' ;}
-puissance   {return '^' ;}
-racine      {return SQRT ;}
+racine      {return SQRT ;}//bloc a conserver?
 et          {return '&' ;}
 ou          {return '|' ;}
 non         {return '!' ;}
