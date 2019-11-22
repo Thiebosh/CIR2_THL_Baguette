@@ -66,7 +66,7 @@
 program : bloc END_PRGM { addInstruct(command::_EXIT_BLOCK_); };
 
 bloc :
-    bloc instruction '\n' { addInstruct(command::_EXIT_BLOCK_); };
+    bloc instruction '\n'
     |    /* Epsilon */
     ;
 
@@ -231,7 +231,7 @@ int main(int argc, char **argv) {
 
   displayGeneratedProgram();
 
-  //executeGeneratedProgram();
+  executeGeneratedProgram();
   
   return 0;
 }

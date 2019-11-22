@@ -1,5 +1,4 @@
 si 1
-alors
 	AFFICHER 2
 sinon
 	AFFICHER 3
