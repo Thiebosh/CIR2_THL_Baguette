@@ -358,10 +358,8 @@ const map<command, functionPointer> executeCommand = {
 
 	{command::_EMPILE_VALUE_,
 		[](instruction& instructContent) {
-			cout << "index mémoire : " << instructContent.second.tabPos << " = " ;
-			if (instructContent.second.type == valType::_int_)cout << intList[instructContent.second.tabPos] << endl;
-			if (instructContent.second.type == valType::_double_)cout << doubleList[instructContent.second.tabPos] << endl;
-			if (instructContent.second.type == valType::_string_)cout << stringList[instructContent.second.tabPos] << endl;
+			printVal("(empile) val ", instructContent.second);
+			cout << " - tabPos " << instructContent.second.tabPos << endl;
 			executionPile.push(instructContent.second);
 		}},
 	{command::_EMPILE_VARIABLE_,
@@ -499,7 +497,7 @@ void displayGeneratedProgram() {
 			cout << "AJOUTE STRATE MEMOIRE";
 			break;
 		case command::_EXIT_BLOCK_:
-			cout << "SUPPRIME STRATE MEMOIRE";
+			cout << "SUPPRIME STRATE MEMOIRE" << endl;
 			break;
 
 		case command::_EMPILE_VALUE_:
