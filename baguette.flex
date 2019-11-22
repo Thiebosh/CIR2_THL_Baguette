@@ -30,14 +30,14 @@ AFFICHER	{return DISPLAY;}
 
 
 
-si|SI|Si 			{return IF;}
-Sinon|sinon|SINON	{return ELSE;}
-FinSi|finsi|FINSI	{return END_IF;}
+si 			{return IF;}
+sinon	  {return ELSE;}
+finSi	  {return END_IF;}
 
 tantque 		{return WHILE;}
-FinTantque	{return END_WHILE;}
+finTantque	{return END_WHILE;}
 
-Répéter { return REPEAT; }
+répéter { return REPEAT; }
 finRépéter { return END_REPEAT; }
 
 parcourir { return FOREACH; }
