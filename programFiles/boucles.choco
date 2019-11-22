@@ -1,0 +1,16 @@
+si 1+4
+	AFFICHER 1
+sinon
+	AFFICHER 2
+finSi
+
+si 0
+    AFFICHER 3
+sinon
+finSi
+
+tantque 0
+    AFFICHER 1
+finTantque
+
+TERMINER

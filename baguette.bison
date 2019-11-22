@@ -44,11 +44,17 @@
 %token DISPLAY
 
 %token <adresse> IF
-%token THEN
 %token ELSE
 %token END_IF
 
-%token REPEAT
+%token <adresse> WHILE
+%token END_WHILE
+
+%token <adresse> REPEAT
+%token END_REPEAT
+
+%token FOREACH
+%token END_FOREACH
 
 %token END_PRGM
 
@@ -121,16 +127,15 @@ instruction :
                                                     stringList.push_back($2);
                                                   }
 
-    | DISPLAY expression { addInstruct(command::_PRINT_);   /* imprimer le résultat de l'expression */  }
+    | DISPLAY expression  { addInstruct(command::_PRINT_); }
 
-    | IF expression '\n'  { //ajouter comparaison empilant 0 ou 1
+    | IF                  { addInstruct(command::_ENTER_BLOCK_); }
+      expression '\n'     {//ajouter comparaison empilant 0 ou 1
                                 //apres interpretation de expression :
-                            addInstruct(command::_ENTER_BLOCK_);
-
-                            $1.refInstructTest = instructionList.size(); //quand arrive à ce numero d'instruction :
+                            $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                             addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans then, sinon sauter à <adresse fin then / debut else>)
                           }
-      THEN '\n' bloc      { 
+      bloc                {//THEN 
                                 //apres interpretation de bloc :
                             $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction :
                             addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse fin else / debut end_if>)
@@ -142,6 +147,27 @@ instruction :
                           }
       END_IF              { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
 
+    | WHILE               { 
+                            addInstruct(command::_ENTER_BLOCK_);
+                            $1.refInstruct = instructionList.size();//<adresse test>
+                          }
+      expression '\n'     { //ajouter comparaison empilant 0 ou 1
+                                //apres interpretation de expression :
+                            $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
+                            addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans bloc, sinon sauter à <adresse end while>)
+                            cout <<"expression"<<endl;
+                          }
+      bloc                {
+                                //apres interpretation de bloc :
+                            addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse test>)
+                            instructionList[instructionList.size()-1].second.tabPos = $1.refInstruct;//<adresse test>
+
+                            instructionList[$1.refInstructTest].second.tabPos = instructionList.size();//<adresse end while>
+                            cout << "traitement bloc" << endl;
+                          }
+      END_WHILE           { cout << "fin while" << endl;addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
+
+    
     | REPEAT '(' expression ')' bloc { /* TO DO */ }
 
     |   /* Ligne vide*/
@@ -205,7 +231,7 @@ int main(int argc, char **argv) {
 
   displayGeneratedProgram();
 
-  executeGeneratedProgram();
+  //executeGeneratedProgram();
   
   return 0;
 }
