@@ -66,7 +66,7 @@
 program : bloc END_PRGM { addInstruct(command::_EXIT_BLOCK_); };
 
 bloc :
-    bloc instruction '\n' 
+    bloc instruction '\n'
     |    /* Epsilon */
     ;
 

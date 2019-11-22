@@ -8,6 +8,8 @@ si 0
     AFFICHER 3
 finSi
 
+TERMINER
+
 tantque 0
     AFFICHER 1
 finTantque
