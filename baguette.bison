@@ -141,10 +141,7 @@ instruction :
                             addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse fin else / debut end_if>)
                             instructionList[$1.refInstructTest].second.tabPos = instructionList.size();//<adresse fin then / debut else>
                           }
-      ELSE '\n' bloc      { 
-                                //apres interpretation de bloc :
-                            instructionList[$1.refInstruct].second.tabPos = instructionList.size();//<adresse fin else / debut end_if>
-                          }
+      bloc_else           { instructionList[$1.refInstruct].second.tabPos = instructionList.size(); }//<adresse fin else / debut end_if>
       END_IF              { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
 
     | WHILE               { 
@@ -172,6 +169,8 @@ instruction :
 
     |   /* Ligne vide*/
     ;
+
+bloc_else : ELSE '\n' bloc | /* Epsilon */ ;
 
 expression :
     '(' expression ')'   { } //reduit expression
@@ -231,7 +230,7 @@ int main(int argc, char **argv) {
 
   displayGeneratedProgram();
 
-  //executeGeneratedProgram();
+  executeGeneratedProgram();
   
   return 0;
 }
