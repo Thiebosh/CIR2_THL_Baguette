@@ -60,7 +60,7 @@
 program : bloc END_PRGM { addInstruct(command::_EXIT_BLOCK_); };
 
 bloc :
-    bloc instruction '\n' 
+    bloc instruction '\n' { addInstruct(command::_EXIT_BLOCK_); };
     |    /* Epsilon */
     ;
 
@@ -127,7 +127,7 @@ instruction :
                                 //apres interpretation de expression :
                             addInstruct(command::_ENTER_BLOCK_);
 
-                            $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
+                            $1.refInstructTest = instructionList.size(); //quand arrive à ce numero d'instruction :
                             addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans then, sinon sauter à <adresse fin then / debut else>)
                           }
       THEN '\n' bloc      { 

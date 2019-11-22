@@ -93,7 +93,7 @@ map<string, tabAccess> tableaux;
 /********************************************************/
 void delVal(valAccess val) {
 	//PILE : decremente references tableau des valeurs suivantes
-	if (val.type == executionPile.top().type && val.tabPos == executionPile.top().tabPos) executionPile.pop();//dernier element? le retire
+	if (!executionPile.empty() && val.type == executionPile.top().type && val.tabPos == executionPile.top().tabPos) executionPile.pop();//dernier element? le retire
 	else {
 		stack<valAccess> reversePile;
 		while (!executionPile.empty()) {
