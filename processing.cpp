@@ -80,6 +80,7 @@ void executeOperation(operation operation) {
 			break;
 		}
 
+		cout << "(push after operation) val " << result << " - tabPos " << doubleList.size() << endl;
 		executionPile.push(valAccess({ valType::_int_,(int)intList.size() }));
 		intList.push_back(result);
 	}
@@ -101,6 +102,7 @@ void executeOperation(operation operation) {
 			break;
 		}
 		executionPile.push(valAccess({ valType::_double_,(int)doubleList.size() }));
+		cout << "(push after operation) val " << result << " - tabPos " << doubleList.size() << endl;
 		doubleList.push_back(result);
 	}
 	else if (val1.type == valType::_string_ && val2.type == valType::_string_) {
@@ -121,7 +123,8 @@ void executeOperation(operation operation) {
 			break;
 			*/
 		}
-		executionPile.push(valAccess({ valType::_double_,(int)doubleList.size() }));
+		executionPile.push(valAccess({ valType::_string_,(int)stringList.size() }));
+		cout << "(push after operation) val " << result << " - tabPos " << stringList.size() << endl;
 		stringList.push_back(result);
 	}
 	else {//string + int ou double
@@ -359,7 +362,7 @@ const map<command, functionPointer> executeCommand = {
 	{command::_EMPILE_VALUE_,
 		[](instruction& instructContent) {
 			printVal("(empile) val ", instructContent.second);
-			cout << " - tabPos " << instructContent.second.tabPos << endl;
+			cout << " - tabPos " << instructContent.second.tabPos << endl << endl;
 			executionPile.push(instructContent.second);
 		}},
 	{command::_EMPILE_VARIABLE_,
@@ -405,6 +408,7 @@ const map<command, functionPointer> executeCommand = {
 		}},
 	{command::_GOTO_TEST_,
 		[](instruction& instructContent) {
+			//cout << "(test) val " << result << " - tabPos " << intList.size() << endl;
 			valAccess testResult = depiler();
 
 			if (testResult.tabPos != -1 && 
@@ -470,6 +474,7 @@ const map<command, functionPointer> executeCommand = {
 			valAccess val = depiler();
 			//if (val.tabPos != -1)
 			printVal("Résultat : ",val,"\n");
+			delVal(val);
 		}}
 	//entree
 };

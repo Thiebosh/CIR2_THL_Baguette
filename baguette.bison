@@ -131,6 +131,7 @@ instruction :
 
     | IF                  { addInstruct(command::_ENTER_BLOCK_); }
       expression '\n'     {//ajouter comparaison empilant 0 ou 1
+      cout << "appel de expression" << endl;
                                 //apres interpretation de expression :
                             $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                             addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans then, sinon sauter à <adresse fin then / debut else>)
@@ -181,6 +182,7 @@ expression :
     | expression '/' expression     { addInstruct(command::_DIVISE_PAR_);}
     
     | INT_VALUE       { 
+      cout << "appel de int value" << endl;
                         addInstruct(command::_EMPILE_VALUE_,(int)intList.size());
                         intList.push_back($1);
                       }

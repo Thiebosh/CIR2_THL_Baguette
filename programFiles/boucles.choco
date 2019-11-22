@@ -1,8 +1,11 @@
-si 1+4
-	AFFICHER 1
+si 1+2
+	AFFICHER 5
+	AFFICHER 8
 sinon
-	AFFICHER 2
+	AFFICHER 11
 finSi
+
+TERMINER
 
 si 0
     AFFICHER 3
