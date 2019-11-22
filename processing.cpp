@@ -128,9 +128,7 @@ void executeOperation(operation operation) {
 		//erreur? "tostring"? repetition?
 	}
 
-	cout << endl << "DELVAL1" << endl;
 	delVal(val1);
-	cout << endl << "DELVAL2" << endl;
 	delVal(val2);
 }
 
@@ -416,7 +414,7 @@ const map<command, functionPointer> executeCommand = {
 				(testResult.type == valType::_double_ && doubleList[testResult.tabPos] == 0)) {
 				indexInstruction = instructContent.second.tabPos;//cas if not 0 : incrementation prealable
 			}
-			
+
 			delVal(testResult);
 		}},
 
