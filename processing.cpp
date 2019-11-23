@@ -474,17 +474,17 @@ const map<command, functionPointer> executeCommand = {
 
 	{command::_CREATE_VARIABLE_,
 		[](valInstruct& instructContent) {
-			//recupere nom de var
-			int nameAdress = depiler().tabPos;
-			string name = stringList[nameAdress];
-			delVal({ valType::_string_,nameAdress});
+			//recupere type de val
+			valAccess valAdress = depiler();
+			valType varType = valAdress.type;
+			delVal(valAdress);
 
 			valAccess value = depiler();//adresse de val a associer a var
-			if (variables.find(name) == variables.end()) {//var est bien nouvelle
-				if (instructContent.type == value.type) {
-					variables.insert({name,value});
+
+			if (variables.find(instructContent.stringVal) == variables.end()) {//var est bien nouvelle
+				if (varType == value.type) {
+					variables.insert({instructContent.stringVal,value});
 				}
-				else cout << "pb de type dans creation var" << endl;
 				//else ? cast here
 			}
 			//else ?
@@ -576,7 +576,7 @@ void displayGeneratedProgram() {
 			cout << " A LA PILE";
 			break;
 		case command::_EMPILE_VARIABLE_:
-			cout << "AJOUTE VALEUR DE " << instructContent.second.stringVal << " A LA PILE";
+			cout << "AJOUTE VALEUR DE '" << instructContent.second.stringVal << "' A LA PILE";
 			break;
 		/*case command::_EMPILE_TABLE_SIZE_:
 			name = stringList[instructContent.second.tabPos];
@@ -641,31 +641,13 @@ void displayGeneratedProgram() {
 
 
 		case command::_CREATE_VARIABLE_:
-			cout << "INITIALISE VARIABLE " << instructContent.second.stringVal;
-		/*
-			name = stringList[instructContent.second.tabPos];
-
-			if (variables.find(name) == variables.end()) {//var est bien nouvelle
-				value = executionPile.top();
-				
-				if (instructContent.second.type == value.type) {
-					printVal("INITIALISE VARIABLE " + name + " AVEC ",value);
-				}
-				else cout << "ERREUR : TYPES DIFFERENTS";
+			if (variables.find(instructContent.second.stringVal) == variables.end()) {//var est bien nouvelle
+				cout << "INITIALISE VARIABLE '" << instructContent.second.stringVal << "'";
 			}
-			else cout << "ERREUR : VARIABLE " << name << " EXISTE DEJA";
-			*/
+			else cout << "ERREUR : VARIABLE '" << name << "' EXISTE DEJA";
 			break;
 		case command::_UPDATE_VARIABLE_:
-			cout <<  "ACTUALISE VARIABLE " << instructContent.second.stringVal;
-		/*
-			name = stringList[instructContent.second.tabPos];
-
-			if (variables.find(name) != variables.end()) {//var existe bien
-				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
-			}
-			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
-			*/
+			cout <<  "ACTUALISE VARIABLE '" << instructContent.second.stringVal << "'";
 			break;
 
 /*

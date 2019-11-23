@@ -1,7 +1,6 @@
 entier var = 8+2
 AFFICHER var
 
-var = 1
 tantque var
 	AFFICHER var
     var = 0

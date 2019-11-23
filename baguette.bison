@@ -72,16 +72,16 @@ bloc :
 
 instruction : 
     INT    VARIABLE_NAME '=' expression {
-                                            addInstruct(command::_EMPILE_VALUE_,$2);//nom var
-                                            addInstruct(command::_CREATE_VARIABLE_,(int)1);//type var
+                                            addInstruct(command::_EMPILE_VALUE_,(int)1);//type var
+                                            addInstruct(command::_CREATE_VARIABLE_,$2);//nom var
                                           }
     | DOUBLE VARIABLE_NAME '=' expression { 
-                                            addInstruct(command::_EMPILE_VALUE_,$2);//nom var
-                                            addInstruct(command::_CREATE_VARIABLE_,(double)1);//type var
+                                            addInstruct(command::_EMPILE_VALUE_,(double)1);//type var
+                                            addInstruct(command::_CREATE_VARIABLE_,$2);//nom var
                                           }
     | STRING VARIABLE_NAME '=' expression { 
-                                            addInstruct(command::_EMPILE_VALUE_,$2);//nom var
-                                            addInstruct(command::_CREATE_VARIABLE_,"");//type var
+                                            addInstruct(command::_EMPILE_VALUE_,"");//type var
+                                            addInstruct(command::_CREATE_VARIABLE_,$2);//nom var
                                           }
     
     | VARIABLE_NAME '=' expression  { addInstruct(command::_UPDATE_VARIABLE_,$1);/*nom var*/ }
