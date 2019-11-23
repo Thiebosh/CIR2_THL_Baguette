@@ -43,7 +43,7 @@ finRépéter { return END_REPEAT; }
 parcourir { return FOREACH; }
 finParcourir { return END_FOREACH; }
 
-TERMINER	{return END_PRGM;}
+TERMINER(.|\n)*	{return END_PRGM;}
 
 
 [A-Za-z_][0-9A-Za-z_]*   		{ strcpy(yylval.nom,yytext); return VARIABLE_NAME; }/*tester fputs(yytext, yyout) : https://stackoverflow.com/questions/48013348/bison-yacc-yyerror-doesnt-work?rq=1*/

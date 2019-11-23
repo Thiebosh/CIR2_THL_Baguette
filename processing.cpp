@@ -492,6 +492,7 @@ void displayGeneratedProgram() {
 	int tabPos;
 	valAccess value;
 	for (auto instructContent : instructionList) {
+		if (instructContent.first == command::_ENTER_BLOCK_) cout << endl;
 		cout << "INSTRUCTION " << setw((streamsize)(1 + log10(instructionList.size()))) << i++ << " - ";
 
 		switch (instructContent.first) {
@@ -676,7 +677,6 @@ void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
 	indexInstruction = 0;
 	while (indexInstruction < instructionList.size()) {
 		instruction instructContent = instructionList[indexInstruction];
-
 		indexInstruction++;
 		if (executeCommand.find(instructContent.first) != executeCommand.end()) {
 			(*(executeCommand.at(instructContent.first))) (instructContent);

@@ -1,14 +1,29 @@
-si 1
-	AFFICHER 2
+AFFICHER -3
+
+AFFICHER 1 + 2
+
+si 0
+	AFFICHER 42
+finSi
+
+si 3
+	AFFICHER 4
+finSi
+
+si 0
+	AFFICHER 5
 sinon
-	AFFICHER 3
+	AFFICHER 6
 finSi
 
-
-si 2+4
-    AFFICHER 5
+si 4+5
+	AFFICHER 7
+sinon
+	AFFICHER 8
 finSi
 
-AFFICHER 7
+tantque 0
+	AFFICHER 9
+finTantque
 
 TERMINER
