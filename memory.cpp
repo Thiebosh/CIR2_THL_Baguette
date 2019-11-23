@@ -93,7 +93,6 @@ map<string, tabAccess> tableaux;
 /*		SOUS PARTIE 4 : LIBERATION DE MEMOIRE	    	*/
 /********************************************************/
 void delVal(valAccess val) {
-	/*
 	//PILE : decremente references tableau des valeurs suivantes
 	if (!executionPile.empty() && val.type == executionPile.top().type && val.tabPos == executionPile.top().tabPos) executionPile.pop();//dernier element? le retire
 	else {
@@ -138,7 +137,6 @@ void delVal(valAccess val) {
 		else stringList.erase(stringList.begin() + val.tabPos);
 		break;
 	}
-	*/
 }
 
 void delVar(string name) {
@@ -261,7 +259,7 @@ void exitMemoryLayer() {
 	}
 
 	//supprime valeurs (non affectees a des variables) declarees dans le bloc (supprime par la fin pour + d'efficacite (deque) et de surete)
-	//while (intList.size() > initial.intListSize)		delVal({ valType::_int_,	(int)intList.size() - 1 });
-	//while (doubleList.size() > initial.doubleListSize)	delVal({ valType::_double_,(int)doubleList.size() - 1 });
-	//while (stringList.size() > initial.stringListSize)	delVal({ valType::_string_,(int)stringList.size() - 1 });
+	while (intList.size() > initial.intListSize)		delVal({ valType::_int_,	(int)intList.size() - 1 });
+	while (doubleList.size() > initial.doubleListSize)	delVal({ valType::_double_,(int)doubleList.size() - 1 });
+	while (stringList.size() > initial.stringListSize)	delVal({ valType::_string_,(int)stringList.size() - 1 });
 }

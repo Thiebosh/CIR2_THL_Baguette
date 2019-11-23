@@ -61,6 +61,8 @@ void executeOperation(operation operation) {
 		break;
 	}
 
+	delVal(val1);
+	delVal(val2);
 
 	//execute operation et enregistre nouvelle valeur
 	if (val1.type == valType::_int_ && val2.type == valType::_int_) {//même type
@@ -79,7 +81,6 @@ void executeOperation(operation operation) {
 			result = val1Int / val2Int;
 			break;
 		}
-
 		executionPile.push({ valType::_int_,(int)intList.size() });
 		intList.push_back(result);
 	}
@@ -129,9 +130,6 @@ void executeOperation(operation operation) {
 	else {//string + int ou double
 		//erreur? "tostring"? repetition?
 	}
-
-	delVal(val1);
-	delVal(val2);
 }
 
 /********************************************************/
@@ -141,7 +139,6 @@ enum class command {
 	//MEMOIRE
 	_ENTER_BLOCK_,
 	_EXIT_BLOCK_,
-	_EXIT_PROGRAM_,
 
 	//EMPILEMENT
 	_EMPILE_VALUE_,
@@ -177,11 +174,67 @@ enum class command {
 /********************************************************/
 /*		SOUS PARTIE 3 : GESTION DES INSTRUCTIONS		*/
 /********************************************************/
-typedef pair<command, valAccess> instruction;
+typedef struct {//initialiser dans ordre de déclaration
+	valType type = valType::_int_;
+	int intVal = -1;
+	double doubleVal = -1;
+	string stringVal = "";
+} valInstruct;
+
+valAccess addVal(valInstruct instructContent) {
+	int tabPos = 0;
+	switch (instructContent.type) {
+	case valType::_int_:
+		tabPos = intList.size();
+		intList.push_back(instructContent.intVal);
+		break;
+	case valType::_double_:
+		tabPos = doubleList.size();
+		doubleList.push_back(instructContent.doubleVal);
+		break;
+	case valType::_string_:
+		tabPos = stringList.size();
+		stringList.push_back(instructContent.stringVal);
+		break;
+	}
+	return { instructContent.type,tabPos };
+}
+
+valAccess addVar(valInstruct instructContent) {
+	int tabPos = 0;
+	switch (instructContent.type) {
+	case valType::_int_:
+		tabPos = intList.size();
+		intList.push_back(instructContent.intVal);
+		break;
+	case valType::_double_:
+		tabPos = doubleList.size();
+		doubleList.push_back(instructContent.doubleVal);
+		break;
+	case valType::_string_:
+		tabPos = stringList.size();
+		stringList.push_back(instructContent.stringVal);
+		break;
+	}
+	variables.insert({ instructContent.stringVal,valAccess{ instructContent.type, tabPos } });
+	return { instructContent.type,tabPos };
+}
+
+
+typedef pair<command, valInstruct> instruction;
 deque<instruction> instructionList;
 
-void addInstruct(command command, int tabPos = -1, valType type = valType::_int_) {
-	instructionList.push_back({ command, { type,tabPos } });
+void addInstruct(command command) {
+	instructionList.push_back({ command, { valType::_int_,-1,-1,"" } });
+};
+void addInstruct(command command, int intValue) {
+	instructionList.push_back({ command, { valType::_int_,intValue,-1,"" } });
+};
+void addInstruct(command command, double doubleValue) {
+	instructionList.push_back({ command, { valType::_double_,-1,doubleValue,"" } });
+};
+void addInstruct(command command, string stringValue) {
+	instructionList.push_back({ command, { valType::_string_,-1,-1,stringValue } });
 };
 
 unsigned int indexInstruction = 0;   // compteur instruction 
@@ -199,6 +252,7 @@ enum class tabAction {//fixe operations
 	_remove_
 };
 
+/*
 void executeTabAction(instruction& instructContent, tabAction action) {
 	string name = stringList[instructContent.second.tabPos];
 	delVal(instructContent.second);//string recupere : peut supprimer du tableau
@@ -341,28 +395,29 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 	}
 	//else : pb
 }
-
+*/
 
 /********************************************************/
 /*		SOUS PARTIE 5 : EXECUTION SELON LES COMMANDES	*/
 /********************************************************/
-typedef void (*functionPointer)(instruction& instructContent);
+typedef void (*functionPointer)(valInstruct& instructContent);
 
 const map<command, functionPointer> executeCommand = {
 	{command::_ENTER_BLOCK_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			enterMemoryLayer();
 		}},
 	{command::_EXIT_BLOCK_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			exitMemoryLayer();
 		}},
 
 
 	{command::_EMPILE_VALUE_,
-		[](instruction& instructContent) {
-			executionPile.push(instructContent.second);
+		[](valInstruct& instructContent) {
+			executionPile.push(addVal(instructContent));
 		}},
+		/*
 	{command::_EMPILE_VARIABLE_,
 		[](instruction& instructContent) {
 			string name = stringList[instructContent.second.tabPos];
@@ -380,44 +435,44 @@ const map<command, functionPointer> executeCommand = {
 		[](instruction& instructContent) {
 			executeTabAction(instructContent, tabAction::_empile_case_);
 		}},
-
+*/
 
 	{command::_PLUS_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			executeOperation(operation::_plus_);
 		}},
 	{command::_MOINS_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			executeOperation(operation::_moins_);
 		}},
 	{command::_FOIS_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			executeOperation(operation::_fois_);
 		}},
 	{command::_DIVISE_PAR_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			executeOperation(operation::_divisePar_);
 		}},
 
 
 	{command::_GOTO_,
-		[](instruction& instructContent) {
-			indexInstruction = instructContent.second.tabPos;//instruction est entier naturel
+		[](valInstruct& instructContent) {
+			indexInstruction = instructContent.intVal;//instruction est entier naturel
 		}},
 	{command::_GOTO_TEST_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			valAccess testResult = depiler();
 
 			if (testResult.tabPos != -1 && 
 				(testResult.type == valType::_int_ && intList[testResult.tabPos] == 0) ||
 				(testResult.type == valType::_double_ && doubleList[testResult.tabPos] == 0)) {
-				indexInstruction = instructContent.second.tabPos;//cas if not 0 : incrementation prealable
+				indexInstruction = instructContent.intVal;//cas if not 0 : incrementation prealable
 			}
 
 			delVal(testResult);
 		}},
 
-
+/*
 	{command::_CREATE_VARIABLE_,
 		[](instruction& instructContent) {
 			string name = stringList[instructContent.second.tabPos];
@@ -464,10 +519,10 @@ const map<command, functionPointer> executeCommand = {
 		[](instruction& instructContent) {
 			executeTabAction(instructContent, tabAction::_remove_);
 		}},
-
+*/
 
 	{command::_PRINT_,//sortie
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			valAccess val = depiler();
 			//if (val.tabPos != -1)
 			printVal("Résultat : ",val,"\n");
@@ -504,9 +559,21 @@ void displayGeneratedProgram() {
 			break;
 
 		case command::_EMPILE_VALUE_:
-			printVal("AJOUTE ", instructContent.second, " A LA PILE");
+			cout << "AJOUTE ";
+			switch (instructContent.second.type) {
+				case valType::_int_:
+					cout << instructContent.second.intVal;
+					break;
+				case valType::_double_:
+					cout << instructContent.second.doubleVal;
+					break;
+				case valType::_string_:
+					cout << instructContent.second.stringVal;
+					break;
+			}
+			cout << " A LA PILE";
 			break;
-		case command::_EMPILE_VARIABLE_:
+		/*case command::_EMPILE_VARIABLE_:
 			name = stringList[instructContent.second.tabPos];
 			if (variables.find(name) != variables.end()) {//var existe bien
 				printVal("AJOUTE ", variables[name]," A LA PILE");
@@ -551,7 +618,7 @@ void displayGeneratedProgram() {
 			}
 			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
 			break;
-
+*/
 
 		case command::_PLUS_:
 			cout << "ADDITIONNE DEUX DERNIERES VALEURS";
@@ -568,13 +635,13 @@ void displayGeneratedProgram() {
 
 
 		case command::_GOTO_:
-			cout << "CONTINUER A L'INSTRUCTION " << instructContent.second.tabPos;
+			cout << "CONTINUER A L'INSTRUCTION " << instructContent.second.intVal;
 			break;
 		case command::_GOTO_TEST_:
-			cout << "SI DERNIERE VALEUR VAUT 0, CONTINUER A L'INSTRUCTION " << instructContent.second.tabPos;
+			cout << "SI DERNIERE VALEUR VAUT 0, CONTINUER A L'INSTRUCTION " << instructContent.second.intVal;
 			break;
 
-
+/*
 		case command::_CREATE_VARIABLE_:
 			name = stringList[instructContent.second.tabPos];
 
@@ -655,7 +722,7 @@ void displayGeneratedProgram() {
 			}
 			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
 			break;
-
+*/
 
 		case command::_PRINT_:
 			cout << "AFFICHE RESULTAT";
@@ -679,7 +746,7 @@ void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
 		instruction instructContent = instructionList[indexInstruction];
 		indexInstruction++;
 		if (executeCommand.find(instructContent.first) != executeCommand.end()) {
-			(*(executeCommand.at(instructContent.first))) (instructContent);
+			(*(executeCommand.at(instructContent.first))) (instructContent.second);
 		}
 		else {
 			cout << "unknow command : " << (int)instructContent.first << endl;
