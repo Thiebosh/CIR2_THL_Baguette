@@ -39,26 +39,26 @@ void executeOperation(operation operation) {
 	string val1String(""), val2String("");
 
 	switch (val1.type) {
-	case valType::_int_:
-		val1Int = intList[val1.tabPos];
-		break;
-	case valType::_double_:
-		val1Double = doubleList[val1.tabPos];
-		break;
-	case valType::_string_:
-		val1String = stringList[val1.tabPos];
-		break;
+		case valType::_int_:
+			val1Int = intList[val1.tabPos];
+			break;
+		case valType::_double_:
+			val1Double = doubleList[val1.tabPos];
+			break;
+		case valType::_string_:
+			val1String = stringList[val1.tabPos];
+			break;
 	}
 	switch (val2.type) {
-	case valType::_int_:
-		val2Int = intList[val2.tabPos];
-		break;
-	case valType::_double_:
-		val2Double = doubleList[val2.tabPos];
-		break;
-	case valType::_string_:
-		val2String = stringList[val2.tabPos];
-		break;
+		case valType::_int_:
+			val2Int = intList[val2.tabPos];
+			break;
+		case valType::_double_:
+			val2Double = doubleList[val2.tabPos];
+			break;
+		case valType::_string_:
+			val2String = stringList[val2.tabPos];
+			break;
 	}
 
 	delVal(val1);
@@ -68,38 +68,38 @@ void executeOperation(operation operation) {
 	if (val1.type == valType::_int_ && val2.type == valType::_int_) {//même type
 		int result(0);
 		switch (operation) {
-		case operation::_plus_:
-			result = val1Int + val2Int;
-			break;
-		case operation::_moins_:
-			result = val1Int - val2Int;
-			break;
-		case operation::_fois_:
-			result = val1Int * val2Int;
-			break;
-		case operation::_divisePar_:
-			result = val1Int / val2Int;
-			break;
+			case operation::_plus_:
+				result = val1Int + val2Int;
+				break;
+			case operation::_moins_:
+				result = val1Int - val2Int;
+				break;
+			case operation::_fois_:
+				result = val1Int * val2Int;
+				break;
+			case operation::_divisePar_:
+				result = val1Int / val2Int;
+				break;
 		}
 		executionPile.push({ valType::_int_,(int)intList.size() });
 		intList.push_back(result);
 	}
 	else if ((val1.type == valType::_int_ || val1.type == valType::_double_) ||
-		(val2.type == valType::_int_ || val2.type == valType::_double_)) {//int et double ou deux doubles
+			(val2.type == valType::_int_ || val2.type == valType::_double_)) {//int et double ou deux doubles
 		double result(0);
 		switch (operation) {
-		case operation::_plus_:
-			result = (val1Int ? val1Int : val1Double) + (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case operation::_moins_:
-			result = (val1Int ? val1Int : val1Double) - (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case operation::_fois_:
-			result = (val1Int ? val1Int : val1Double) * (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case operation::_divisePar_:
-			result = (val1Int ? val1Int : val1Double) / (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
+			case operation::_plus_:
+				result = (val1Int ? val1Int : val1Double) + (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case operation::_moins_:
+				result = (val1Int ? val1Int : val1Double) - (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case operation::_fois_:
+				result = (val1Int ? val1Int : val1Double) * (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case operation::_divisePar_:
+				result = (val1Int ? val1Int : val1Double) / (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
 		}
 
 		executionPile.push({ valType::_double_,(int)doubleList.size() });
@@ -108,20 +108,20 @@ void executeOperation(operation operation) {
 	else if (val1.type == valType::_string_ && val2.type == valType::_string_) {
 		string result("");
 		switch (operation) {
-		case operation::_plus_://concatenation
-			result = val1String + val2String;
-			break;
-			/* reste?
-		case operation::_moins_:
-			result = (val1Int ? val1Int : val1Double) - (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case operation::_fois_:
-			result = (val1Int ? val1Int : val1Double) * (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case operation::_divisePar_:
-			result = (val1Int ? val1Int : val1Double) / (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-			*/
+			case operation::_plus_://concatenation
+				result = val1String + val2String;
+				break;
+				/* reste?
+			case operation::_moins_:
+				result = (val1Int ? val1Int : val1Double) - (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case operation::_fois_:
+				result = (val1Int ? val1Int : val1Double) * (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case operation::_divisePar_:
+				result = (val1Int ? val1Int : val1Double) / (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+				*/
 		}
 
 		executionPile.push({ valType::_string_,(int)stringList.size() });
@@ -184,40 +184,27 @@ typedef struct {//initialiser dans ordre de déclaration
 valAccess addVal(valInstruct instructContent) {
 	int tabPos = 0;
 	switch (instructContent.type) {
-	case valType::_int_:
-		tabPos = intList.size();
-		intList.push_back(instructContent.intVal);
-		break;
-	case valType::_double_:
-		tabPos = doubleList.size();
-		doubleList.push_back(instructContent.doubleVal);
-		break;
-	case valType::_string_:
-		tabPos = stringList.size();
-		stringList.push_back(instructContent.stringVal);
-		break;
+		case valType::_int_:
+			tabPos = intList.size();
+			intList.push_back(instructContent.intVal);
+			break;
+		case valType::_double_:
+			tabPos = doubleList.size();
+			doubleList.push_back(instructContent.doubleVal);
+			break;
+		case valType::_string_:
+			tabPos = stringList.size();
+			stringList.push_back(instructContent.stringVal);
+			break;
 	}
 	return { instructContent.type,tabPos };
 }
 
 valAccess addVar(valInstruct instructContent) {
-	int tabPos = 0;
-	switch (instructContent.type) {
-	case valType::_int_:
-		tabPos = intList.size();
-		intList.push_back(instructContent.intVal);
-		break;
-	case valType::_double_:
-		tabPos = doubleList.size();
-		doubleList.push_back(instructContent.doubleVal);
-		break;
-	case valType::_string_:
-		tabPos = stringList.size();
-		stringList.push_back(instructContent.stringVal);
-		break;
-	}
-	variables.insert({ instructContent.stringVal,valAccess{ instructContent.type, tabPos } });
-	return { instructContent.type,tabPos };
+	string name = stringList[depiler().tabPos];
+
+	variables.insert({ name,addVal(instructContent) });
+	return { instructContent.type,variables[name].tabPos };
 }
 
 
@@ -417,22 +404,34 @@ const map<command, functionPointer> executeCommand = {
 		[](valInstruct& instructContent) {
 			executionPile.push(addVal(instructContent));
 		}},
-		/*
 	{command::_EMPILE_VARIABLE_,
-		[](instruction& instructContent) {
-			string name = stringList[instructContent.second.tabPos];
-			delVal(instructContent.second);//supprimer string du tableau
-			
-			if (variables.find(name) != variables.end()) {//var existe bien
-				executionPile.push(variables[name]);
+		[](valInstruct& instructContent) {
+			if (variables.find(instructContent.stringVal) != variables.end()) {//var existe bien
+				//empile une copie qui sera supprimee apres utilisation
+				valAccess copy = { variables[instructContent.stringVal].type };
+				switch(copy.type) {
+					case valType::_int_:
+						copy.tabPos = intList.size();
+						intList.push_back(intList[variables[instructContent.stringVal].tabPos]);
+					case valType::_double_:
+						copy.tabPos = doubleList.size();
+						doubleList.push_back(doubleList[variables[instructContent.stringVal].tabPos]);
+					case valType::_string_:
+						copy.tabPos = stringList.size();
+						stringList.push_back(stringList[variables[instructContent.stringVal].tabPos]);
+					break;
+				}
+				executionPile.push(copy);
 			}
+			//else ?
 		}},
+/*
 	{command::_EMPILE_TABLE_SIZE_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			executeTabAction(instructContent, tabAction::_empile_size_);
 		}},
 	{command::_EMPILE_TABLE_ELEMENT_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			executeTabAction(instructContent, tabAction::_empile_case_);
 		}},
 */
@@ -472,51 +471,54 @@ const map<command, functionPointer> executeCommand = {
 			delVal(testResult);
 		}},
 
-/*
-	{command::_CREATE_VARIABLE_,
-		[](instruction& instructContent) {
-			string name = stringList[instructContent.second.tabPos];
-			delVal({ valType::_string_,instructContent.second.tabPos});//supprimer string du tableau
 
+	{command::_CREATE_VARIABLE_,
+		[](valInstruct& instructContent) {
+			//recupere nom de var
+			int nameAdress = depiler().tabPos;
+			string name = stringList[nameAdress];
+			delVal({ valType::_string_,nameAdress});
+
+			valAccess value = depiler();//adresse de val a associer a var
 			if (variables.find(name) == variables.end()) {//var est bien nouvelle
-				valAccess value = depiler();//supprime pas : transmet adresse
-				
-				if (instructContent.second.type == value.type) {
+				if (instructContent.type == value.type) {
 					variables.insert({name,value});
 				}
+				else cout << "pb de type dans creation var" << endl;
 				//else ? cast here
 			}
 			//else ?
 		}},
 	{command::_UPDATE_VARIABLE_,
-		[](instruction& instructContent) {
-			string name = stringList[instructContent.second.tabPos];
-			delVal(instructContent.second);//supprimer string du tableau
+		[](valInstruct& instructContent) {
+			//recupere nom de var
+			string name = instructContent.stringVal;
 
+			valAccess value = depiler();//adresse de val a associer a var
 			if (variables.find(name) != variables.end()) {//var existe bien
-				if (instructContent.second.type == variables[name].type) {
-					variables[name] = depiler();//ne supprime pas : transmet adresse
+				if (variables[name].type == value.type) {
+					variables[name] = value;//ne supprime pas value : transmet adresse
 				}
 				//else? cast here
 			}
 			//else ?
 		}},
 
-
+/*
 	{command::_CREATE_TABLE_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			executeTabAction(instructContent, tabAction::_create_);
 		}},
 	{command::_ADD_TABLE_ELEMENT_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			executeTabAction(instructContent, tabAction::_add_);
 		}},
 	{command::_UPDATE_TABLE_ELEMENT_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			executeTabAction(instructContent, tabAction::_update_);
 		}},
 	{command::_REMOVE_TABLE_ELEMENT_,
-		[](instruction& instructContent) {
+		[](valInstruct& instructContent) {
 			executeTabAction(instructContent, tabAction::_remove_);
 		}},
 */
@@ -573,14 +575,10 @@ void displayGeneratedProgram() {
 			}
 			cout << " A LA PILE";
 			break;
-		/*case command::_EMPILE_VARIABLE_:
-			name = stringList[instructContent.second.tabPos];
-			if (variables.find(name) != variables.end()) {//var existe bien
-				printVal("AJOUTE ", variables[name]," A LA PILE");
-			}
-			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+		case command::_EMPILE_VARIABLE_:
+			cout << "AJOUTE VALEUR DE " << instructContent.second.stringVal << " A LA PILE";
 			break;
-		case command::_EMPILE_TABLE_SIZE_:
+		/*case command::_EMPILE_TABLE_SIZE_:
 			name = stringList[instructContent.second.tabPos];
 			if (tableaux.find(name) != tableaux.end()) {//var existe bien
 				switch(tableaux[name].type) {
@@ -641,8 +639,10 @@ void displayGeneratedProgram() {
 			cout << "SI DERNIERE VALEUR VAUT 0, CONTINUER A L'INSTRUCTION " << instructContent.second.intVal;
 			break;
 
-/*
+
 		case command::_CREATE_VARIABLE_:
+			cout << "INITIALISE VARIABLE " << instructContent.second.stringVal;
+		/*
 			name = stringList[instructContent.second.tabPos];
 
 			if (variables.find(name) == variables.end()) {//var est bien nouvelle
@@ -654,17 +654,21 @@ void displayGeneratedProgram() {
 				else cout << "ERREUR : TYPES DIFFERENTS";
 			}
 			else cout << "ERREUR : VARIABLE " << name << " EXISTE DEJA";
+			*/
 			break;
 		case command::_UPDATE_VARIABLE_:
+			cout <<  "ACTUALISE VARIABLE " << instructContent.second.stringVal;
+		/*
 			name = stringList[instructContent.second.tabPos];
 
 			if (variables.find(name) != variables.end()) {//var existe bien
 				printVal("ACTUALISE VARIABLE " + name + " AVEC ",executionPile.top());
 			}
 			else cout << "ERREUR : VARIABLE " << name << " N'EXISTE PAS";
+			*/
 			break;
 
-
+/*
 		case command::_CREATE_TABLE_:
 			name = stringList[instructContent.second.tabPos];
 			if (tableaux.find(name) == tableaux.end()) {

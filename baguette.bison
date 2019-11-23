@@ -72,47 +72,41 @@ bloc :
 
 instruction : 
     INT    VARIABLE_NAME '=' expression {
-                                            //var name forcement string donc passe en type l'expression (type de var) pour savoir quel tableau checker
-                                            addInstruct(command::_CREATE_VARIABLE_,$2);
+                                            addInstruct(command::_EMPILE_VALUE_,$2);//nom var
+                                            addInstruct(command::_CREATE_VARIABLE_,(int)1);//type var
                                           }
     | DOUBLE VARIABLE_NAME '=' expression { 
-                                            addInstruct(command::_CREATE_VARIABLE_,$2);
+                                            addInstruct(command::_EMPILE_VALUE_,$2);//nom var
+                                            addInstruct(command::_CREATE_VARIABLE_,(double)1);//type var
                                           }
     | STRING VARIABLE_NAME '=' expression { 
-                                            addInstruct(command::_CREATE_VARIABLE_,$2); 
+                                            addInstruct(command::_EMPILE_VALUE_,$2);//nom var
+                                            addInstruct(command::_CREATE_VARIABLE_,"");//type var
                                           }
     
-    | VARIABLE_NAME '=' expression  { 
-                                      addInstruct(command::_UPDATE_VARIABLE_,$1);
-                                    }
+    | VARIABLE_NAME '=' expression  { addInstruct(command::_UPDATE_VARIABLE_,$1);/*nom var*/ }
     
     | TAB INT     VARIABLE_NAME   '=' expression  { 
-                                                    addInstruct(command::_CREATE_TABLE_,$3);
+                                                    addInstruct(command::_EMPILE_VALUE_,$3);//nom tab
+                                                    addInstruct(command::_CREATE_TABLE_,(int)1);//type var
                                                   }
     | TAB DOUBLE  VARIABLE_NAME   '=' expression  { 
-                                                    addInstruct(command::_CREATE_TABLE_,$3);
+                                                    addInstruct(command::_EMPILE_VALUE_,$3);//nom tab
+                                                    addInstruct(command::_CREATE_TABLE_,(double)1);//type var
                                                   }
     | TAB STRING  VARIABLE_NAME   '=' expression  { 
-                                                    addInstruct(command::_CREATE_TABLE_,$3);
+                                                    addInstruct(command::_EMPILE_VALUE_,$3);//nom tab
+                                                    addInstruct(command::_CREATE_TABLE_,"");//type var
                                                   }
     
-    | VARIABLE_NAME'['']' '=' expression          { 
-                                                    //nom var + contenu expression (index dispo dans pile)
-                                                    addInstruct(command::_ADD_TABLE_ELEMENT_,$1);
-                                                  }
+    | VARIABLE_NAME'['']' '=' expression          { addInstruct(command::_ADD_TABLE_ELEMENT_,$1);/*nom tab*/ }
     | VARIABLE_NAME'['INT_VALUE']' '=' expression  { 
-                                                    //index tab
-                                                    addInstruct(command::_EMPILE_VALUE_,$3);
-
-                                                    //nom var + contenu expression (index dispo dans pile)
-                                                    addInstruct(command::_UPDATE_TABLE_ELEMENT_,$1);
+                                                    addInstruct(command::_EMPILE_VALUE_,$3);//index tab
+                                                    addInstruct(command::_UPDATE_TABLE_ELEMENT_,$1);//nom tab
                                                   }
     | DELETE VARIABLE_NAME'['INT_VALUE']'         { 
-                                                    //index tab
-                                                    addInstruct(command::_EMPILE_VALUE_,$4);
-
-                                                    //nom var
-                                                    addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);
+                                                    addInstruct(command::_EMPILE_VALUE_,$4);//index tab
+                                                    addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);//nom tab
                                                   }
 
     | DISPLAY expression  { addInstruct(command::_PRINT_); }
@@ -167,30 +161,16 @@ expression :
     | expression '*' expression     { addInstruct(command::_FOIS_);}
     | expression '/' expression     { addInstruct(command::_DIVISE_PAR_);}
     
-    | INT_VALUE       { 
-                        addInstruct(command::_EMPILE_VALUE_,$1);
-                      }
-    | DOUBLE_VALUE    { 
-                        addInstruct(command::_EMPILE_VALUE_,$1); 
-                      }
-    | STRING_VALUE    { 
-                        addInstruct(command::_EMPILE_VALUE_,$1); 
-                      }
+    | INT_VALUE       { addInstruct(command::_EMPILE_VALUE_,$1); }
+    | DOUBLE_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
+    | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
     
-    | VARIABLE_NAME   { 
-                        addInstruct(command::_EMPILE_VARIABLE_,$1); 
-                      }
+    | VARIABLE_NAME   { addInstruct(command::_EMPILE_VARIABLE_,$1); }
     
-    | SIZE VARIABLE_NAME    { 
-                              //nom var
-                              addInstruct(command::_EMPILE_TABLE_SIZE_,$2);
-                            }
+    | SIZE VARIABLE_NAME    { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
     | VARIABLE_NAME'['INT_VALUE']'    { 
-                                        //index tab
-                                        addInstruct(command::_EMPILE_VALUE_,$3);
-
-                                        //nom var
-                                        addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);
+                                        addInstruct(command::_EMPILE_VALUE_,$3);//index tab
+                                        addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
                                       }
 
   /*
