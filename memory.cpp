@@ -93,6 +93,7 @@ map<string, tabAccess> tableaux;
 /*		SOUS PARTIE 4 : LIBERATION DE MEMOIRE	    	*/
 /********************************************************/
 void delVal(valAccess val) {
+	/*
 	//PILE : decremente references tableau des valeurs suivantes
 	if (!executionPile.empty() && val.type == executionPile.top().type && val.tabPos == executionPile.top().tabPos) executionPile.pop();//dernier element? le retire
 	else {
@@ -137,6 +138,7 @@ void delVal(valAccess val) {
 		else stringList.erase(stringList.begin() + val.tabPos);
 		break;
 	}
+	*/
 }
 
 void delVar(string name) {

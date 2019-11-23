@@ -112,7 +112,6 @@ instruction :
                                                     //index tab
                                                     addInstruct(command::_EMPILE_VALUE_,(int)intList.size());
                                                     intList.push_back($3);
-                                                    cout << "varTab indice" << endl;
 
                                                     //nom var + contenu expression (index dispo dans pile)
                                                     addInstruct(command::_UPDATE_TABLE_ELEMENT_,(int)stringList.size(),valType::_string_); 
@@ -122,7 +121,6 @@ instruction :
                                                     //index tab
                                                     addInstruct(command::_EMPILE_VALUE_,(int)intList.size());
                                                     intList.push_back($4);
-                                                    cout << "varTab indice" << endl;
 
                                                     //nom var
                                                     addInstruct(command::_REMOVE_TABLE_ELEMENT_,(int)stringList.size(),valType::_string_);
@@ -141,6 +139,7 @@ instruction :
                                 //apres interpretation de bloc :
                             $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction :
                             addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse fin else / debut end_if>)
+
                             instructionList[$1.refInstructTest].second.tabPos = instructionList.size();//<adresse fin then / debut else>
                           }
       bloc_else           { instructionList[$1.refInstruct].second.tabPos = instructionList.size(); }//<adresse fin else / debut end_if>
@@ -154,7 +153,6 @@ instruction :
                                 //apres interpretation de expression :
                             $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                             addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans bloc, sinon sauter à <adresse end while>)
-                            cout <<"expression"<<endl;
                           }
       bloc                {
                                 //apres interpretation de bloc :
@@ -162,9 +160,8 @@ instruction :
                             instructionList[instructionList.size()-1].second.tabPos = $1.refInstruct;//<adresse test>
 
                             instructionList[$1.refInstructTest].second.tabPos = instructionList.size();//<adresse end while>
-                            cout << "traitement bloc" << endl;
                           }
-      END_WHILE           { cout << "fin while" << endl;addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
+      END_WHILE           { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
 
     
     | REPEAT '(' expression ')' bloc { /* TO DO */ }
@@ -185,7 +182,6 @@ expression :
     | INT_VALUE       { 
                         addInstruct(command::_EMPILE_VALUE_,(int)intList.size());
                         intList.push_back($1);
-                        cout << "int val" << endl;
                       }
     | DOUBLE_VALUE    { 
                         addInstruct(command::_EMPILE_VALUE_,(int)doubleList.size(),valType::_double_); 
@@ -210,7 +206,6 @@ expression :
                                         //index tab
                                         addInstruct(command::_EMPILE_VALUE_,(int)intList.size());
                                         intList.push_back($3);
-                                        cout << "varTab indice" << endl;
 
                                         //nom var
                                         addInstruct(command::_EMPILE_TABLE_ELEMENT_,(int)stringList.size(),valType::_string_);

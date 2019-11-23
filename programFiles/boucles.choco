@@ -1,35 +1,14 @@
 si 1
 	AFFICHER 2
 sinon
-	AFFICHER 4
+	AFFICHER 3
 finSi
 
 
-TERMINER
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-si 0
-    AFFICHER 3
+si 2+4
+    AFFICHER 5
 finSi
 
-TERMINER
-
-tantque 0
-    AFFICHER 1
-finTantque
+AFFICHER 7
 
 TERMINER

@@ -80,10 +80,8 @@ void executeOperation(operation operation) {
 			break;
 		}
 
-        cout << "ajoute à la pile " << result << ", à l'index " << intList.size() << " de intList - ";
 		executionPile.push({ valType::_int_,(int)intList.size() });
 		intList.push_back(result);
-		cout << "fait" << endl;
 	}
 	else if ((val1.type == valType::_int_ || val1.type == valType::_double_) ||
 		(val2.type == valType::_int_ || val2.type == valType::_double_)) {//int et double ou deux doubles
@@ -103,10 +101,8 @@ void executeOperation(operation operation) {
 			break;
 		}
 
-        cout << "ajoute à la pile " << result << ", à l'index " << doubleList.size() << "de doubleList - ";
 		executionPile.push({ valType::_double_,(int)doubleList.size() });
 		doubleList.push_back(result);
-		cout << "fait" << endl;
 	}
 	else if (val1.type == valType::_string_ && val2.type == valType::_string_) {
 		string result("");
@@ -127,10 +123,8 @@ void executeOperation(operation operation) {
 			*/
 		}
 
-        cout << "ajoute à la pile " << result << ", à l'index " << stringList.size() << "de stringList - ";
 		executionPile.push({ valType::_string_,(int)stringList.size() });
 		stringList.push_back(result);
-		cout << "fait" << endl;
 	}
 	else {//string + int ou double
 		//erreur? "tostring"? repetition?
@@ -147,6 +141,7 @@ enum class command {
 	//MEMOIRE
 	_ENTER_BLOCK_,
 	_EXIT_BLOCK_,
+	_EXIT_PROGRAM_,
 
 	//EMPILEMENT
 	_EMPILE_VALUE_,
@@ -227,7 +222,6 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 				break;
 			}
 			intList.push_back(tableaux[name].valuesPos.size());//name
-			cout<<"unexpected push"<<endl;
 			break;
 			
 		case tabAction::_empile_case_:
@@ -253,7 +247,6 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 					break;
 				}
 			}
-			cout <<"unexpected push"<<endl;
 			break;
 
 		case tabAction::_create_:
@@ -358,88 +351,61 @@ typedef void (*functionPointer)(instruction& instructContent);
 const map<command, functionPointer> executeCommand = {
 	{command::_ENTER_BLOCK_,
 		[](instruction& instructContent) {
-			cout << "entrer bloc"<< endl;
 			enterMemoryLayer();
 		}},
 	{command::_EXIT_BLOCK_,
 		[](instruction& instructContent) {
-			cout << "sortir bloc"<< endl;
 			exitMemoryLayer();
 		}},
 
 
 	{command::_EMPILE_VALUE_,
 		[](instruction& instructContent) {
-			cout << "empile val"<< endl;
-/*			printVal("ajoute à la pile ",instructContent.second,", à l'index ");
-			switch (instructContent.second.type) {
-			case valType::_int_:
-				cout << instructContent.second.tabPos << " de intList - ";
-				break;
-			case valType::_double_:
-				cout << instructContent.second.tabPos << " de doubleList - ";
-				break;
-			case valType::_string_:
-				cout << instructContent.second.tabPos << " de stringList - ";
-				break;
-			}*/
 			executionPile.push(instructContent.second);
-			//cout << "fait" << endl;
 		}},
 	{command::_EMPILE_VARIABLE_,
 		[](instruction& instructContent) {
-			cout << "empile var"<< endl;
 			string name = stringList[instructContent.second.tabPos];
 			delVal(instructContent.second);//supprimer string du tableau
 			
 			if (variables.find(name) != variables.end()) {//var existe bien
 				executionPile.push(variables[name]);
-				//cout << "unexpected push"<< endl;
 			}
 		}},
 	{command::_EMPILE_TABLE_SIZE_,
 		[](instruction& instructContent) {
-			cout << "empile tab size"<< endl;
 			executeTabAction(instructContent, tabAction::_empile_size_);
 		}},
 	{command::_EMPILE_TABLE_ELEMENT_,
 		[](instruction& instructContent) {
-			cout << "empile tab element"<< endl;
 			executeTabAction(instructContent, tabAction::_empile_case_);
 		}},
 
 
 	{command::_PLUS_,
 		[](instruction& instructContent) {
-			cout << "addition"<< endl;
 			executeOperation(operation::_plus_);
 		}},
 	{command::_MOINS_,
 		[](instruction& instructContent) {
-			cout << "soustraction"<< endl;
 			executeOperation(operation::_moins_);
 		}},
 	{command::_FOIS_,
 		[](instruction& instructContent) {
-			cout << "multiplication"<< endl;
 			executeOperation(operation::_fois_);
 		}},
 	{command::_DIVISE_PAR_,
 		[](instruction& instructContent) {
-			cout << "division"<< endl;
 			executeOperation(operation::_divisePar_);
 		}},
 
 
 	{command::_GOTO_,
 		[](instruction& instructContent) {
-			cout << "saut"<< endl;
 			indexInstruction = instructContent.second.tabPos;//instruction est entier naturel
 		}},
 	{command::_GOTO_TEST_,
 		[](instruction& instructContent) {
-			cout << "saut conditionnel"<< endl;
-			//cout << "(test) val " << result << " - tabPos " << intList.size() << endl;
 			valAccess testResult = depiler();
 
 			if (testResult.tabPos != -1 && 
@@ -454,7 +420,6 @@ const map<command, functionPointer> executeCommand = {
 
 	{command::_CREATE_VARIABLE_,
 		[](instruction& instructContent) {
-			cout << "create var"<< endl;
 			string name = stringList[instructContent.second.tabPos];
 			delVal({ valType::_string_,instructContent.second.tabPos});//supprimer string du tableau
 
@@ -470,7 +435,6 @@ const map<command, functionPointer> executeCommand = {
 		}},
 	{command::_UPDATE_VARIABLE_,
 		[](instruction& instructContent) {
-			cout << "update var"<< endl;
 			string name = stringList[instructContent.second.tabPos];
 			delVal(instructContent.second);//supprimer string du tableau
 
@@ -504,7 +468,6 @@ const map<command, functionPointer> executeCommand = {
 
 	{command::_PRINT_,//sortie
 		[](instruction& instructContent) {
-			cout << "afficher"<< endl;
 			valAccess val = depiler();
 			//if (val.tabPos != -1)
 			printVal("Résultat : ",val,"\n");
@@ -709,11 +672,9 @@ void displayGeneratedProgram() {
 
 //fonction 4
 void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
-	cout << executionPile.size() << " - " << intList.size() << endl;
 	cout << endl << "===== EXECUTION =====" << endl;
 	indexInstruction = 0;
 	while (indexInstruction < instructionList.size()) {
-		cout << endl << "execute instruction " << indexInstruction << " : ";
 		instruction instructContent = instructionList[indexInstruction];
 
 		indexInstruction++;
