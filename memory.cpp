@@ -60,38 +60,12 @@ void printVal(string beginMessage, valAccess val, string endMessage = "") {
 stack<valAccess> executionPile;
 
 valAccess depiler() {
-	
-	stack<valAccess> tmp = executionPile;
-	stack<valAccess> tmpDisplay;
-	while (!tmp.empty()) {
-		tmpDisplay.push(tmp.top());
-		tmp.pop();
-	}
-	cout << "dépiler\n contenu pile :";
-	while (!tmpDisplay.empty()) {
-		printVal(" ",tmpDisplay.top());
-		tmpDisplay.pop();
-	}
-	cout << endl << endl;
-
 	valAccess var;
 	if (!executionPile.empty()) {
 		var = executionPile.top();
 		executionPile.pop();
 	}
 
-	stack<valAccess> tmp2 = executionPile;
-	stack<valAccess> tmp2Display;
-	while (!tmp2.empty()) {
-		tmp2Display.push(tmp2.top());
-		tmp2.pop();
-	}
-	cout << "dépilé\n contenu pile :";
-	while (!tmp2Display.empty()) {
-		printVal(" ",tmp2Display.top());
-		tmp2Display.pop();
-	}
-	cout << endl << endl;
 	return var;//controler tabPos != -1
 }
 

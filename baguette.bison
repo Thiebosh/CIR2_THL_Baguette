@@ -112,6 +112,7 @@ instruction :
                                                     //index tab
                                                     addInstruct(command::_EMPILE_VALUE_,(int)intList.size());
                                                     intList.push_back($3);
+                                                    cout << "varTab indice" << endl;
 
                                                     //nom var + contenu expression (index dispo dans pile)
                                                     addInstruct(command::_UPDATE_TABLE_ELEMENT_,(int)stringList.size(),valType::_string_); 
@@ -121,6 +122,7 @@ instruction :
                                                     //index tab
                                                     addInstruct(command::_EMPILE_VALUE_,(int)intList.size());
                                                     intList.push_back($4);
+                                                    cout << "varTab indice" << endl;
 
                                                     //nom var
                                                     addInstruct(command::_REMOVE_TABLE_ELEMENT_,(int)stringList.size(),valType::_string_);
@@ -131,7 +133,6 @@ instruction :
 
     | IF                  { addInstruct(command::_ENTER_BLOCK_); }
       expression '\n'     {//ajouter comparaison empilant 0 ou 1
-      cout << "appel de expression" << endl;
                                 //apres interpretation de expression :
                             $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                             addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans then, sinon sauter à <adresse fin then / debut else>)
@@ -182,9 +183,9 @@ expression :
     | expression '/' expression     { addInstruct(command::_DIVISE_PAR_);}
     
     | INT_VALUE       { 
-      cout << "appel de int value" << endl;
                         addInstruct(command::_EMPILE_VALUE_,(int)intList.size());
                         intList.push_back($1);
+                        cout << "int val" << endl;
                       }
     | DOUBLE_VALUE    { 
                         addInstruct(command::_EMPILE_VALUE_,(int)doubleList.size(),valType::_double_); 
@@ -209,6 +210,7 @@ expression :
                                         //index tab
                                         addInstruct(command::_EMPILE_VALUE_,(int)intList.size());
                                         intList.push_back($3);
+                                        cout << "varTab indice" << endl;
 
                                         //nom var
                                         addInstruct(command::_EMPILE_TABLE_ELEMENT_,(int)stringList.size(),valType::_string_);
