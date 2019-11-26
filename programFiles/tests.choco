@@ -2,23 +2,24 @@ si 1
 	AFFICHER 2
 sinon
 	AFFICHER 3
-finsi
+fin
+
+var entier = 1 + 4 *2/2 - 3
+AFFICHER var
+
+AFFICHER "texte"//pb flex d'acquisition string?
 
 TERMINER
 
-AFFICHER "texte"
-
-var = 1
-AFFICHER var
-
-liste var = 8
-liste var[] = 9
+// listes pas encore fonctionnelles
+var liste entier = 8
+var[] = 9
 AFFICHER TAILLE var
 AFFICHER var[0]
 AFFICHER var[1]
 
 SUPPRIMER var[1]
-liste var[] = 10
+var[] = 10
 SUPPRIMER var[0]
 AFFICHER var[0]
 

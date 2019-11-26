@@ -35,7 +35,16 @@ conservé :
 - etc (ternaires)
 
 
+## pile de choses à faire :
+- finir reprise tab
+- fonction cast pour associations (fonction prend valAccess et varType, dépile valeur, la transforme si besoin et la rempile pour la variable) - si conversion impossible, fonction erreur
+- cast dans les opérations, à la fin des if existants - si conversion impossible, fonction erreur
+- fonction (appelle map ?) levée d'erreur (enum d'erreurs associées) pour regrouper textes -> exit(1) le programme
+- comparaisons et type "binaire" (booléen)
 
-ajouter fonction conversion intruction - code (le faire nous même pour plus de contrôle / mettre plusieurs caractères)
+- ajouter do while, for(initialisation / affectation, test, affectation), foreach dans bison
+- implémenter fonctions (deque de fonction (nom - adresse instruction)) sans arguments
+- ajouter paramètres aux fonctions (ajoute au deque vecteur des types attendus, crée variables dans l'ordre dans fonction)
+- rendre paramètres facultatifs ( fonction(,4,) => fonction(entier var1 = 0, reel var2 = 0, texte var3 = "") )
 
-boucle : instruction suivante saute au niveau du test
+- mémoire programme (instruction list) opti : vector de bool et types pour enregistrer uniquement info utile(conversion binaire). Pour string, taille puis caractères. Si taille max, flag de fin de texte : 1 si fini, 0 pour continuer à lire string

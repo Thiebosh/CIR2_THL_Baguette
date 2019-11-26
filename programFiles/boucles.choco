@@ -4,26 +4,26 @@ AFFICHER 1 + 2
 
 si 0
 	AFFICHER 42
-finSi
+fin
 
 si 3
 	AFFICHER 4
-finSi
+fin
 
 si 0
 	AFFICHER 5
 sinon
 	AFFICHER 6
-finSi
+fin
 
 si 4+5
 	AFFICHER 7
 sinon
 	AFFICHER 8
-finSi
+fin
 
 tantque 0
 	AFFICHER 9
-finTantque
+fin
 
 TERMINER

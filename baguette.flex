@@ -9,10 +9,10 @@
 -?[0-9]+               { yylval.intValeur = atoi(yytext); return INT_VALUE; }
 -?[0-9]+[\.][0-9]*     { yylval.doubleValeur = atof(yytext); return DOUBLE_VALUE; }
 
-entier                      { return INT; }
-virgule                     { return DOUBLE; }
+entier                      { return INT; }//futur : binaire return bool
+reel                        { return DOUBLE; }
 texte                       { return STRING; }
-"[A-Za-z_][0-9A-Za-z_]*"   	{ strcpy(yylval.stringValeur,yytext);    return STRING_VALUE; }//OK car guillemets + tester fputs(yytext, yyout) : https://stackoverflow.com/questions/48013348/bison-yacc-yyerror-doesnt-work?rq=1
+\"[A-Za-z_][0-9A-Za-z_]*\"  { /*to do : retirer les "*/yylval.stringValeur = strdup(yytext); return STRING_VALUE; }//OK car guillemets 
 
 liste                       { return TAB; }
 TAILLE                      { return SIZE; }
@@ -29,27 +29,21 @@ tan|tangente  {return TAN ;}
 AFFICHER	{return DISPLAY;}
 
 
-
-si 			{return IF;}
-sinon	  {return ELSE;}
-finSi	  {return END_IF;}
-
-tantque 		{return WHILE;}
-finTantque	{return END_WHILE;}
-
-répéter { return REPEAT; }
-finRépéter { return END_REPEAT; }
-
+si 			  { return IF; }
+sinon	    { return ELSE; }
+tantque 	{ return WHILE; }
+faire 	  { return DO; }
+répéter   { return REPEAT; }
 parcourir { return FOREACH; }
-finParcourir { return END_FOREACH; }
+fin	      { return END; }
 
-TERMINER(.|\n)*	{return END_PRGM;}
+TERMINER(.|\n)*	{ return END_PRGM; }
 
 
-[A-Za-z_][0-9A-Za-z_]*   		{ strcpy(yylval.nom,yytext); return VARIABLE_NAME; }/*tester fputs(yytext, yyout) : https://stackoverflow.com/questions/48013348/bison-yacc-yyerror-doesnt-work?rq=1*/
+[A-Za-z_][0-9A-Za-z_]*   		{ yylval.nom = strdup(yytext); return VARIABLE_NAME; }
 
-\r\n|\r|\n  	{  return '\n'; }	
-[ \t]					{ }
-.							{  return yytext[0]; }
+\r\n|\r|\n  	                { return '\n'; }
+[ \t]|\/\/.*|\/\*(.|\n)*\*\/	{ }
+.							                { return yytext[0]; }
 
 %%

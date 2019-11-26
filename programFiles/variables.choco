@@ -1,10 +1,15 @@
-entier var = 8+2
-AFFICHER var
+testitons entier = 8+2
+AFFICHER testitons //on met ce qu on veut ici
 
-tantque var
-	AFFICHER var
-    var = 0
-finTantque
-AFFICHER var
+/*
+et un peu de doc ici
+*/
+
+tantque testitons
+	AFFICHER testitons
+    testitons = 0
+fin
+
+AFFICHER testitons
 
 TERMINER

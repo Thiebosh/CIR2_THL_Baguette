@@ -2,10 +2,12 @@ AFFICHER 1+2
 
 AFFICHER (2*3+4*6)
 
-a = 6
-b = 3
-c = a*b-15
+a entier = 6
+b entier = 3
+c entier = a*b-15
 AFFICHER c
 
-delta = b*b
+delta entier = b*b
 AFFICHER delta
+
+TERMINER

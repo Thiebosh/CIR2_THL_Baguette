@@ -18,7 +18,7 @@
   int intValeur;
   double doubleValeur;
   char* stringValeur;
-  char nom[50];
+  char* nom;
   instructAdress adresse;
 }
 
@@ -45,16 +45,11 @@
 
 %token <adresse> IF
 %token ELSE
-%token END_IF
-
 %token <adresse> WHILE
-%token END_WHILE
-
+%token <adresse> DO
 %token <adresse> REPEAT
-%token END_REPEAT
-
-%token FOREACH
-%token END_FOREACH
+%token <adresse> FOREACH
+%token END
 
 %token END_PRGM
 
@@ -71,114 +66,134 @@ bloc :
     ;
 
 instruction : 
-    INT    VARIABLE_NAME '=' expression {
-                                            addInstruct(command::_EMPILE_VALUE_,(int)1);//type var
-                                            addInstruct(command::_CREATE_VARIABLE_,$2);//nom var
+    operation
+    | affectation
+    | structure
+    
+    | DELETE VARIABLE_NAME'['INT_VALUE']' { 
+                                            addInstruct(command::_EMPILE_VALUE_,$4);//index tab
+                                            addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);//nom tab
                                           }
-    | DOUBLE VARIABLE_NAME '=' expression { 
-                                            addInstruct(command::_EMPILE_VALUE_,(double)1);//type var
-                                            addInstruct(command::_CREATE_VARIABLE_,$2);//nom var
-                                          }
-    | STRING VARIABLE_NAME '=' expression { 
-                                            addInstruct(command::_EMPILE_VALUE_,"");//type var
-                                            addInstruct(command::_CREATE_VARIABLE_,$2);//nom var
-                                          }
-    
-    | VARIABLE_NAME '=' expression  { addInstruct(command::_UPDATE_VARIABLE_,$1);/*nom var*/ }
-    
-    | TAB INT     VARIABLE_NAME   '=' expression  { 
-                                                    addInstruct(command::_EMPILE_VALUE_,$3);//nom tab
-                                                    addInstruct(command::_CREATE_TABLE_,(int)1);//type var
-                                                  }
-    | TAB DOUBLE  VARIABLE_NAME   '=' expression  { 
-                                                    addInstruct(command::_EMPILE_VALUE_,$3);//nom tab
-                                                    addInstruct(command::_CREATE_TABLE_,(double)1);//type var
-                                                  }
-    | TAB STRING  VARIABLE_NAME   '=' expression  { 
-                                                    addInstruct(command::_EMPILE_VALUE_,$3);//nom tab
-                                                    addInstruct(command::_CREATE_TABLE_,"");//type var
-                                                  }
-    
-    | VARIABLE_NAME'['']' '=' expression          { addInstruct(command::_ADD_TABLE_ELEMENT_,$1);/*nom tab*/ }
-    | VARIABLE_NAME'['INT_VALUE']' '=' expression  { 
-                                                    addInstruct(command::_EMPILE_VALUE_,$3);//index tab
-                                                    addInstruct(command::_UPDATE_TABLE_ELEMENT_,$1);//nom tab
-                                                  }
-    | DELETE VARIABLE_NAME'['INT_VALUE']'         { 
-                                                    addInstruct(command::_EMPILE_VALUE_,$4);//index tab
-                                                    addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);//nom tab
-                                                  }
 
-    | DISPLAY expression  { addInstruct(command::_PRINT_); }
-
-    | IF                  { addInstruct(command::_ENTER_BLOCK_); }
-      expression '\n'     {//ajouter comparaison empilant 0 ou 1
-                                //apres interpretation de expression :
-                            $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
-                            addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans then, sinon sauter à <adresse fin then / debut else>)
-                          }
-      bloc                {//THEN 
-                                //apres interpretation de bloc :
-                            $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction :
-                            addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse fin else / debut end_if>)
-
-                            instructionList[$1.refInstructTest].second.intVal = instructionList.size();//<adresse fin then / debut else>
-                          }
-      bloc_else           { instructionList[$1.refInstruct].second.intVal = instructionList.size(); }//<adresse fin else / debut end_if>
-      END_IF              { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
-
-    | WHILE               { 
-                            addInstruct(command::_ENTER_BLOCK_);
-                            $1.refInstruct = instructionList.size();//<adresse test>
-                          }
-      expression '\n'     { //ajouter comparaison empilant 0 ou 1
-                                //apres interpretation de expression :
-                            $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
-                            addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans bloc, sinon sauter à <adresse end while>)
-                          }
-      bloc                {
-                                //apres interpretation de bloc :
-                            addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse test>)
-                            instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse test>
-
-                            instructionList[$1.refInstructTest].second.intVal = instructionList.size();//<adresse end while>
-                          }
-      END_WHILE           { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
-
-    
-    | REPEAT '(' expression ')' bloc { /* TO DO */ }
+    | DISPLAY input
 
     |   /* Ligne vide*/
     ;
+  
+input :
+    operation { addInstruct(command::_PRINT_); }
+    | ','
+    ;
 
-bloc_else : ELSE '\n' bloc | /* Epsilon */ ;
+operation :
+    '(' operation ')'   { } //reduit operation
 
-expression :
-    '(' expression ')'   { } //reduit expression
+    /*
+      | SIN '(' expr ')'  { $$ = sin($3); cout << "sin(" << $3 << ") = " << $$ << endl; }
+      | TAN '(' expr ')'  { $$ = tan($3); cout << "tan(" << $3 << ") = " << $$ << endl; }
+      | SQRT '(' expr ')' { $$ = sqrt($3); cout << "sqrt(" << $3 << ") = " << $$ << endl;}
+    */
 
-    | expression '+' expression     { addInstruct(command::_PLUS_);}
-    | expression '-' expression     { addInstruct(command::_MOINS_);}
-    | expression '*' expression     { addInstruct(command::_FOIS_);}
-    | expression '/' expression     { addInstruct(command::_DIVISE_PAR_);}
+    | operation '+' operation     { addInstruct(command::_PLUS_);}
+    | operation '-' operation     { addInstruct(command::_MOINS_);}
+    | operation '*' operation     { addInstruct(command::_FOIS_);}
+    | operation '/' operation     { addInstruct(command::_DIVISE_PAR_);}
     
     | INT_VALUE       { addInstruct(command::_EMPILE_VALUE_,$1); }
     | DOUBLE_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
     | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
     
     | VARIABLE_NAME   { addInstruct(command::_EMPILE_VARIABLE_,$1); }
-    
-    | SIZE VARIABLE_NAME    { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
     | VARIABLE_NAME'['INT_VALUE']'    { 
                                         addInstruct(command::_EMPILE_VALUE_,$3);//index tab
                                         addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
                                       }
-
-  /*
-    | SIN '(' expr ')'  { $$ = sin($3); cout << "sin(" << $3 << ") = " << $$ << endl; }
-    | TAN '(' expr ')'  { $$ = tan($3); cout << "tan(" << $3 << ") = " << $$ << endl; }
-    | SQRT '(' expr ')' { $$ = sqrt($3); cout << "sqrt(" << $3 << ") = " << $$ << endl;}
-  */
+    | SIZE VARIABLE_NAME    { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
     ;
+
+affectation :
+    VARIABLE_NAME INT '=' operation       {
+                                            addInstruct(command::_EMPILE_VALUE_,(int)1);//type var
+                                            addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
+                                          }
+    | VARIABLE_NAME DOUBLE '=' operation  { 
+                                            addInstruct(command::_EMPILE_VALUE_,(double)1);//type var
+                                            addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
+                                          }
+    | VARIABLE_NAME STRING '=' operation  { 
+                                            addInstruct(command::_EMPILE_VALUE_,"");//type var
+                                            addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
+                                          }
+    | VARIABLE_NAME '=' operation         { addInstruct(command::_UPDATE_VARIABLE_,$1);/*nom var*/ }
+
+    | VARIABLE_NAME TAB INT '=' operation     { 
+                                                addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
+                                                addInstruct(command::_CREATE_TABLE_,(int)1);//type var
+                                              }
+    | VARIABLE_NAME TAB DOUBLE '=' operation  { 
+                                                addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
+                                                addInstruct(command::_CREATE_TABLE_,(double)1);//type var
+                                              }
+    | VARIABLE_NAME TAB STRING '=' operation  { 
+                                                addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
+                                                addInstruct(command::_CREATE_TABLE_,"");//type var
+                                              }
+    | VARIABLE_NAME'['']' '=' operation           { addInstruct(command::_ADD_TABLE_ELEMENT_,$1);/*nom tab*/ }
+    | VARIABLE_NAME'['INT_VALUE']' '=' operation  { 
+                                                    addInstruct(command::_EMPILE_VALUE_,$3);//index tab
+                                                    addInstruct(command::_UPDATE_TABLE_ELEMENT_,$1);//nom tab
+                                                  }
+    ;
+
+structure :
+    IF                { addInstruct(command::_ENTER_BLOCK_); }
+      operation '\n'  {//ajouter comparaison empilant 0 ou 1
+                            //apres interpretation de operation :
+                        $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
+                        addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans then, sinon sauter à <adresse fin then / debut else>)
+                      }
+      bloc            { 
+                            //apres interpretation de bloc :
+                        $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction :
+                        addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse fin else / debut end_if>)
+
+                        instructionList[$1.refInstructTest].second.intVal = instructionList.size();//<adresse fin then / debut else>
+                      }
+      bloc_else       { instructionList[$1.refInstruct].second.intVal = instructionList.size(); }//<adresse fin else / debut end_if>
+      END             { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
+
+    | WHILE           { 
+                        addInstruct(command::_ENTER_BLOCK_);
+                        $1.refInstruct = instructionList.size();//<adresse test>
+                      }
+      operation '\n'  { //ajouter comparaison empilant 0 ou 1
+                            //apres interpretation de operation :
+                        $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
+                        addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans bloc, sinon sauter à <adresse end while>)
+                      }
+      bloc            {
+                            //apres interpretation de bloc :
+                        addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse test>)
+                        instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse test>
+
+                        instructionList[$1.refInstructTest].second.intVal = instructionList.size();//<adresse end while>
+                      }
+      END             { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
+
+    | DO                    {
+                              addInstruct(command::_ENTER_BLOCK_);
+                              //<adresse debut>
+                            }
+      bloc WHILE operation  { //ajouter comparaison empilant 0 ou 1
+                                  //apres interpretation de operation :
+                              //si vrai, saut <adresse debut>
+                              //sinon
+                              addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
+
+//    | REPEAT '(' operation ')' bloc { /* TO DO */ }
+    ;
+
+bloc_else : ELSE '\n' bloc | /* Epsilon */ ;
 %%
 
 
