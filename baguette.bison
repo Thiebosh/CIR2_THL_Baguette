@@ -75,15 +75,14 @@ instruction :
                                             addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);//nom tab
                                           }
 
-    | DISPLAY input
+    | DISPLAY output
 
     |   /* Ligne vide*/
     ;
-  
-input :
-    operation { addInstruct(command::_PRINT_); }
-    | ','
-    ;
+
+output : operation { addInstruct(command::_PRINT_); } output_inter;
+output_inter : ',' output | /*Epsilon*/ ;
+
 
 operation :
     '(' operation ')'   { } //reduit operation

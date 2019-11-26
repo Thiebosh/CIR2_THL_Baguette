@@ -1,3 +1,8 @@
+
+AFFICHER "texte 1!","texte2?\t","texte3+4\n",2
+
+TERMINER
+
 si 1
 	AFFICHER 2
 sinon
@@ -7,7 +12,9 @@ fin
 var entier = 1 + 4 *2/2 - 3
 AFFICHER var
 
-AFFICHER "texte"//pb flex d'acquisition string?
+AFFICHER "texte"
+
+AFFICHER "j'obtiens ","cette valeur"
 
 TERMINER
 

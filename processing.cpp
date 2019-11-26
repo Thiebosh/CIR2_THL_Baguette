@@ -526,8 +526,7 @@ const map<command, functionPointer> executeCommand = {
 	{command::_PRINT_,//sortie
 		[](valInstruct& instructContent) {
 			valAccess val = depiler();
-			//if (val.tabPos != -1)
-			printVal("Résultat : ",val,"\n");
+			printVal("",val,"\n");
 			delVal(val);
 		}}
 	//entree

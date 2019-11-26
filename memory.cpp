@@ -47,6 +47,7 @@ void printVal(string beginMessage, valAccess val, string endMessage = "") {
 		cout << doubleList[val.tabPos];
 		break;
 	case valType::_string_:
+		//si trouve \ suivi de t ou n dans la string, le transforme en un seul caractere
 		cout << stringList[val.tabPos];
 		break;
 	}

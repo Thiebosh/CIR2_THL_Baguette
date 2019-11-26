@@ -12,7 +12,7 @@
 entier                      { return INT; }//futur : binaire return bool
 reel                        { return DOUBLE; }
 texte                       { return STRING; }
-\"[A-Za-z_][0-9A-Za-z_]*\"  { /*to do : retirer les "*/yylval.stringValeur = strdup(yytext); return STRING_VALUE; }//OK car guillemets 
+\"[0-9A-Za-z_!?\+\-\*\/(\\(n|t)) ]*\"  { /*to do : retirer les "*/yylval.stringValeur = strdup(yytext); return STRING_VALUE; }//OK car guillemets 
 
 liste                       { return TAB; }
 TAILLE                      { return SIZE; }
