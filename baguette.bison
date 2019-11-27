@@ -60,38 +60,25 @@
 
 program : bloc END_PRGM { addInstruct(command::_EXIT_BLOCK_); };
 
-bloc :
-    bloc instruction '\n'
-    |    /* Epsilon */
-    ;
+bloc : instruction '\n' bloc | /*Epsilon*/ ;
 
 instruction : 
-    operation
+    DISPLAY output
+    | operation
     | affectation
-    | structure
-    
     | DELETE VARIABLE_NAME'['INT_VALUE']' { 
                                             addInstruct(command::_EMPILE_VALUE_,$4);//index tab
                                             addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);//nom tab
                                           }
-
-    | DISPLAY output
-
+    | structure
     |   /* Ligne vide*/
     ;
 
 output : operation { addInstruct(command::_PRINT_); } output_inter;
 output_inter : ',' output | /*Epsilon*/ ;
 
-
 operation :
     '(' operation ')'   { } //reduit operation
-
-    /*
-      | SIN '(' expr ')'  { $$ = sin($3); cout << "sin(" << $3 << ") = " << $$ << endl; }
-      | TAN '(' expr ')'  { $$ = tan($3); cout << "tan(" << $3 << ") = " << $$ << endl; }
-      | SQRT '(' expr ')' { $$ = sqrt($3); cout << "sqrt(" << $3 << ") = " << $$ << endl;}
-    */
 
     | operation '+' operation     { addInstruct(command::_PLUS_);}
     | operation '-' operation     { addInstruct(command::_MOINS_);}
@@ -102,12 +89,12 @@ operation :
     | DOUBLE_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
     | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
     
-    | VARIABLE_NAME   { addInstruct(command::_EMPILE_VARIABLE_,$1); }
-    | VARIABLE_NAME'['INT_VALUE']'    { 
-                                        addInstruct(command::_EMPILE_VALUE_,$3);//index tab
-                                        addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
-                                      }
-    | SIZE VARIABLE_NAME    { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
+    | VARIABLE_NAME                 { addInstruct(command::_EMPILE_VARIABLE_,$1); }
+    | VARIABLE_NAME'['INT_VALUE']'  { 
+                                      addInstruct(command::_EMPILE_VALUE_,$3);//index tab
+                                      addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
+                                    }
+    | SIZE VARIABLE_NAME            { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
     ;
 
 affectation :
@@ -183,7 +170,8 @@ structure :
                               addInstruct(command::_ENTER_BLOCK_);
                               $1.refInstruct = instructionList.size();//<adresse debut>
                             }
-      bloc WHILE operation  { //ajouter comparaison empilant 0 ou 1
+      bloc 
+      WHILE operation  { //ajouter comparaison empilant 0 ou 1
                                   //apres interpretation de operation :
                               addInstruct(command::_GOTO_TEST_INV_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
                               instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
@@ -191,7 +179,7 @@ structure :
                               addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/
                             }
 
-//    | REPEAT affectation, comparaison, operation '\n' bloc { /* TO DO */ }
+    // | REPEAT affectation, comparaison, operation '\n' bloc { /* TO DO */ }
     ;
 
 bloc_else : ELSE '\n' bloc | /* Epsilon */ ;
