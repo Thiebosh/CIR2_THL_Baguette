@@ -4,6 +4,7 @@
   #include "parser.bison.cpp"
 %}
 
+
 %%
 
 -?[0-9]+               { yylval.intValeur = atoi(yytext); return INT_VALUE; }
@@ -12,7 +13,11 @@
 entier                      { return INT; }//futur : binaire return bool
 reel                        { return DOUBLE; }
 texte                       { return STRING; }
-\"[0-9A-Za-z_!?\+\-\*\/(\\(n|t)) ]*\"  { /*to do : retirer les "*/yylval.stringValeur = strdup(yytext); return STRING_VALUE; }//OK car guillemets 
+\"[0-9A-Za-zéèàçâôùê_!?\'\+\-\*\/(\\(n|t)),;:_ ]*\"  { //OK car guillemets 
+                                                      string read = strdup(yytext);
+                                                      yylval.stringValeur = strdup(read.substr(1,read.size()-2).c_str());//retire les guillemets
+                                                      return STRING_VALUE;
+                                                    }
 
 liste                       { return TAB; }
 TAILLE                      { return SIZE; }

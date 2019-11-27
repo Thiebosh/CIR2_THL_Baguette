@@ -42,7 +42,7 @@ conservé :
 - fonction (appelle map ?) levée d'erreur (enum d'erreurs associées) pour regrouper textes -> exit(1) le programme
 - comparaisons et type "binaire" (booléen)
 
-- ajouter do while, for(initialisation / affectation, test, affectation), foreach dans bison
+- ajouter for(initialisation / affectation, test, affectation), foreach dans bison
 - implémenter fonctions (deque de fonction (nom - adresse instruction)) sans arguments
 - ajouter paramètres aux fonctions (ajoute au deque vecteur des types attendus, crée variables dans l'ordre dans fonction)
 - rendre paramètres facultatifs ( fonction(,4,) => fonction(entier var1 = 0, reel var2 = 0, texte var3 = "") )

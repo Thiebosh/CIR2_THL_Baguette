@@ -1,20 +1,19 @@
 
-AFFICHER "texte 1!","texte2?\t","texte3+4\n",2
+AFFICHER "texte 1!","texte2?\t\thehe","texte3+4\n\ncoucou",2,"\n"
 
-TERMINER
+//TERMINER
 
 si 1
-	AFFICHER 2
+	AFFICHER 2,"\n"
 sinon
-	AFFICHER 3
+	AFFICHER 3,"\n"
 fin
 
 var entier = 1 + 4 *2/2 - 3
-AFFICHER var
 
-AFFICHER "texte"
+AFFICHER "texte\n"
 
-AFFICHER "j'obtiens ","cette valeur"
+AFFICHER "j'obtiens ","cette valeur : ",var,"\n"
 
 TERMINER
 

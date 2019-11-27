@@ -1,13 +1,13 @@
-AFFICHER 1+2
+AFFICHER 1+2,"\n"
 
-AFFICHER (2*3+4*6)
+AFFICHER (2*3+4*6),"\n"
 
 a entier = 6
 b entier = 3
 c entier = a*b-15
-AFFICHER c
+AFFICHER c,"\n"
 
 delta entier = b*b
-AFFICHER delta
+AFFICHER delta,"\n"
 
 TERMINER

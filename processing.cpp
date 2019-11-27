@@ -155,6 +155,7 @@ enum class command {
 	//SAUTS (conditions, boucles, fonctions)
 	_GOTO_,
 	_GOTO_TEST_,
+	_GOTO_TEST_INV_,
 
 	//VARIABLES
 	_CREATE_VARIABLE_,
@@ -387,6 +388,14 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 /********************************************************/
 /*		SOUS PARTIE 5 : EXECUTION SELON LES COMMANDES	*/
 /********************************************************/
+void replaceString(string& subject, const string& search, const string& replace) {
+	size_t pos = 0;
+	while ((pos = subject.find(search, pos)) != std::string::npos) {
+		subject.replace(pos, search.length(), replace);
+		pos += replace.length();
+	}
+}
+
 typedef void (*functionPointer)(valInstruct& instructContent);
 
 const map<command, functionPointer> executeCommand = {
@@ -470,6 +479,18 @@ const map<command, functionPointer> executeCommand = {
 
 			delVal(testResult);
 		}},
+	{command::_GOTO_TEST_INV_,
+		[](valInstruct& instructContent) {
+			valAccess testResult = depiler();
+
+			if (testResult.tabPos != -1 && 
+				(testResult.type == valType::_int_ && intList[testResult.tabPos] != 0) ||
+				(testResult.type == valType::_double_ && doubleList[testResult.tabPos] != 0)) {
+				indexInstruction = instructContent.intVal;//cas if not 0 : incrementation prealable
+			}
+
+			delVal(testResult);
+		}},
 
 
 	{command::_CREATE_VARIABLE_,
@@ -526,7 +547,22 @@ const map<command, functionPointer> executeCommand = {
 	{command::_PRINT_,//sortie
 		[](valInstruct& instructContent) {
 			valAccess val = depiler();
-			printVal("",val,"\n");
+
+			switch (val.type) {
+			case valType::_int_:
+				cout << intList[val.tabPos];
+				break;
+			case valType::_double_:
+				cout << doubleList[val.tabPos];
+				break;
+			case valType::_string_:
+				string display = stringList[val.tabPos];
+				replaceString(display,"\\n","\n");
+				replaceString(display,"\\t","\t");
+				cout << display;
+				break;
+			}
+
 			delVal(val);
 		}}
 	//entree
@@ -569,7 +605,7 @@ void displayGeneratedProgram() {
 					cout << instructContent.second.doubleVal;
 					break;
 				case valType::_string_:
-					cout << instructContent.second.stringVal;
+					cout << "\"" << instructContent.second.stringVal << "\"";
 					break;
 			}
 			cout << " A LA PILE";
@@ -577,7 +613,8 @@ void displayGeneratedProgram() {
 		case command::_EMPILE_VARIABLE_:
 			cout << "AJOUTE VALEUR DE '" << instructContent.second.stringVal << "' A LA PILE";
 			break;
-		/*case command::_EMPILE_TABLE_SIZE_:
+/*		
+		case command::_EMPILE_TABLE_SIZE_:
 			name = stringList[instructContent.second.tabPos];
 			if (tableaux.find(name) != tableaux.end()) {//var existe bien
 				switch(tableaux[name].type) {
@@ -636,6 +673,9 @@ void displayGeneratedProgram() {
 			break;
 		case command::_GOTO_TEST_:
 			cout << "SI DERNIERE VALEUR VAUT 0, CONTINUER A L'INSTRUCTION " << instructContent.second.intVal;
+			break;
+		case command::_GOTO_TEST_INV_:
+			cout << "SI DERNIERE VALEUR DIFFERENTE DE 0, CONTINUER A L'INSTRUCTION " << instructContent.second.intVal;
 			break;
 
 
@@ -737,5 +777,5 @@ void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
 			cout << "unknow command : " << (int)instructContent.first << endl;
 		}
 	}
-	cout << "=====================" << endl;
+	cout << endl << "=====================" << endl;
 }

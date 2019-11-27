@@ -1,29 +1,33 @@
-AFFICHER -3
+AFFICHER "test négatif : ",-3,"\n"
 
-AFFICHER 1 + 2
+AFFICHER "test somme : ",1 + 2,"\n"
 
 si 0
-	AFFICHER 42
+	AFFICHER "valeur if masquée : ",42,"\n"
 fin
 
 si 3
-	AFFICHER 4
+	AFFICHER "valeur if then : ",4,"\n"
 fin
 
 si 0
-	AFFICHER 5
+	AFFICHER "valeur if then masquée : ",5,"\n"
 sinon
-	AFFICHER 6
+	AFFICHER "valeur if else : ",6,"\n"
 fin
 
 si 4+5
-	AFFICHER 7
+	AFFICHER "valeur if then : ",7,"\n"
 sinon
-	AFFICHER 8
+	AFFICHER "valeur if else masquée : ",8,"\n"
 fin
 
 tantque 0
-	AFFICHER 9
+	AFFICHER "valeur while masquée : ",9,"\n"
 fin
+
+faire
+	AFFICHER "valeur do while : ",5,"\n"
+tantque 0
 
 TERMINER

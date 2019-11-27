@@ -1,15 +1,15 @@
 testitons entier = 8+2
-AFFICHER testitons //on met ce qu on veut ici
+AFFICHER testitons,"\n" //on met ce qu on veut ici
 
 /*
 et un peu de doc ici
 */
 
 tantque testitons
-	AFFICHER testitons
+	AFFICHER testitons,"\n"
     testitons = 0
 fin
 
-AFFICHER testitons
+AFFICHER testitons,"\n"
 
 TERMINER

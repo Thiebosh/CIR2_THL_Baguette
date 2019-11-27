@@ -181,15 +181,17 @@ structure :
 
     | DO                    {
                               addInstruct(command::_ENTER_BLOCK_);
-                              //<adresse debut>
+                              $1.refInstruct = instructionList.size();//<adresse debut>
                             }
       bloc WHILE operation  { //ajouter comparaison empilant 0 ou 1
                                   //apres interpretation de operation :
-                              //si vrai, saut <adresse debut>
-                              //sinon
-                              addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
+                              addInstruct(command::_GOTO_TEST_INV_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
+                              instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
+                              
+                              addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/
+                            }
 
-//    | REPEAT '(' operation ')' bloc { /* TO DO */ }
+//    | REPEAT affectation, comparaison, operation '\n' bloc { /* TO DO */ }
     ;
 
 bloc_else : ELSE '\n' bloc | /* Epsilon */ ;
