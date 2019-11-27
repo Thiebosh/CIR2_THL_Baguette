@@ -1,6 +1,7 @@
 
 AFFICHER "texte 1!","texte2?\t\thehe","texte3+4\n\ncoucou",2,"\n"
 
+PAUSE
 //TERMINER
 
 si 1

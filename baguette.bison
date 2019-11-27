@@ -42,6 +42,7 @@
 //fin conserver ?
 
 %token DISPLAY
+%token STOP
 
 %token <adresse> IF
 %token ELSE
@@ -63,7 +64,7 @@ program : bloc END_PRGM { addInstruct(command::_EXIT_BLOCK_); };
 bloc : instruction '\n' bloc | /*Epsilon*/ ;
 
 instruction : 
-    DISPLAY output
+    IO
     | operation
     | affectation
     | DELETE VARIABLE_NAME'['INT_VALUE']' { 
@@ -74,27 +75,45 @@ instruction :
     |   /* Ligne vide*/
     ;
 
+IO :
+    DISPLAY output
+    | STOP         { addInstruct(command::_STOP_); }
+    ;
+
 output : operation { addInstruct(command::_PRINT_); } output_inter;
 output_inter : ',' output | /*Epsilon*/ ;
 
 operation :
     '(' operation ')'   { } //reduit operation
-
-    | operation '+' operation     { addInstruct(command::_PLUS_);}
-    | operation '-' operation     { addInstruct(command::_MOINS_);}
-    | operation '*' operation     { addInstruct(command::_FOIS_);}
-    | operation '/' operation     { addInstruct(command::_DIVISE_PAR_);}
     
     | INT_VALUE       { addInstruct(command::_EMPILE_VALUE_,$1); }
     | DOUBLE_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
     | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
     
+    | SIZE VARIABLE_NAME            { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
+
+    | operation '+' operation     { addInstruct(command::_PLUS_);}
+    | operation '-' operation     { addInstruct(command::_MOINS_);}
+    | operation '*' operation     { addInstruct(command::_FOIS_);}
+    | operation '/' operation     { addInstruct(command::_DIVISE_PAR_);}
+
+    | VARIABLE_NAME'+''+' { 
+                            addInstruct(command::_EMPILE_VARIABLE_,$1);
+                            addInstruct(command::_EMPILE_VALUE_,1);
+                            addInstruct(command::_PLUS_);
+                            addInstruct(command::_UPDATE_VARIABLE_,$1);
+                          }
+    | VARIABLE_NAME'-''-' { 
+                            addInstruct(command::_EMPILE_VARIABLE_,$1);
+                            addInstruct(command::_EMPILE_VALUE_,1);
+                            addInstruct(command::_MOINS_);
+                            addInstruct(command::_UPDATE_VARIABLE_,$1);
+                          }
     | VARIABLE_NAME                 { addInstruct(command::_EMPILE_VARIABLE_,$1); }
     | VARIABLE_NAME'['INT_VALUE']'  { 
                                       addInstruct(command::_EMPILE_VALUE_,$3);//index tab
                                       addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
                                     }
-    | SIZE VARIABLE_NAME            { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
     ;
 
 affectation :
@@ -112,6 +131,29 @@ affectation :
                                           }
     | VARIABLE_NAME '=' operation         { addInstruct(command::_UPDATE_VARIABLE_,$1);/*nom var*/ }
 
+
+/*
+    | VARIABLE_NAME '+''=' operation  { 
+                                      addInstruct(command::_EMPILE_VARIABLE_,$1);
+                                      addInstruct(command::_PLUS_);
+                                      addInstruct(command::_UPDATE_VARIABLE_,$1);
+                                    }
+    | VARIABLE_NAME '-''=' operation  { 
+                                      addInstruct(command::_EMPILE_VARIABLE_,$1);
+                                      addInstruct(command::_MOINS_);
+                                      addInstruct(command::_UPDATE_VARIABLE_,$1);
+                                    }
+    | VARIABLE_NAME '*''=' operation  { 
+                                      addInstruct(command::_EMPILE_VARIABLE_,$1);
+                                      addInstruct(command::_FOIS_);
+                                      addInstruct(command::_UPDATE_VARIABLE_,$1);
+                                    }
+    | VARIABLE_NAME '/''=' operation  { 
+                                      addInstruct(command::_EMPILE_VARIABLE_,$1);
+                                      addInstruct(command::_DIVISE_PAR_);
+                                      addInstruct(command::_UPDATE_VARIABLE_,$1);
+                                    }
+*/
     | VARIABLE_NAME TAB INT '=' operation     { 
                                                 addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
                                                 addInstruct(command::_CREATE_TABLE_,(int)1);//type var

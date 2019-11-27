@@ -31,7 +31,8 @@ sin|sinus   {return SIN ;}
 tan|tangente  {return TAN ;}
 
 
-AFFICHER	{return DISPLAY;}
+AFFICHER	{ return DISPLAY;}
+PAUSE  { return STOP; }//attendre pour delay
 
 
 si 			  { return IF; }

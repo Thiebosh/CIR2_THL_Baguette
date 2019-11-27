@@ -1,0 +1,8 @@
+test entier = 0
+AFFICHER test,"\n"
+//AFFICHER test++,"\n"
+test++
+
+AFFICHER test
+
+TERMINER

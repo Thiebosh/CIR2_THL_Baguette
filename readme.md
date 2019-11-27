@@ -38,7 +38,6 @@ conservé :
 ## pile de choses à faire :
 - finir reprise tab
 - fonction cast pour associations (fonction prend valAccess et varType, dépile valeur, la transforme si besoin et la rempile pour la variable) - si conversion impossible, fonction erreur
-- cast dans les opérations, à la fin des if existants - si conversion impossible, fonction erreur
 - fonction (appelle map ?) levée d'erreur (enum d'erreurs associées) pour regrouper textes -> exit(1) le programme
 - comparaisons et type "binaire" (booléen)
 

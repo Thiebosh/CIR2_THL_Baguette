@@ -1,5 +1,6 @@
 //gestion affichage
 #include <iostream>
+#include <cstdio> //getchar
 #include <iomanip>
 #include <cmath>
 
@@ -168,7 +169,8 @@ enum class command {
 	_REMOVE_TABLE_ELEMENT_,
 
 	//ENTREE SORTIE
-	_PRINT_
+	_PRINT_,
+	_STOP_
 };
 
 
@@ -564,6 +566,12 @@ const map<command, functionPointer> executeCommand = {
 			}
 
 			delVal(val);
+		}},
+	{command::_STOP_,
+		[](valInstruct& instructContent) {
+			cout << endl << "Entrez un caractère pour continuer... ";
+			void* tmp;
+			cin >> tmp;
 		}}
 	//entree
 };
@@ -751,6 +759,9 @@ void displayGeneratedProgram() {
 
 		case command::_PRINT_:
 			cout << "AFFICHE RESULTAT";
+			break;
+		case command::_STOP_:
+			cout << "ATTENDRE ACTION UTILISATEUR";
 			break;
 
 		default:
