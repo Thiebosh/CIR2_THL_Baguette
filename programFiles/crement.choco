@@ -1,0 +1,17 @@
+test entier = 0
+AFFICHER test,"\n"
+
+++test
+AFFICHER test,"\n"
+
+AFFICHER ++test,"\n"
+
+calcul entier = 5 + ++test
+AFFICHER calcul,"\n"
+
+AFFICHER --calcul,"\n"
+
+calcul += 4
+AFFICHER calcul
+
+TERMINER

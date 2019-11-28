@@ -120,6 +120,88 @@ void executeOperation(operation operation) {
 	}
 }
 
+void executeCrement(string varName, operation operation) {
+	//recupere valeurs
+	valAccess val = depiler();
+
+	int valInt(0);
+	double valDouble(0);
+	string valString("");
+
+	switch (val.type) {
+		case valType::_int_:
+			valInt = intList[val.tabPos];
+			break;
+		case valType::_double_:
+			valDouble = doubleList[val.tabPos];
+			break;
+		case valType::_string_:
+			valString = stringList[val.tabPos];
+			break;
+	}
+
+	delVal(val);
+
+
+	if (variables.find(varName) != variables.end() &&
+		((variables[varName].type != valType::_string_ && val.type != valType::_string_) ||
+		(variables[varName].type == valType::_string_ && val.type == valType::_string_))) {//var existe bien
+		valAccess copy = { variables[varName].type };
+
+		switch (variables[varName].type) {
+			case valType::_int_:
+				switch (operation) {
+					case operation::_plus_:
+						intList[variables[varName].tabPos] += (valInt ? valInt : valDouble);
+						break;
+					case operation::_moins_:
+						intList[variables[varName].tabPos] -= (valInt ? valInt : valDouble);
+						break;
+					case operation::_fois_:
+						intList[variables[varName].tabPos] *= (valInt ? valInt : valDouble);
+						break;
+					case operation::_divisePar_:
+						intList[variables[varName].tabPos] /= (valInt ? valInt : valDouble);
+						break;
+				}
+				
+				copy.tabPos = intList.size();
+				intList.push_back(intList[variables[varName].tabPos]);
+				executionPile.push(copy);
+				break;
+			case valType::_double_:
+				switch (operation) {
+					case operation::_plus_:
+						doubleList[variables[varName].tabPos] += (valInt ? valInt : valDouble);
+						break;
+					case operation::_moins_:
+						doubleList[variables[varName].tabPos] -= (valInt ? valInt : valDouble);
+						break;
+					case operation::_fois_:
+						doubleList[variables[varName].tabPos] *= (valInt ? valInt : valDouble);
+						break;
+					case operation::_divisePar_:
+						doubleList[variables[varName].tabPos] /= (valInt ? valInt : valDouble);
+						break;
+				}
+
+				copy.tabPos = doubleList.size();
+				doubleList.push_back(doubleList[variables[varName].tabPos]);
+				executionPile.push(copy);
+				break;
+			case valType::_string_:
+				if (operation == operation::_plus_) stringList[variables[varName].tabPos] += valString;
+				//else erreur
+
+				copy.tabPos = stringList.size();
+				stringList.push_back(stringList[variables[varName].tabPos]);
+				executionPile.push(copy);
+				break;
+		}
+	}
+	//else //variable n'existe pas ou types incompatibles
+}
+
 void executeComparaison(comparaison operation) {
 	cout << "ici" << endl;
 	//recupere valeurs
@@ -399,20 +481,11 @@ void replaceString(string& subject, const string& search, const string& replace)
 }
 
 const map<command, functionPointer> executeCommand = {
-	{command::_ENTER_BLOCK_,
-		[](valInstruct& instructContent) {
-			enterMemoryLayer();
-		}},
-	{command::_EXIT_BLOCK_,
-		[](valInstruct& instructContent) {
-			exitMemoryLayer();
-		}},
+	{command::_ENTER_BLOCK_,[](valInstruct& instructContent) { enterMemoryLayer();	}},
+	{command::_EXIT_BLOCK_,	[](valInstruct& instructContent) { exitMemoryLayer();	}},
 
 
-	{command::_EMPILE_VALUE_,
-		[](valInstruct& instructContent) {
-			executionPile.push(addVal(instructContent));
-		}},
+	{command::_EMPILE_VALUE_,[](valInstruct& instructContent) { executionPile.push(addVal(instructContent)); }},
 	{command::_EMPILE_VARIABLE_,
 		[](valInstruct& instructContent) {
 			string name = instructContent.stringVal;
@@ -496,6 +569,14 @@ const map<command, functionPointer> executeCommand = {
 				}
 			}
 		}},
+	{command::_PLUS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_plus_);		}},
+	{command::_MOINS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_moins_); 		}},
+	{command::_FOIS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_fois_); 		}},
+	{command::_DIVISE_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_divisePar_);	}},
+	{command::_PLUS_,			[](valInstruct& instructContent) { executeOperation(operation::_plus_);		}},
+	{command::_MOINS_,			[](valInstruct& instructContent) { executeOperation(operation::_moins_);	}},
+	{command::_FOIS_,			[](valInstruct& instructContent) { executeOperation(operation::_fois_);		}},
+	{command::_DIVISE_PAR_,		[](valInstruct& instructContent) { executeOperation(operation::_divisePar_);}},
 	{command::_INFERIEUR_,
 		[](valInstruct& instructContent) {
 			executeComparaison(comparaison::_inferieur_);
@@ -531,10 +612,7 @@ const map<command, functionPointer> executeCommand = {
 		}},
 
 
-	{command::_GOTO_,
-		[](valInstruct& instructContent) {
-			indexInstruction = instructContent.intVal;//instruction est entier naturel
-		}},
+	{command::_GOTO_,		[](valInstruct& instructContent) { indexInstruction = instructContent.intVal;/*instruction est entier naturel*/	}},
 	{command::_GOTO_TEST_,
 		[](valInstruct& instructContent) {
 			valAccess testResult = depiler();
@@ -738,6 +816,18 @@ void displayGeneratedProgram() {
 			break;
 		case command::_DECREMENT_:
 			cout << "ENLEVE 1 A LA VARIABLE '" << instructContent.second.stringVal << "'";
+			break;
+		case command::_PLUS_CREMENT_:
+			cout << "SOMME LA VARIABLE '" << instructContent.second.stringVal << "' ET LA DERNIERE VALEUR";
+			break;
+		case command::_MOINS_CREMENT_:
+			cout << "SOUSTRAIT LA VARIABLE '" << instructContent.second.stringVal << "' PAR LA DERNIERE VALEUR";
+			break;
+		case command::_FOIS_CREMENT_:
+			cout << "MULTIPLIE LA VARIABLE '" << instructContent.second.stringVal << "' ET LA DERNIERE VALEUR";
+			break;
+		case command::_DIVISE_CREMENT_:
+			cout << "DIVISE LA VARIABLE '" << instructContent.second.stringVal << "' PAR LA DERNIERE VALEUR";
 			break;
 		case command::_SUPERIEUR_:
 			cout << "COMPARE DEUX DERNIERES VALEURS (<)";

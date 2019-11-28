@@ -59,6 +59,10 @@ enum class command {
 	//OPERATIONS (var to var)
 	_INCREMENT_,
 	_DECREMENT_,
+    _PLUS_CREMENT_,
+    _MOINS_CREMENT_,
+    _FOIS_CREMENT_,
+    _DIVISE_CREMENT_,
 	_PLUS_,
 	_MOINS_,
 	_FOIS_,
@@ -157,8 +161,8 @@ void exitMemoryLayer();
 
  // Processing
 void executeOperation(operation operation);
-void executeOperation(operation operation);
 void executeComparaison(comparaison comparaison);
+void executeCrement(string varName, operation operation);
 valAccess addVal(valInstruct instructContent);
 valAccess addVar(valInstruct instructContent);
 void addInstruct(command command);
