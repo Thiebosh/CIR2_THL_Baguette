@@ -17,7 +17,8 @@ using namespace std;
 enum class valType {//fixe types
 	_int_,
 	_double_,
-	_string_
+	_string_,
+	_bool_
 };
 
 enum class operation {//fixe operations
@@ -26,6 +27,14 @@ enum class operation {//fixe operations
 	_fois_,
 	_divisePar_
 };
+
+enum class comparaison {//fixe comparaison
+	_inferieur_,
+	_superieur_,
+	_inf_egal_,
+	_sup_egal_,
+};
+
 
 enum class tabAction {//fixe operations
 	_empile_size_,
@@ -58,6 +67,12 @@ enum class command {
 	_MOINS_,
 	_FOIS_,
 	_DIVISE_PAR_,
+
+	//COMPARAISON
+	_SUPERIEUR_,
+	_INFERIEUR_,
+	_SUP_EGAL_,
+	_INF_EGAL_,
 
 	//SAUTS (conditions, boucles, fonctions)
 	_GOTO_,
@@ -100,6 +115,7 @@ typedef struct {
 
 typedef struct {//initialiser dans ordre de déclaration
 	valType type = valType::_int_;
+	bool boolVal = false;
 	int intVal = -1;
 	double doubleVal = -1;
 	string stringVal = "";
@@ -114,6 +130,7 @@ typedef void (*functionPointer)(valInstruct& instructContent);//necessaire pour 
 deque<int>		intList;
 deque<double>	doubleList;
 deque<string>	stringList;
+deque<bool>     boolList;
 
 stack<valAccess> executionPile;
 
@@ -122,6 +139,7 @@ map<string, valAccess> variables;
 deque<int>		intArray;
 deque<double>	doubleArray;
 deque<string>	stringArray;
+deque<bool>     boolArray;
 map<string, tabAccess> tableaux;
 
 stack<memoryState> memoryLayer;
@@ -143,6 +161,7 @@ void exitMemoryLayer();
 
  // Processing
 void executeOperation(operation operation);
+void executeComparaison(comparaison comparaison);
 void executeCrement(string varName, operation operation);
 valAccess addVal(valInstruct instructContent);
 valAccess addVar(valInstruct instructContent);

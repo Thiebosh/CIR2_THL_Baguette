@@ -202,6 +202,67 @@ void executeCrement(string varName, operation operation) {
 	//else //variable n'existe pas ou types incompatibles
 }
 
+void executeComparaison(comparaison operation) {
+	cout << "ici" << endl;
+	//recupere valeurs
+	valAccess val2 = depiler();
+	valAccess val1 = depiler();
+	
+	int val1Int(0), val2Int(0);
+	double val1Double(0), val2Double(0);
+	string val1String(""), val2String("");
+
+	switch (val1.type) {
+		case valType::_int_:
+			val1Int = intList[val1.tabPos];
+			break;
+		case valType::_double_:
+			val1Double = doubleList[val1.tabPos];
+			break;
+		case valType::_string_:
+			val1String = stringList[val1.tabPos];
+			break;
+	}
+	switch (val2.type) {
+		case valType::_int_:
+			val2Int = intList[val2.tabPos];
+			break;
+		case valType::_double_:
+			val2Double = doubleList[val2.tabPos];
+			break;
+		case valType::_string_:
+			val2String = stringList[val2.tabPos];
+			break;
+	}
+
+	delVal(val1);
+	delVal(val2);
+	//execute operation et enregistre nouvelle valeur
+	if (val1.type != valType::_string_ && val2.type != valType::_string_) {//si non string
+		int result(0);
+		switch (operation) {
+			case comparaison::_inferieur_:
+				result = (val1Int ? val1Int : val1Double) > (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case comparaison::_superieur_:
+				result = (val1Int ? val1Int : val1Double) < (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case comparaison::_inf_egal_:
+				result = (val1Int ? val1Int : val1Double) >= (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case comparaison::_sup_egal_:
+				result = (val1Int ? val1Int : val1Double) <= (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+		}
+
+		executionPile.push({ valType::_int_,(int)intList.size() });
+		intList.push_back(result);
+	}
+	else {//string + autre
+		//erreur
+	}
+}
+
 /********************************************************/
 /*		SOUS PARTIE 2 : DECLARATION DES COMMANDES		*/
 /********************************************************/
@@ -226,6 +287,10 @@ valAccess addVal(valInstruct instructContent) {
 			tabPos = stringList.size();
 			stringList.push_back(instructContent.stringVal);
 			break;
+		case valType::_bool_:
+			tabPos = boolList.size();
+			boolList.push_back(instructContent.boolVal);
+			break;
 	}
 	return { instructContent.type,tabPos };
 }
@@ -239,16 +304,19 @@ valAccess addVar(valInstruct instructContent) {
 
 
 void addInstruct(command command) {
-	instructionList.push_back({ command, { valType::_int_,-1,-1,"" } });
+	instructionList.push_back({ command, { valType::_int_,false,-1,-1,"" } });
+};
+void addInstruct(command command, bool boolValue) {
+	instructionList.push_back({ command, { valType::_bool_,boolValue,-1,-1,"" } });
 };
 void addInstruct(command command, int intValue) {
-	instructionList.push_back({ command, { valType::_int_,intValue,-1,"" } });
+	instructionList.push_back({ command, { valType::_int_,false,intValue,-1,"" } });
 };
 void addInstruct(command command, double doubleValue) {
-	instructionList.push_back({ command, { valType::_double_,-1,doubleValue,"" } });
+	instructionList.push_back({ command, { valType::_double_,false,-1,doubleValue,"" } });
 };
 void addInstruct(command command, string stringValue) {
-	instructionList.push_back({ command, { valType::_string_,-1,-1,stringValue } });
+	instructionList.push_back({ command, { valType::_string_,false,-1,-1,stringValue } });
 };
 
 
@@ -465,6 +533,9 @@ const map<command, functionPointer> executeCommand = {
 					case valType::_string_:
 						copy.tabPos = stringList.size();
 						stringList.push_back(stringList[variables[name].tabPos]);
+					case valType::_bool_:
+						copy.tabPos = boolList.size();
+						boolList.push_back(boolList[variables[name].tabPos]);
 					break;
 				}
 				executionPile.push(copy);
@@ -536,6 +607,39 @@ const map<command, functionPointer> executeCommand = {
 	{command::_MOINS_,			[](valInstruct& instructContent) { executeOperation(operation::_moins_);	}},
 	{command::_FOIS_,			[](valInstruct& instructContent) { executeOperation(operation::_fois_);		}},
 	{command::_DIVISE_PAR_,		[](valInstruct& instructContent) { executeOperation(operation::_divisePar_);}},
+	{command::_INFERIEUR_,
+		[](valInstruct& instructContent) {
+			executeComparaison(comparaison::_inferieur_);
+		}},
+	{command::_SUPERIEUR_,
+		[](valInstruct& instructContent) {
+			executeComparaison(comparaison::_superieur_);
+		}},
+	{command::_SUP_EGAL_,
+		[](valInstruct& instructContent) {
+			executeComparaison(comparaison::_sup_egal_);
+		}},
+	{command::_INF_EGAL_,
+		[](valInstruct& instructContent) {
+			executeComparaison(comparaison::_inf_egal_);
+		}},
+	
+	{command::_PLUS_,
+		[](valInstruct& instructContent) {
+			executeOperation(operation::_plus_);
+		}},
+	{command::_MOINS_,
+		[](valInstruct& instructContent) {
+			executeOperation(operation::_moins_);
+		}},
+	{command::_FOIS_,
+		[](valInstruct& instructContent) {
+			executeOperation(operation::_fois_);
+		}},
+	{command::_DIVISE_PAR_,
+		[](valInstruct& instructContent) {
+			executeOperation(operation::_divisePar_);
+		}},
 
 
 	{command::_GOTO_,		[](valInstruct& instructContent) { indexInstruction = instructContent.intVal;/*instruction est entier naturel*/	}},
@@ -543,7 +647,8 @@ const map<command, functionPointer> executeCommand = {
 		[](valInstruct& instructContent) {
 			valAccess testResult = depiler();
 
-			if (testResult.tabPos != -1 && 
+			if (testResult.tabPos != -1 &&
+				(testResult.type == valType::_bool_ && boolList[testResult.tabPos] == false) || 
 				(testResult.type == valType::_int_ && intList[testResult.tabPos] == 0) ||
 				(testResult.type == valType::_double_ && doubleList[testResult.tabPos] == 0)) {
 				indexInstruction = instructContent.intVal;//cas if not 0 : incrementation prealable
@@ -556,6 +661,7 @@ const map<command, functionPointer> executeCommand = {
 			valAccess testResult = depiler();
 
 			if (testResult.tabPos != -1 && 
+				(testResult.type == valType::_bool_ && boolList[testResult.tabPos] == true) ||
 				(testResult.type == valType::_int_ && intList[testResult.tabPos] != 0) ||
 				(testResult.type == valType::_double_ && doubleList[testResult.tabPos] != 0)) {
 				indexInstruction = instructContent.intVal;//cas if not 0 : incrementation prealable
@@ -678,6 +784,10 @@ void displayGeneratedProgram() {
 				case valType::_string_:
 					cout << "\"" << instructContent.second.stringVal << "\"";
 					break;
+				case valType::_bool_:
+					cout << "\"" << instructContent.second.boolVal << "\"";
+					break;
+
 			}
 			cout << " A LA PILE";
 			break;
@@ -743,6 +853,19 @@ void displayGeneratedProgram() {
 		case command::_DIVISE_CREMENT_:
 			cout << "DIVISE LA VARIABLE '" << instructContent.second.stringVal << "' PAR LA DERNIERE VALEUR";
 			break;
+		case command::_SUPERIEUR_:
+			cout << "COMPARE DEUX DERNIERES VALEURS (<)";
+			break;
+		case command::_INFERIEUR_:
+			cout << "COMPARE DEUX DERNIERES VALEURS (>)";
+			break;
+		case command::_SUP_EGAL_:
+			cout << "COMPARE DEUX DERNIERES VALEURS (<=)";
+			break;
+		case command::_INF_EGAL_:
+			cout << "COMPARE DEUX DERNIERES VALEURS (>=)";
+			break;
+
 		case command::_PLUS_:
 			cout << "ADDITIONNE DEUX DERNIERES VALEURS";
 			break;

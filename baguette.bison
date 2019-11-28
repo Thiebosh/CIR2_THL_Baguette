@@ -25,16 +25,20 @@
 %token <intValeur>    INT_VALUE
 %token <doubleValeur> DOUBLE_VALUE
 %token <stringValeur> STRING_VALUE
+%token <boolValeur> BOOL_VALUE
 
 %token INT
 %token DOUBLE
 %token STRING
+%token BOOL
 %token TAB
 %token <nom> VARIABLE_NAME
 
 %token SIZE
 %token DELETE
 
+%token INF_EGAL
+%token SUP_EGAL
 %token PLUS_CREMENT
 %token MOINS_CREMENT
 %token FOIS_CREMENT
@@ -90,6 +94,11 @@ operation :
     | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
     
     | SIZE VARIABLE_NAME            { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
+
+    | operation '>' operation     { addInstruct(command::_INFERIEUR_);}
+    | operation '<' operation     { addInstruct(command::_SUPERIEUR_);}
+    | operation INF_EGAL operation     { addInstruct(command::_INF_EGAL_);}
+    | operation SUP_EGAL operation     { addInstruct(command::_SUP_EGAL_);}
 
     | operation '+' operation     { addInstruct(command::_PLUS_);}
     | operation '-' operation     { addInstruct(command::_MOINS_);}

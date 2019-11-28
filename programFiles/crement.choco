@@ -12,13 +12,6 @@ AFFICHER calcul,"\n"
 AFFICHER --calcul,"\n"
 
 calcul += 4
-AFFICHER calcul,"\n"
-
-calcul *= 2
-AFFICHER calcul,"\n"
-
-testString texte = "hello "
-testString += "world"
-AFFICHER testString
+AFFICHER calcul
 
 TERMINER

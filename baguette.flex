@@ -27,6 +27,8 @@ SUPPRIMER                   { return DELETE; }
 AFFICHER	{ return DISPLAY;}
 PAUSE  { return STOP; }//attendre pour delay
 
+\>=   { return INF_EGAL; }
+\<=   { return SUP_EGAL; }
 \+=   { return PLUS_CREMENT; }
 \-=   { return MOINS_CREMENT; }
 \*=   { return FOIS_CREMENT; }
