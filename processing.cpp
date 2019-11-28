@@ -412,6 +412,36 @@ void replaceString(string& subject, const string& search, const string& replace)
 	}
 }
 
+valAccess castVal(valAccess value, valType cast) {
+	if (value.type == cast) return value;
+	
+	else if (value.type != valType::_string_ && cast != valType::_string_) {
+		valAccess result = { cast };
+		switch (cast) {
+			case valType::_int_:
+				result.tabPos = intList.size();
+				switch (value.type) {
+					case valType::_double_:
+						intList.push_back(doubleList[value.tabPos]);
+						break;
+				}
+				break;
+			case valType::_double_:
+				result.tabPos = doubleList.size();
+				switch (value.type) {
+					case valType::_int_:
+						doubleList.push_back(intList[value.tabPos]);
+						break;
+				}
+				break;
+		}
+		return result;
+	}
+
+	//else error : types incompatibles
+}
+
+
 const map<command, functionPointer> executeCommand = {
 	{command::_ENTER_BLOCK_,[](valInstruct& instructContent) { enterMemoryLayer();	}},
 	{command::_EXIT_BLOCK_,	[](valInstruct& instructContent) { exitMemoryLayer();	}},
@@ -545,12 +575,9 @@ const map<command, functionPointer> executeCommand = {
 			valAccess value = depiler();//adresse de val a associer a var
 
 			if (variables.find(instructContent.stringVal) == variables.end()) {//var est bien nouvelle
-				if (varType == value.type) {
-					variables.insert({instructContent.stringVal,value});
-				}
-				//else ? cast here
+				variables.insert({instructContent.stringVal,castVal(value, varType)});
 			}
-			//else ?
+			//else error : variable existe pas
 		}},
 	{command::_UPDATE_VARIABLE_,
 		[](valInstruct& instructContent) {
@@ -559,12 +586,9 @@ const map<command, functionPointer> executeCommand = {
 
 			valAccess value = depiler();//adresse de val a associer a var
 			if (variables.find(name) != variables.end()) {//var existe bien
-				if (variables[name].type == value.type) {
-					variables[name] = value;//ne supprime pas value : transmet adresse
-				}
-				//else? cast here
+				variables[name] = castVal(value, variables[name].type);
 			}
-			//else ?
+			//else errreur : existe pas
 		}},
 
 /*

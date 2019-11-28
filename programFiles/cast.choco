@@ -1,0 +1,7 @@
+test entier = 10
+AFFICHER test,"\n"
+
+test = 10.5
+AFFICHER test
+
+TERMINER
