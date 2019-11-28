@@ -148,6 +148,8 @@ enum class command {
 	_EMPILE_TABLE_ELEMENT_,
 
 	//OPERATIONS (var to var)
+	_INCREMENT_,
+	_DECREMENT_,
 	_PLUS_,
 	_MOINS_,
 	_FOIS_,
@@ -417,19 +419,21 @@ const map<command, functionPointer> executeCommand = {
 		}},
 	{command::_EMPILE_VARIABLE_,
 		[](valInstruct& instructContent) {
-			if (variables.find(instructContent.stringVal) != variables.end()) {//var existe bien
+			string name = instructContent.stringVal;
+
+			if (variables.find(name) != variables.end()) {//var existe bien
 				//empile une copie qui sera supprimee apres utilisation
-				valAccess copy = { variables[instructContent.stringVal].type };
+				valAccess copy = { variables[name].type };
 				switch(copy.type) {
 					case valType::_int_:
 						copy.tabPos = intList.size();
-						intList.push_back(intList[variables[instructContent.stringVal].tabPos]);
+						intList.push_back(intList[variables[name].tabPos]);
 					case valType::_double_:
 						copy.tabPos = doubleList.size();
-						doubleList.push_back(doubleList[variables[instructContent.stringVal].tabPos]);
+						doubleList.push_back(doubleList[variables[name].tabPos]);
 					case valType::_string_:
 						copy.tabPos = stringList.size();
-						stringList.push_back(stringList[variables[instructContent.stringVal].tabPos]);
+						stringList.push_back(stringList[variables[name].tabPos]);
 					break;
 				}
 				executionPile.push(copy);
@@ -447,6 +451,52 @@ const map<command, functionPointer> executeCommand = {
 		}},
 */
 
+	{command::_INCREMENT_,
+		[](valInstruct& instructContent) {
+			string name = instructContent.stringVal;
+
+			if (variables.find(name) != variables.end()) {//var existe bien
+				valAccess copy = { variables[name].type };
+
+				if (variables[name].type == valType::_int_) {
+					++intList[variables[name].tabPos];
+
+					copy.tabPos = intList.size();
+					intList.push_back(intList[variables[name].tabPos]);
+					executionPile.push(copy);
+				}
+				else if (variables[name].type == valType::_double_) {
+					++doubleList[variables[name].tabPos];
+
+					copy.tabPos = intList.size();
+					doubleList.push_back(doubleList[variables[name].tabPos]);
+					executionPile.push(copy);
+				}
+			}
+		}},
+	{command::_DECREMENT_,
+		[](valInstruct& instructContent) {
+			string name = instructContent.stringVal;
+
+			if (variables.find(name) != variables.end()) {//var existe bien
+				valAccess copy = { variables[name].type };
+
+				if (variables[name].type == valType::_int_) {
+					--intList[variables[name].tabPos];
+
+					copy.tabPos = intList.size();
+					intList.push_back(intList[variables[name].tabPos]);
+					executionPile.push(copy);
+				}
+				else if (variables[name].type == valType::_double_) {
+					--doubleList[variables[name].tabPos];
+
+					copy.tabPos = intList.size();
+					doubleList.push_back(doubleList[variables[name].tabPos]);
+					executionPile.push(copy);
+				}
+			}
+		}},
 	{command::_PLUS_,
 		[](valInstruct& instructContent) {
 			executeOperation(operation::_plus_);
@@ -549,7 +599,6 @@ const map<command, functionPointer> executeCommand = {
 	{command::_PRINT_,//sortie
 		[](valInstruct& instructContent) {
 			valAccess val = depiler();
-
 			switch (val.type) {
 			case valType::_int_:
 				cout << intList[val.tabPos];

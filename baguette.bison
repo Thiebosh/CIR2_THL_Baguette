@@ -96,19 +96,10 @@ operation :
     | operation '-' operation     { addInstruct(command::_MOINS_);}
     | operation '*' operation     { addInstruct(command::_FOIS_);}
     | operation '/' operation     { addInstruct(command::_DIVISE_PAR_);}
-
-    | VARIABLE_NAME'+''+' { 
-                            addInstruct(command::_EMPILE_VARIABLE_,$1);
-                            addInstruct(command::_EMPILE_VALUE_,1);
-                            addInstruct(command::_PLUS_);
-                            addInstruct(command::_UPDATE_VARIABLE_,$1);
-                          }
-    | VARIABLE_NAME'-''-' { 
-                            addInstruct(command::_EMPILE_VARIABLE_,$1);
-                            addInstruct(command::_EMPILE_VALUE_,1);
-                            addInstruct(command::_MOINS_);
-                            addInstruct(command::_UPDATE_VARIABLE_,$1);
-                          }
+    
+    | '+''+' VARIABLE_NAME  { addInstruct(command::_INCREMENT_,$3); }
+    | '-''-' VARIABLE_NAME  { addInstruct(command::_DECREMENT_,$3); }
+    
     | VARIABLE_NAME                 { addInstruct(command::_EMPILE_VARIABLE_,$1); }
     | VARIABLE_NAME'['INT_VALUE']'  { 
                                       addInstruct(command::_EMPILE_VALUE_,$3);//index tab
@@ -130,9 +121,7 @@ affectation :
                                             addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
                                           }
     | VARIABLE_NAME '=' operation         { addInstruct(command::_UPDATE_VARIABLE_,$1);/*nom var*/ }
-
-
-/*
+    /*
     | VARIABLE_NAME '+''=' operation  { 
                                       addInstruct(command::_EMPILE_VARIABLE_,$1);
                                       addInstruct(command::_PLUS_);
@@ -153,7 +142,7 @@ affectation :
                                       addInstruct(command::_DIVISE_PAR_);
                                       addInstruct(command::_UPDATE_VARIABLE_,$1);
                                     }
-*/
+    */
     | VARIABLE_NAME TAB INT '=' operation     { 
                                                 addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
                                                 addInstruct(command::_CREATE_TABLE_,(int)1);//type var

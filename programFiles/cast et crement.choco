@@ -1,8 +1,13 @@
 test entier = 0
 AFFICHER test,"\n"
-//AFFICHER test++,"\n"
-test++
 
-AFFICHER test
+++test
+AFFICHER test,"\n"
+
+AFFICHER ++test,"\n"
+
+calcul entier = 5 + ++test
+AFFICHER calcul,"\n"
+AFFICHER --calcul
 
 TERMINER
