@@ -23,17 +23,14 @@ liste                       { return TAB; }
 TAILLE                      { return SIZE; }
 SUPPRIMER                   { return DELETE; }
 
-racine      {return SQRT ;}//bloc a conserver?
-et          {return '&' ;}
-ou          {return '|' ;}
-non         {return '!' ;}
-sin|sinus   {return SIN ;}
-tan|tangente  {return TAN ;}
-
 
 AFFICHER	{ return DISPLAY;}
 PAUSE  { return STOP; }//attendre pour delay
 
+\+=   { return PLUS_CREMENT; }
+\-=   { return MOINS_CREMENT; }
+\*=   { return FOIS_CREMENT; }
+\/=   { return DIVISE_CREMENT; }
 
 si 			  { return IF; }
 sinon	    { return ELSE; }

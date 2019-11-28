@@ -8,6 +8,10 @@ AFFICHER ++test,"\n"
 
 calcul entier = 5 + ++test
 AFFICHER calcul,"\n"
-AFFICHER --calcul
+
+AFFICHER --calcul,"\n"
+
+calcul += 4
+AFFICHER calcul
 
 TERMINER

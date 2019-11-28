@@ -456,7 +456,7 @@ const map<command, functionPointer> executeCommand = {
 			string name = instructContent.stringVal;
 
 			if (variables.find(name) != variables.end()) {//var existe bien
-				valAccess copy = { variables[name].type };
+				valAccess copy = { variables[name].type };//copie supprimee apres utilisation
 
 				if (variables[name].type == valType::_int_) {
 					++intList[variables[name].tabPos];
@@ -711,6 +711,12 @@ void displayGeneratedProgram() {
 			break;
 */
 
+		case command::_INCREMENT_:
+			cout << "AJOUTE 1 A LA VARIABLE '" << instructContent.second.stringVal << "'";
+			break;
+		case command::_DECREMENT_:
+			cout << "ENLEVE 1 A LA VARIABLE '" << instructContent.second.stringVal << "'";
+			break;
 		case command::_PLUS_:
 			cout << "ADDITIONNE DEUX DERNIERES VALEURS";
 			break;

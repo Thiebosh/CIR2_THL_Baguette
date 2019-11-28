@@ -35,11 +35,10 @@
 %token SIZE
 %token DELETE
 
-//conserver?
-%token SIN
-%token TAN
-%token SQRT
-//fin conserver ?
+%token PLUS_CREMENT
+%token MOINS_CREMENT
+%token FOIS_CREMENT
+%token DIVISE_CREMENT
 
 %token DISPLAY
 %token STOP
@@ -121,28 +120,28 @@ affectation :
                                             addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
                                           }
     | VARIABLE_NAME '=' operation         { addInstruct(command::_UPDATE_VARIABLE_,$1);/*nom var*/ }
-    /*
-    | VARIABLE_NAME '+''=' operation  { 
-                                      addInstruct(command::_EMPILE_VARIABLE_,$1);
-                                      addInstruct(command::_PLUS_);
-                                      addInstruct(command::_UPDATE_VARIABLE_,$1);
-                                    }
-    | VARIABLE_NAME '-''=' operation  { 
-                                      addInstruct(command::_EMPILE_VARIABLE_,$1);
-                                      addInstruct(command::_MOINS_);
-                                      addInstruct(command::_UPDATE_VARIABLE_,$1);
-                                    }
-    | VARIABLE_NAME '*''=' operation  { 
-                                      addInstruct(command::_EMPILE_VARIABLE_,$1);
-                                      addInstruct(command::_FOIS_);
-                                      addInstruct(command::_UPDATE_VARIABLE_,$1);
-                                    }
-    | VARIABLE_NAME '/''=' operation  { 
-                                      addInstruct(command::_EMPILE_VARIABLE_,$1);
-                                      addInstruct(command::_DIVISE_PAR_);
-                                      addInstruct(command::_UPDATE_VARIABLE_,$1);
-                                    }
-    */
+    
+    | VARIABLE_NAME PLUS_CREMENT operation    {
+                                                addInstruct(command::_EMPILE_VARIABLE_,$1);
+                                                addInstruct(command::_PLUS_);
+                                                addInstruct(command::_UPDATE_VARIABLE_,$1);
+                                              }
+    | VARIABLE_NAME MOINS_CREMENT operation   {
+                                                addInstruct(command::_EMPILE_VARIABLE_,$1);
+                                                addInstruct(command::_MOINS_);
+                                                addInstruct(command::_UPDATE_VARIABLE_,$1);
+                                              }
+    | VARIABLE_NAME FOIS_CREMENT operation    { 
+                                                addInstruct(command::_EMPILE_VARIABLE_,$1);
+                                                addInstruct(command::_FOIS_);
+                                                addInstruct(command::_UPDATE_VARIABLE_,$1);
+                                              }
+    | VARIABLE_NAME DIVISE_CREMENT operation  { 
+                                                addInstruct(command::_EMPILE_VARIABLE_,$1);
+                                                addInstruct(command::_DIVISE_PAR_);
+                                                addInstruct(command::_UPDATE_VARIABLE_,$1);
+                                              }
+    
     | VARIABLE_NAME TAB INT '=' operation     { 
                                                 addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
                                                 addInstruct(command::_CREATE_TABLE_,(int)1);//type var
