@@ -1,0 +1,40 @@
+/*COURS 1
+afficher, opérations, variables
+*/
+
+//partie 1
+AFFICHER "PARTIE 1\n"
+AFFICHER 1,"\n"
+AFFICHER 1.23,"\n","hello world","\n\n"
+
+AFFICHER 1+6*4,"\n"
+AFFICHER 4*6+1,"\n"
+AFFICHER -1*2+5/3,"\n\n\n"
+
+//partie 2
+AFFICHER "PARTIE 2\n"
+maVar entier = 2
+AFFICHER "j'initialise maVar à ",maVar,"\n"
+maVar = 3.5
+AFFICHER "j'affecte 3.5 à maVar entière (cast) : ",maVar,"\n\n"
+
+AFFICHER "j'incrémente : ",++maVar,"\n"
+AFFICHER "je décrémente : ",--maVar,"\n\n"
+
+maVar *= 3
+AFFICHER "je multiplie maVar par 3 et lui affecte directement : ",maVar,"\n","\n"
+
+autreVar reel = maVar / 2 - 12
+AFFICHER "j'affecte une opération complexe à une variable réelle : ",autreVar,"\n\n"
+
+//pb : prend 5 et pas somme mais marche quand isolé
+//calcul entier = 5 + ++autreVar
+//AFFICHER "j'incrémente la variable réelle, je lui ajoute 5 et je caste le résultat : ",calcul," (var réelle : ",autreVar,")\n\n"
+
+placeAuxStrings texte = "hello"
+placeAuxStrings += " world"
+AFFICHER "je concatène des strings : ",placeAuxStrings,"\n"
+
+TERMINER
+
+éléments inatteignables - ne provoquent pas de syntax error

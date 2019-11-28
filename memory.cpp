@@ -19,6 +19,9 @@
 void printVal(string beginMessage, valAccess val, string endMessage = "") {
 	cout << beginMessage;
 	switch (val.type) {
+	case valType::_bool_:
+		cout << boolList[val.tabPos];
+		break;
 	case valType::_int_:
 		cout << intList[val.tabPos];
 		break;
@@ -41,18 +44,15 @@ void printVal(string beginMessage, valAccess val, string endMessage = "") {
 
 valAccess depiler() {
 	valAccess var;
+
 	if (!executionPile.empty()) {
 		var = executionPile.top();
 		executionPile.pop();
 	}
+	else error(errorCode::emptyExecutionStack);
 
-	return var;//controler tabPos != -1
+	return var;
 }
-
-
-/********************************************************/
-/*		SOUS PARTIE 3 : DECLARATION DES VARIABLES		*/
-/********************************************************/
 
 
 /********************************************************/
@@ -90,6 +90,10 @@ void delVal(valAccess val) {
 
 	//supprimer la valeur du tableau
 	switch (val.type) {
+	case valType::_bool_:
+		if (val.tabPos == boolList.size() - 1) boolList.pop_back();
+		else boolList.erase(boolList.begin() + val.tabPos);
+		break;
 	case valType::_int_:
 		if (val.tabPos == intList.size() - 1) intList.pop_back();
 		else intList.erase(intList.begin() + val.tabPos);
@@ -190,7 +194,7 @@ void delTab(string tabName) {
 
 
 void enterMemoryLayer() {
-	memoryLayer.push({ (unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
+	memoryLayer.push({ (unsigned)boolList.size(),(unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
 }
 
 void exitMemoryLayer() {
@@ -211,7 +215,8 @@ void exitMemoryLayer() {
 	//supprime variables declarees dans le bloc
 	map<string, valAccess> variablesCopy = variables;
 	for (auto var : variablesCopy) {
-		if ((var.second.type == valType::_int_	  && (unsigned)var.second.tabPos > initial.intListSize) ||
+		if ((var.second.type == valType::_bool_ && (unsigned)var.second.tabPos > initial.boolListSize) ||
+			(var.second.type == valType::_int_ && (unsigned)var.second.tabPos > initial.intListSize) ||
 			(var.second.type == valType::_double_ && (unsigned)var.second.tabPos > initial.doubleListSize) ||
 			(var.second.type == valType::_string_ && (unsigned)var.second.tabPos > initial.stringListSize)) {
 			delVar(var.first);
@@ -219,7 +224,8 @@ void exitMemoryLayer() {
 	}
 
 	//supprime valeurs (non affectees a des variables) declarees dans le bloc (supprime par la fin pour + d'efficacite (deque) et de surete)
+	while (boolList.size() > initial.boolListSize)		delVal({ valType::_int_,	(int)boolList.size() - 1 });
 	while (intList.size() > initial.intListSize)		delVal({ valType::_int_,	(int)intList.size() - 1 });
-	while (doubleList.size() > initial.doubleListSize)	delVal({ valType::_double_,(int)doubleList.size() - 1 });
-	while (stringList.size() > initial.stringListSize)	delVal({ valType::_string_,(int)stringList.size() - 1 });
+	while (doubleList.size() > initial.doubleListSize)	delVal({ valType::_double_,	(int)doubleList.size() - 1 });
+	while (stringList.size() > initial.stringListSize)	delVal({ valType::_string_,	(int)stringList.size() - 1 });
 }

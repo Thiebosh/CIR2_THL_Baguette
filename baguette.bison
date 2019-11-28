@@ -15,28 +15,28 @@
 %}
 
 %union{//variables
-  int intValeur;
-  double doubleValeur;
-  char* stringValeur;
-  char* nom;
+  int     intValeur;
+  double  doubleValeur;
+  char*   stringValeur;
+  char*   nom;
   instructAdress adresse;
 }
 
 %token <intValeur>    INT_VALUE
 %token <doubleValeur> DOUBLE_VALUE
 %token <stringValeur> STRING_VALUE
-%token <boolValeur> BOOL_VALUE
 
 %token INT
 %token DOUBLE
 %token STRING
-%token BOOL
 %token TAB
 %token <nom> VARIABLE_NAME
 
 %token SIZE
 %token DELETE
 
+%token EQUIV
+%token DIFF
 %token INF_EGAL
 %token SUP_EGAL
 %token PLUS_CREMENT
@@ -71,7 +71,7 @@ instruction :
     | operation
     | affectation
     | DELETE VARIABLE_NAME'['INT_VALUE']' { 
-                                            addInstruct(command::_EMPILE_VALUE_,$4);//index tab
+                                            addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
                                             addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);//nom tab
                                           }
     | structure
@@ -86,19 +86,15 @@ IO :
 output : operation { addInstruct(command::_PRINT_); } output_inter;
 output_inter : ',' output | /*Epsilon*/ ;
 
+
 operation :
     '(' operation ')'   { } //reduit operation
     
-    | INT_VALUE       { addInstruct(command::_EMPILE_VALUE_,$1); }
-    | DOUBLE_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
-    | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
+    | INT_VALUE       { addInstruct(command::_EMPILE_VALUE_,(int)$1); }
+    | DOUBLE_VALUE    { addInstruct(command::_EMPILE_VALUE_,(double)$1); }
+    | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,(string)$1); }
     
     | SIZE VARIABLE_NAME            { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
-
-    | operation '>' operation     { addInstruct(command::_INFERIEUR_);}
-    | operation '<' operation     { addInstruct(command::_SUPERIEUR_);}
-    | operation INF_EGAL operation     { addInstruct(command::_INF_EGAL_);}
-    | operation SUP_EGAL operation     { addInstruct(command::_SUP_EGAL_);}
 
     | operation '+' operation     { addInstruct(command::_PLUS_);}
     | operation '-' operation     { addInstruct(command::_MOINS_);}
@@ -110,7 +106,7 @@ operation :
     
     | VARIABLE_NAME                 { addInstruct(command::_EMPILE_VARIABLE_,$1); }
     | VARIABLE_NAME'['INT_VALUE']'  { 
-                                      addInstruct(command::_EMPILE_VALUE_,$3);//index tab
+                                      addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
                                       addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
                                     }
     ;
@@ -125,38 +121,48 @@ affectation :
                                             addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
                                           }
     | VARIABLE_NAME STRING '=' operation  { 
-                                            addInstruct(command::_EMPILE_VALUE_,"");//type var
+                                            addInstruct(command::_EMPILE_VALUE_,(string)"");//type var
                                             addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
                                           }
     | VARIABLE_NAME '=' operation         { addInstruct(command::_UPDATE_VARIABLE_,$1);/*nom var*/ }
     
-    | VARIABLE_NAME PLUS_CREMENT operation    { addInstruct(command::_PLUS_CREMENT_,$1); }
-    | VARIABLE_NAME MOINS_CREMENT operation   { addInstruct(command::_MOINS_CREMENT_,$1); }
-    | VARIABLE_NAME FOIS_CREMENT operation    { addInstruct(command::_FOIS_CREMENT_,$1); }
-    | VARIABLE_NAME DIVISE_CREMENT operation  { addInstruct(command::_DIVISE_CREMENT_,$1); }
+    | VARIABLE_NAME PLUS_CREMENT    operation { addInstruct(command::_PLUS_CREMENT_,$1); }
+    | VARIABLE_NAME MOINS_CREMENT   operation { addInstruct(command::_MOINS_CREMENT_,$1); }
+    | VARIABLE_NAME FOIS_CREMENT    operation { addInstruct(command::_FOIS_CREMENT_,$1); }
+    | VARIABLE_NAME DIVISE_CREMENT  operation { addInstruct(command::_DIVISE_CREMENT_,$1); }
     
     | VARIABLE_NAME TAB INT '=' operation     { 
-                                                addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
+                                                addInstruct(command::_EMPILE_VALUE_,(string)$1);//nom tab
                                                 addInstruct(command::_CREATE_TABLE_,(int)1);//type var
                                               }
     | VARIABLE_NAME TAB DOUBLE '=' operation  { 
-                                                addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
+                                                addInstruct(command::_EMPILE_VALUE_,(string)$1);//nom tab
                                                 addInstruct(command::_CREATE_TABLE_,(double)1);//type var
                                               }
     | VARIABLE_NAME TAB STRING '=' operation  { 
-                                                addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
+                                                addInstruct(command::_EMPILE_VALUE_,(string)$1);//nom tab
                                                 addInstruct(command::_CREATE_TABLE_,"");//type var
                                               }
     | VARIABLE_NAME'['']' '=' operation           { addInstruct(command::_ADD_TABLE_ELEMENT_,$1);/*nom tab*/ }
     | VARIABLE_NAME'['INT_VALUE']' '=' operation  { 
-                                                    addInstruct(command::_EMPILE_VALUE_,$3);//index tab
+                                                    addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
                                                     addInstruct(command::_UPDATE_TABLE_ELEMENT_,$1);//nom tab
                                                   }
     ;
 
+comparaison :
+    operation EQUIV operation     { addInstruct(command::_EQUIV_);}
+    | operation DIFF operation      { addInstruct(command::_DIFF_);}
+    | operation '>' operation       { addInstruct(command::_INFERIEUR_);}
+    | operation '<' operation       { addInstruct(command::_SUPERIEUR_);}
+    | operation INF_EGAL operation  { addInstruct(command::_INF_EGAL_);}
+    | operation SUP_EGAL operation  { addInstruct(command::_SUP_EGAL_);}
+    ;
+
+
 structure :
     IF                { addInstruct(command::_ENTER_BLOCK_); }
-      operation '\n'  {//ajouter comparaison empilant 0 ou 1
+      comparaison '\n'{
                             //apres interpretation de operation :
                         $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                         addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans then, sinon sauter à <adresse fin then / debut else>)
@@ -175,7 +181,7 @@ structure :
                         addInstruct(command::_ENTER_BLOCK_);
                         $1.refInstruct = instructionList.size();//<adresse test>
                       }
-      operation '\n'  { //ajouter comparaison empilant 0 ou 1
+      comparaison '\n'{
                             //apres interpretation de operation :
                         $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                         addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans bloc, sinon sauter à <adresse end while>)
@@ -189,18 +195,18 @@ structure :
                       }
       END             { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
 
-    | DO                    {
-                              addInstruct(command::_ENTER_BLOCK_);
-                              $1.refInstruct = instructionList.size();//<adresse debut>
-                            }
+    | DO                {
+                          addInstruct(command::_ENTER_BLOCK_);
+                          $1.refInstruct = instructionList.size();//<adresse debut>
+                        }
       bloc 
-      WHILE operation  { //ajouter comparaison empilant 0 ou 1
-                                  //apres interpretation de operation :
-                              addInstruct(command::_GOTO_TEST_INV_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
-                              instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
-                              
-                              addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/
-                            }
+      WHILE comparaison { 
+                              //apres interpretation de operation :
+                          addInstruct(command::_GOTO_TEST_INV_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
+                          instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
+                          
+                          addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/
+                        }
 
     // | REPEAT affectation, comparaison, operation '\n' bloc { /* TO DO */ }
     ;
