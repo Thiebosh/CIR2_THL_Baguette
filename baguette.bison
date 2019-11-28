@@ -121,26 +121,10 @@ affectation :
                                           }
     | VARIABLE_NAME '=' operation         { addInstruct(command::_UPDATE_VARIABLE_,$1);/*nom var*/ }
     
-    | VARIABLE_NAME PLUS_CREMENT operation    {
-                                                addInstruct(command::_EMPILE_VARIABLE_,$1);
-                                                addInstruct(command::_PLUS_);
-                                                addInstruct(command::_UPDATE_VARIABLE_,$1);
-                                              }
-    | VARIABLE_NAME MOINS_CREMENT operation   {
-                                                addInstruct(command::_EMPILE_VARIABLE_,$1);
-                                                addInstruct(command::_MOINS_);
-                                                addInstruct(command::_UPDATE_VARIABLE_,$1);
-                                              }
-    | VARIABLE_NAME FOIS_CREMENT operation    { 
-                                                addInstruct(command::_EMPILE_VARIABLE_,$1);
-                                                addInstruct(command::_FOIS_);
-                                                addInstruct(command::_UPDATE_VARIABLE_,$1);
-                                              }
-    | VARIABLE_NAME DIVISE_CREMENT operation  { 
-                                                addInstruct(command::_EMPILE_VARIABLE_,$1);
-                                                addInstruct(command::_DIVISE_PAR_);
-                                                addInstruct(command::_UPDATE_VARIABLE_,$1);
-                                              }
+    | VARIABLE_NAME PLUS_CREMENT operation    { addInstruct(command::_PLUS_CREMENT_,$1); }
+    | VARIABLE_NAME MOINS_CREMENT operation   { addInstruct(command::_MOINS_CREMENT_,$1); }
+    | VARIABLE_NAME FOIS_CREMENT operation    { addInstruct(command::_FOIS_CREMENT_,$1); }
+    | VARIABLE_NAME DIVISE_CREMENT operation  { addInstruct(command::_DIVISE_CREMENT_,$1); }
     
     | VARIABLE_NAME TAB INT '=' operation     { 
                                                 addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
