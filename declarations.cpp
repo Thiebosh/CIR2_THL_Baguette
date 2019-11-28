@@ -27,6 +27,14 @@ enum class operation {//fixe operations
 	_divisePar_
 };
 
+enum class comparaison {//fixe comparaison
+	_inferieur_,
+	_superieur_,
+	_inf_egal_,
+	_sup_egal_,
+};
+
+
 enum class tabAction {//fixe operations
 	_empile_size_,
 	_empile_case_,
@@ -54,6 +62,12 @@ enum class command {
 	_MOINS_,
 	_FOIS_,
 	_DIVISE_PAR_,
+
+	//COMPARAISON
+	_SUPERIEUR_,
+	_INFERIEUR_,
+	_SUP_EGAL_,
+	_INF_EGAL_,
 
 	//SAUTS (conditions, boucles, fonctions)
 	_GOTO_,
@@ -128,7 +142,7 @@ unsigned int indexInstruction = 0;   // compteur instruction
 
 //IV. PROTOTYPES
  // Memory
-void printVal(string beginMessage, valAccess val, string endMessage = "");
+void printVal(string beginMessage, valAccess val, string endMessage);
 valAccess depiler();
 void delVal(valAccess val);
 void delVar(string name);
@@ -139,6 +153,8 @@ void exitMemoryLayer();
 
  // Processing
 void executeOperation(operation operation);
+void executeOperation(operation operation);
+void executeComparaison(comparaison comparaison);
 valAccess addVal(valInstruct instructContent);
 valAccess addVar(valInstruct instructContent);
 void addInstruct(command command);

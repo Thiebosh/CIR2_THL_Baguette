@@ -35,6 +35,8 @@
 %token SIZE
 %token DELETE
 
+%token INF_EGAL
+%token SUP_EGAL
 %token PLUS_CREMENT
 %token MOINS_CREMENT
 %token FOIS_CREMENT
@@ -90,6 +92,11 @@ operation :
     | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
     
     | SIZE VARIABLE_NAME            { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
+
+    | operation '>' operation     { addInstruct(command::_INFERIEUR_);}
+    | operation '<' operation     { addInstruct(command::_SUPERIEUR_);}
+    | operation INF_EGAL operation     { addInstruct(command::_INF_EGAL_);}
+    | operation SUP_EGAL operation     { addInstruct(command::_SUP_EGAL_);}
 
     | operation '+' operation     { addInstruct(command::_PLUS_);}
     | operation '-' operation     { addInstruct(command::_MOINS_);}

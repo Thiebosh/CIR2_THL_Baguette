@@ -120,6 +120,67 @@ void executeOperation(operation operation) {
 	}
 }
 
+void executeComparaison(comparaison operation) {
+	cout << "ici" << endl;
+	//recupere valeurs
+	valAccess val2 = depiler();
+	valAccess val1 = depiler();
+	
+	int val1Int(0), val2Int(0);
+	double val1Double(0), val2Double(0);
+	string val1String(""), val2String("");
+
+	switch (val1.type) {
+		case valType::_int_:
+			val1Int = intList[val1.tabPos];
+			break;
+		case valType::_double_:
+			val1Double = doubleList[val1.tabPos];
+			break;
+		case valType::_string_:
+			val1String = stringList[val1.tabPos];
+			break;
+	}
+	switch (val2.type) {
+		case valType::_int_:
+			val2Int = intList[val2.tabPos];
+			break;
+		case valType::_double_:
+			val2Double = doubleList[val2.tabPos];
+			break;
+		case valType::_string_:
+			val2String = stringList[val2.tabPos];
+			break;
+	}
+
+	delVal(val1);
+	delVal(val2);
+	//execute operation et enregistre nouvelle valeur
+	if (val1.type != valType::_string_ && val2.type != valType::_string_) {//si non string
+		int result(0);
+		switch (operation) {
+			case comparaison::_inferieur_:
+				result = (val1Int ? val1Int : val1Double) > (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case comparaison::_superieur_:
+				result = (val1Int ? val1Int : val1Double) < (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case comparaison::_inf_egal_:
+				result = (val1Int ? val1Int : val1Double) >= (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+			case comparaison::_sup_egal_:
+				result = (val1Int ? val1Int : val1Double) <= (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				break;
+		}
+
+		executionPile.push({ valType::_int_,(int)intList.size() });
+		intList.push_back(result);
+	}
+	else {//string + autre
+		//erreur
+	}
+}
+
 /********************************************************/
 /*		SOUS PARTIE 2 : DECLARATION DES COMMANDES		*/
 /********************************************************/
@@ -425,6 +486,23 @@ const map<command, functionPointer> executeCommand = {
 				}
 			}
 		}},
+	{command::_INFERIEUR_,
+		[](valInstruct& instructContent) {
+			executeComparaison(comparaison::_inferieur_);
+		}},
+	{command::_SUPERIEUR_,
+		[](valInstruct& instructContent) {
+			executeComparaison(comparaison::_superieur_);
+		}},
+	{command::_SUP_EGAL_,
+		[](valInstruct& instructContent) {
+			executeComparaison(comparaison::_sup_egal_);
+		}},
+	{command::_INF_EGAL_,
+		[](valInstruct& instructContent) {
+			executeComparaison(comparaison::_inf_egal_);
+		}},
+	
 	{command::_PLUS_,
 		[](valInstruct& instructContent) {
 			executeOperation(operation::_plus_);
@@ -645,6 +723,19 @@ void displayGeneratedProgram() {
 		case command::_DECREMENT_:
 			cout << "ENLEVE 1 A LA VARIABLE '" << instructContent.second.stringVal << "'";
 			break;
+		case command::_SUPERIEUR_:
+			cout << "COMPARE DEUX DERNIERES VALEURS (<)";
+			break;
+		case command::_INFERIEUR_:
+			cout << "COMPARE DEUX DERNIERES VALEURS (>)";
+			break;
+		case command::_SUP_EGAL_:
+			cout << "COMPARE DEUX DERNIERES VALEURS (<=)";
+			break;
+		case command::_INF_EGAL_:
+			cout << "COMPARE DEUX DERNIERES VALEURS (>=)";
+			break;
+
 		case command::_PLUS_:
 			cout << "ADDITIONNE DEUX DERNIERES VALEURS";
 			break;
