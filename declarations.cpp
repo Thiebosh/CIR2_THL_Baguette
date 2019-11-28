@@ -143,6 +143,7 @@ void exitMemoryLayer();
 
  // Processing
 void executeOperation(operation operation);
+void executeCrement(string varName, operation operation);
 valAccess addVal(valInstruct instructContent);
 valAccess addVar(valInstruct instructContent);
 void addInstruct(command command);
