@@ -127,3 +127,25 @@ deque<instruction> instructionList;
 unsigned int indexInstruction = 0;   // compteur instruction 
 
 //IV. PROTOTYPES
+ // Memory
+void printVal(string beginMessage, valAccess val, string endMessage = "");
+valAccess depiler();
+void delVal(valAccess val);
+void delVar(string name);
+void delTabVal(string tabName, int tabCase);
+void delTab(string tabName);
+void enterMemoryLayer();
+void exitMemoryLayer();
+
+ // Processing
+void executeOperation(operation operation);
+valAccess addVal(valInstruct instructContent);
+valAccess addVar(valInstruct instructContent);
+void addInstruct(command command);
+void addInstruct(command command, int intValue);
+void addInstruct(command command, double doubleValue);
+void addInstruct(command command, string stringValue);
+void executeTabAction(instruction& instructContent, tabAction action);
+void replaceString(string& subject, const string& search, const string& replace);
+void displayGeneratedProgram();
+void executeGeneratedProgram();
