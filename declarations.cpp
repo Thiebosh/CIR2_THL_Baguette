@@ -17,7 +17,8 @@ using namespace std;
 enum class valType {//fixe types
 	_int_,
 	_double_,
-	_string_
+	_string_,
+	_bool_
 };
 
 enum class operation {//fixe operations
@@ -110,6 +111,7 @@ typedef struct {
 
 typedef struct {//initialiser dans ordre de déclaration
 	valType type = valType::_int_;
+	bool boolVal = false;
 	int intVal = -1;
 	double doubleVal = -1;
 	string stringVal = "";
@@ -124,6 +126,7 @@ typedef void (*functionPointer)(valInstruct& instructContent);//necessaire pour 
 deque<int>		intList;
 deque<double>	doubleList;
 deque<string>	stringList;
+deque<bool>     boolList;
 
 stack<valAccess> executionPile;
 
@@ -132,6 +135,7 @@ map<string, valAccess> variables;
 deque<int>		intArray;
 deque<double>	doubleArray;
 deque<string>	stringArray;
+deque<bool>     boolArray;
 map<string, tabAccess> tableaux;
 
 stack<memoryState> memoryLayer;

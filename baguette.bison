@@ -25,10 +25,12 @@
 %token <intValeur>    INT_VALUE
 %token <doubleValeur> DOUBLE_VALUE
 %token <stringValeur> STRING_VALUE
+%token <boolValeur> BOOL_VALUE
 
 %token INT
 %token DOUBLE
 %token STRING
+%token BOOL
 %token TAB
 %token <nom> VARIABLE_NAME
 

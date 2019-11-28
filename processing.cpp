@@ -205,6 +205,10 @@ valAccess addVal(valInstruct instructContent) {
 			tabPos = stringList.size();
 			stringList.push_back(instructContent.stringVal);
 			break;
+		case valType::_bool_:
+			tabPos = boolList.size();
+			boolList.push_back(instructContent.boolVal);
+			break;
 	}
 	return { instructContent.type,tabPos };
 }
@@ -218,16 +222,19 @@ valAccess addVar(valInstruct instructContent) {
 
 
 void addInstruct(command command) {
-	instructionList.push_back({ command, { valType::_int_,-1,-1,"" } });
+	instructionList.push_back({ command, { valType::_int_,false,-1,-1,"" } });
+};
+void addInstruct(command command, bool boolValue) {
+	instructionList.push_back({ command, { valType::_bool_,boolValue,-1,-1,"" } });
 };
 void addInstruct(command command, int intValue) {
-	instructionList.push_back({ command, { valType::_int_,intValue,-1,"" } });
+	instructionList.push_back({ command, { valType::_int_,false,intValue,-1,"" } });
 };
 void addInstruct(command command, double doubleValue) {
-	instructionList.push_back({ command, { valType::_double_,-1,doubleValue,"" } });
+	instructionList.push_back({ command, { valType::_double_,false,-1,doubleValue,"" } });
 };
 void addInstruct(command command, string stringValue) {
-	instructionList.push_back({ command, { valType::_string_,-1,-1,stringValue } });
+	instructionList.push_back({ command, { valType::_string_,false,-1,-1,stringValue } });
 };
 
 
@@ -423,6 +430,9 @@ const map<command, functionPointer> executeCommand = {
 					case valType::_string_:
 						copy.tabPos = stringList.size();
 						stringList.push_back(stringList[variables[name].tabPos]);
+					case valType::_bool_:
+						copy.tabPos = boolList.size();
+						boolList.push_back(boolList[variables[name].tabPos]);
 					break;
 				}
 				executionPile.push(copy);
@@ -529,7 +539,8 @@ const map<command, functionPointer> executeCommand = {
 		[](valInstruct& instructContent) {
 			valAccess testResult = depiler();
 
-			if (testResult.tabPos != -1 && 
+			if (testResult.tabPos != -1 &&
+				(testResult.type == valType::_bool_ && boolList[testResult.tabPos] == false) || 
 				(testResult.type == valType::_int_ && intList[testResult.tabPos] == 0) ||
 				(testResult.type == valType::_double_ && doubleList[testResult.tabPos] == 0)) {
 				indexInstruction = instructContent.intVal;//cas if not 0 : incrementation prealable
@@ -542,6 +553,7 @@ const map<command, functionPointer> executeCommand = {
 			valAccess testResult = depiler();
 
 			if (testResult.tabPos != -1 && 
+				(testResult.type == valType::_bool_ && boolList[testResult.tabPos] == true) ||
 				(testResult.type == valType::_int_ && intList[testResult.tabPos] != 0) ||
 				(testResult.type == valType::_double_ && doubleList[testResult.tabPos] != 0)) {
 				indexInstruction = instructContent.intVal;//cas if not 0 : incrementation prealable
@@ -670,6 +682,10 @@ void displayGeneratedProgram() {
 				case valType::_string_:
 					cout << "\"" << instructContent.second.stringVal << "\"";
 					break;
+				case valType::_bool_:
+					cout << "\"" << instructContent.second.boolVal << "\"";
+					break;
+
 			}
 			cout << " A LA PILE";
 			break;
