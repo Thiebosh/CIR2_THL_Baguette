@@ -36,9 +36,11 @@ conservé :
 
 
 ## pile de choses à faire :
-- finir reprise tab
-- fonction (appelle map ?) levée d'erreur (enum d'erreurs associées) pour regrouper textes -> exit(1) le programme
+- passer executeCrement et executeComparaison sous cast et bool (s'inspirer de executeOperation)
+- vérifier exécution des comparaisons pour cours2.choco
+- ajouter test implicites, négation, et / ou logique
 
+- finir reprise tab
 - ajouter for(initialisation / affectation, test, affectation), foreach dans bison
 - implémenter fonctions (deque de fonction (nom - adresse instruction)) sans arguments
 - ajouter paramètres aux fonctions (ajoute au deque vecteur des types attendus, crée variables dans l'ordre dans fonction)

@@ -29,10 +29,12 @@ enum class operation {//fixe operations
 };
 
 enum class comparaison {//fixe comparaison
+	_equiv_,
+	_diff_,
 	_inferieur_,
 	_superieur_,
 	_inf_egal_,
-	_sup_egal_,
+	_sup_egal_
 };
 
 
@@ -59,16 +61,18 @@ enum class command {
 	//OPERATIONS (var to var)
 	_INCREMENT_,
 	_DECREMENT_,
-    _PLUS_CREMENT_,
-    _MOINS_CREMENT_,
-    _FOIS_CREMENT_,
-    _DIVISE_CREMENT_,
+	_PLUS_CREMENT_,
+	_MOINS_CREMENT_,
+	_FOIS_CREMENT_,
+	_DIVISE_CREMENT_,
 	_PLUS_,
 	_MOINS_,
 	_FOIS_,
 	_DIVISE_PAR_,
 
 	//COMPARAISON
+	_EQUIV_,
+	_DIFF_,
 	_SUPERIEUR_,
 	_INFERIEUR_,
 	_SUP_EGAL_,
@@ -94,6 +98,13 @@ enum class command {
 	_STOP_
 };
 
+enum class errorCode {
+	conversionType,
+	unknowVariable,
+	alreadyUseVariable,
+	emptyExecutionStack
+};
+
 
 //II. TYPES PERSONNALISES
 typedef struct {//initialiser dans ordre de déclaration
@@ -116,7 +127,6 @@ typedef struct {
 
 typedef struct {//initialiser dans ordre de déclaration
 	valType type = valType::_int_;
-	bool boolVal = false;
 	int intVal = -1;
 	double doubleVal = -1;
 	string stringVal = "";
@@ -137,7 +147,6 @@ stack<valAccess> executionPile;
 
 map<string, valAccess> variables;
 
-deque<bool>     boolArray;
 deque<int>		intArray;
 deque<double>	doubleArray;
 deque<string>	stringArray;
@@ -148,6 +157,14 @@ stack<memoryState> memoryLayer;
 deque<instruction> instructionList;
 
 unsigned int indexInstruction = 0;   // compteur instruction 
+
+map<errorCode,string> errorMessage = {
+	{errorCode::conversionType,"types incompatibles - échec de conversion"},
+	{errorCode::unknowVariable,"nom de variable inconnu"},
+	{errorCode::alreadyUseVariable,"nom de variable déjà en utilisation"},
+	{errorCode::emptyExecutionStack,"pile vide"}
+};
+
 
 //IV. PROTOTYPES
  // Memory
@@ -160,7 +177,8 @@ void delTab(string tabName);
 void enterMemoryLayer();
 void exitMemoryLayer();
 
- // Processing
+// Utils
+void error(errorCode cause);
 void executeOperation(operation operation);
 void executeComparaison(comparaison comparaison);
 void executeCrement(string varName, operation operation);
@@ -172,5 +190,7 @@ void addInstruct(command command, double doubleValue);
 void addInstruct(command command, string stringValue);
 void executeTabAction(instruction& instructContent, tabAction action);
 void replaceString(string& subject, const string& search, const string& replace);
+
+// Processing
 void displayGeneratedProgram();
 void executeGeneratedProgram();

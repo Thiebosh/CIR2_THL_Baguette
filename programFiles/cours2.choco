@@ -1,0 +1,50 @@
+/*COURS 1
+conditions, tests et boucles
+*/
+
+valeur entier = 0
+
+AFFICHER "PARTIE 1 : SI\n\n"
+si valeur > 0
+	AFFICHER "premier if (pas accessible)\n"
+fin
+
+si valeur == 0
+	AFFICHER "deuxieme if - then (accès)\n"
+sinon
+	AFFICHER "deuxieme if - else (pas accessible)\n"
+fin
+
+si valeur + 8 != 0
+	AFFICHER "troisième if - then (accès)\n"
+sinon
+	AFFICHER "troisième if - else (pas accessible)\n"
+fin
+
+
+AFFICHER "\n\n\nPARTIE 2 : TANT QUE\n\n"
+faire
+    AFFICHER ++valeur," (2 repetitions)\n"
+tantque valeur < 2
+
+tantque valeur > 0
+    AFFICHER --valeur," (1 repetition)\n"
+fin
+
+AFFICHER "\n\n\nPARTIE 3 : POUR (à venir)\n\n"
+//pour et pour chaque
+
+TERMINER
+
+
+
+
+    '!' comparaison                 {
+                                      addInstruct(command::_EMPILE_VALUE_,(int)0);
+                                      addInstruct(command::_EQUIV_);
+                                    }
+    | operation                     { 
+                                      addInstruct(command::_EMPILE_VALUE_,(int)0);
+                                      addInstruct(command::_DIFF_);
+                                    }
+    

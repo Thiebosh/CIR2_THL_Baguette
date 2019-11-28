@@ -10,10 +10,10 @@
 -?[0-9]+               { yylval.intValeur = atoi(yytext); return INT_VALUE; }
 -?[0-9]+[\.][0-9]*     { yylval.doubleValeur = atof(yytext); return DOUBLE_VALUE; }
 
-entier                      { return INT; }//futur : binaire return bool
+entier                      { return INT; }
 reel                        { return DOUBLE; }
 texte                       { return STRING; }
-\"[0-9A-Za-zéèàçâôùê_!?\'\+\-\*\/(\\(n|t)),;:_ ]*\"  { //OK car guillemets 
+\"[0-9A-Za-zéèàçâôùê_!?\'\+\-\*\/\(\)\.(\\(n|t)),;:_ ]*\"  { //OK car guillemets 
                                                       string read = strdup(yytext);
                                                       yylval.stringValeur = strdup(read.substr(1,read.size()-2).c_str());//retire les guillemets
                                                       return STRING_VALUE;
@@ -27,6 +27,8 @@ SUPPRIMER                   { return DELETE; }
 AFFICHER	{ return DISPLAY;}
 PAUSE  { return STOP; }//attendre pour delay
 
+==   { return EQUIV; }
+\!=   { return DIFF; }
 \>=   { return INF_EGAL; }
 \<=   { return SUP_EGAL; }
 \+=   { return PLUS_CREMENT; }
