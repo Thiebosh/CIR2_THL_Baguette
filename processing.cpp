@@ -1,13 +1,5 @@
-//gestion affichage
-#include <iostream>
-#include <cstdio> //getchar
-#include <iomanip>
-#include <cmath>
-
 #include "memory.cpp"
 
-
-using namespace std;
 
 /********************************************************/
 /*														*/
@@ -23,12 +15,7 @@ using namespace std;
 /********************************************************/
 /*		SOUS PARTIE 1 : OPERATION SUR LES VALEURS		*/
 /********************************************************/
-enum class operation {//fixe operations
-	_plus_,
-	_moins_,
-	_fois_,
-	_divisePar_
-};
+
 
 void executeOperation(operation operation) {
 	//recupere valeurs
@@ -136,55 +123,11 @@ void executeOperation(operation operation) {
 /********************************************************/
 /*		SOUS PARTIE 2 : DECLARATION DES COMMANDES		*/
 /********************************************************/
-enum class command {
-	//MEMOIRE
-	_ENTER_BLOCK_,
-	_EXIT_BLOCK_,
-
-	//EMPILEMENT
-	_EMPILE_VALUE_,
-	_EMPILE_VARIABLE_,
-	_EMPILE_TABLE_SIZE_,
-	_EMPILE_TABLE_ELEMENT_,
-
-	//OPERATIONS (var to var)
-	_INCREMENT_,
-	_DECREMENT_,
-	_PLUS_,
-	_MOINS_,
-	_FOIS_,
-	_DIVISE_PAR_,
-
-	//SAUTS (conditions, boucles, fonctions)
-	_GOTO_,
-	_GOTO_TEST_,
-	_GOTO_TEST_INV_,
-
-	//VARIABLES
-	_CREATE_VARIABLE_,
-	_UPDATE_VARIABLE_,
-
-	//TABLEAUX
-	_CREATE_TABLE_,
-	_ADD_TABLE_ELEMENT_,
-	_UPDATE_TABLE_ELEMENT_,
-	_REMOVE_TABLE_ELEMENT_,
-
-	//ENTREE SORTIE
-	_PRINT_,
-	_STOP_
-};
 
 
 /********************************************************/
 /*		SOUS PARTIE 3 : GESTION DES INSTRUCTIONS		*/
 /********************************************************/
-typedef struct {//initialiser dans ordre de déclaration
-	valType type = valType::_int_;
-	int intVal = -1;
-	double doubleVal = -1;
-	string stringVal = "";
-} valInstruct;
 
 valAccess addVal(valInstruct instructContent) {
 	int tabPos = 0;
@@ -213,9 +156,6 @@ valAccess addVar(valInstruct instructContent) {
 }
 
 
-typedef pair<command, valInstruct> instruction;
-deque<instruction> instructionList;
-
 void addInstruct(command command) {
 	instructionList.push_back({ command, { valType::_int_,-1,-1,"" } });
 };
@@ -229,20 +169,10 @@ void addInstruct(command command, string stringValue) {
 	instructionList.push_back({ command, { valType::_string_,-1,-1,stringValue } });
 };
 
-unsigned int indexInstruction = 0;   // compteur instruction 
-
 
 /********************************************************/
 /*		SOUS PARTIE 4 : GESTION DES TABLEAUX			*/
 /********************************************************/
-enum class tabAction {//fixe operations
-	_empile_size_,
-	_empile_case_,
-	_create_,
-	_add_,
-	_update_,
-	_remove_
-};
 
 /*
 void executeTabAction(instruction& instructContent, tabAction action) {
@@ -400,8 +330,6 @@ void replaceString(string& subject, const string& search, const string& replace)
 	}
 }
 
-typedef void (*functionPointer)(valInstruct& instructContent);
-
 const map<command, functionPointer> executeCommand = {
 	{command::_ENTER_BLOCK_,
 		[](valInstruct& instructContent) {
@@ -440,7 +368,7 @@ const map<command, functionPointer> executeCommand = {
 			}
 			//else ?
 		}},
-/*
+	/*
 	{command::_EMPILE_TABLE_SIZE_,
 		[](valInstruct& instructContent) {
 			executeTabAction(instructContent, tabAction::_empile_size_);
@@ -449,7 +377,7 @@ const map<command, functionPointer> executeCommand = {
 		[](valInstruct& instructContent) {
 			executeTabAction(instructContent, tabAction::_empile_case_);
 		}},
-*/
+	*/
 
 	{command::_INCREMENT_,
 		[](valInstruct& instructContent) {

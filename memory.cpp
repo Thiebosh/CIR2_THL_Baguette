@@ -1,11 +1,4 @@
-#include <iostream>
-
-#include <string>
-#include <deque>
-#include <stack>
-#include <map>
-
-using namespace std;
+#include "declarations.cpp"
 
 /********************************************************/
 /*														*/
@@ -22,20 +15,6 @@ using namespace std;
 /********************************************************/
 /*		SOUS PARTIE 1 : STOCKAGE DE VALEURS TYPEES		*/
 /********************************************************/
-enum class valType {//fixe types
-	_int_,
-	_double_,
-	_string_
-};
-
-typedef struct {//initialiser dans ordre de déclaration
-	valType type = valType::_int_;
-	int tabPos = -1;//valeur par defaut : flag d'invalidation
-} valAccess;
-
-deque<int>		intList;
-deque<double>	doubleList;
-deque<string>	stringList;
 
 void printVal(string beginMessage, valAccess val, string endMessage = "") {
 	cout << beginMessage;
@@ -58,7 +37,7 @@ void printVal(string beginMessage, valAccess val, string endMessage = "") {
 /********************************************************/
 /*		SOUS PARTIE 2 : PILE DE VALEURS	EN UTILISATION	*/
 /********************************************************/
-stack<valAccess> executionPile;
+
 
 valAccess depiler() {
 	valAccess var;
@@ -74,20 +53,6 @@ valAccess depiler() {
 /********************************************************/
 /*		SOUS PARTIE 3 : DECLARATION DES VARIABLES		*/
 /********************************************************/
-map<string, valAccess> variables;
-
-//stockage tableau a part : doit preserver valeur ajoutee dans couche memoire (voir part 5) differente de celle supportant la declaration
-typedef struct {
-	unsigned int memoryLayer = 0;
-	valType type = valType::_int_;
-	deque<int> valuesPos;
-} tabAccess;
-
-deque<int>		intArray;
-deque<double>	doubleArray;
-deque<string>	stringArray;
-
-map<string, tabAccess> tableaux;
 
 
 /********************************************************/
@@ -222,13 +187,7 @@ void delTab(string tabName) {
 /********************************************************/
 /*		SOUS PARTIE 5 : PILE DE BLOCS MEMOIRE			*/
 /********************************************************/
-typedef struct {
-	unsigned int intListSize = 0;
-	unsigned int doubleListSize = 0;
-	unsigned int stringListSize = 0;
-} memoryState;
 
-stack<memoryState> memoryLayer;
 
 void enterMemoryLayer() {
 	memoryLayer.push({ (unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
