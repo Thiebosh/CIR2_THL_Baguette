@@ -16,110 +16,85 @@
 /*		SOUS PARTIE 1 : OPERATION SUR LES VALEURS		*/
 /********************************************************/
 
+valAccess castVal(valAccess value, valType cast) {
+	if (value.type == cast) return value;
+	
+	else if (value.type != valType::_string_ && cast != valType::_string_) {
+		valAccess result = { cast };
+		switch (cast) {
+			case valType::_int_:
+				result.tabPos = intList.size();
+				switch (value.type) {
+					case valType::_double_:
+						intList.push_back(doubleList[value.tabPos]);
+						break;
+				}
+				break;
+			case valType::_double_:
+				result.tabPos = doubleList.size();
+				switch (value.type) {
+					case valType::_int_:
+						doubleList.push_back(intList[value.tabPos]);
+						break;
+				}
+				break;
+		}
+		return result;
+	}
+
+	//else error : types incompatibles
+}
+
 
 void executeOperation(operation operation) {
 	//recupere valeurs
 	valAccess val2 = depiler();
 	valAccess val1 = depiler();
 
-	int val1Int(0), val2Int(0);
-	double val1Double(0), val2Double(0);
-	string val1String(""), val2String("");
-
-	switch (val1.type) {
-		case valType::_int_:
-			val1Int = intList[val1.tabPos];
-			break;
-		case valType::_double_:
-			val1Double = doubleList[val1.tabPos];
-			break;
-		case valType::_string_:
-			val1String = stringList[val1.tabPos];
-			break;
-	}
-	switch (val2.type) {
-		case valType::_int_:
-			val2Int = intList[val2.tabPos];
-			break;
-		case valType::_double_:
-			val2Double = doubleList[val2.tabPos];
-			break;
-		case valType::_string_:
-			val2String = stringList[val2.tabPos];
-			break;
-	}
-
-	delVal(val1);
-	delVal(val2);
-
-	//execute operation et enregistre nouvelle valeur
-	if (val1.type == valType::_int_ && val2.type == valType::_int_) {//même type
-		int result(0);
+	if (val1.type == valType::_string_ && val2.type == valType::_string_) {
 		switch (operation) {
-			case operation::_plus_:
-				result = val1Int + val2Int;
-				break;
-			case operation::_moins_:
-				result = val1Int - val2Int;
-				break;
-			case operation::_fois_:
-				result = val1Int * val2Int;
-				break;
-			case operation::_divisePar_:
-				result = val1Int / val2Int;
+			case operation::_plus_://concatenation
+				stringList[val1.tabPos] += stringList[val2.tabPos];
 				break;
 		}
-		executionPile.push({ valType::_int_,(int)intList.size() });
-		intList.push_back(result);
+
+		executionPile.push({ valType::_string_,(int)stringList.size() });
+		stringList.push_back(stringList[val1.tabPos]);
+		return;
 	}
-	else if ((val1.type == valType::_int_ || val1.type == valType::_double_) ||
-			(val2.type == valType::_int_ || val2.type == valType::_double_)) {//int et double ou deux doubles
-		double result(0);
+	
+	else if (val1.type != valType::_string_ && val2.type != valType::_string_) {//ensuite, si pas deux reels, erreur levee par fonction cast
+		valType destination = (val1.type == valType::_double_ || val2.type == valType::_double_ ? valType::_double_ :
+								val1.type == valType::_int_ || val2.type == valType::_int_ ? valType::_int_ : valType::_bool_);
+
+		val1 = castVal(val1, destination);
+		val2 = castVal(val2, destination);
+
+		double result(0);//cast au plus haut
 		switch (operation) {
 			case operation::_plus_:
-				result = (val1Int ? val1Int : val1Double) + (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				result = doubleList[val1.tabPos] + doubleList[val2.tabPos];
 				break;
 			case operation::_moins_:
-				result = (val1Int ? val1Int : val1Double) - (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				result = doubleList[val1.tabPos] - doubleList[val2.tabPos];
 				break;
 			case operation::_fois_:
-				result = (val1Int ? val1Int : val1Double) * (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				result = doubleList[val1.tabPos] * doubleList[val2.tabPos];
 				break;
 			case operation::_divisePar_:
-				result = (val1Int ? val1Int : val1Double) / (val2Int ? val2Int : val2Double);//variables initialisees a 0
+				result = doubleList[val1.tabPos] / doubleList[val2.tabPos];
 				break;
 		}
 
 		executionPile.push({ valType::_double_,(int)doubleList.size() });
 		doubleList.push_back(result);
 	}
-	else if (val1.type == valType::_string_ && val2.type == valType::_string_) {
-		string result("");
-		switch (operation) {
-			case operation::_plus_://concatenation
-				result = val1String + val2String;
-				break;
-				/* reste?
-			case operation::_moins_:
-				result = (val1Int ? val1Int : val1Double) - (val2Int ? val2Int : val2Double);//variables initialisees a 0
-				break;
-			case operation::_fois_:
-				result = (val1Int ? val1Int : val1Double) * (val2Int ? val2Int : val2Double);//variables initialisees a 0
-				break;
-			case operation::_divisePar_:
-				result = (val1Int ? val1Int : val1Double) / (val2Int ? val2Int : val2Double);//variables initialisees a 0
-				break;
-				*/
-		}
 
-		executionPile.push({ valType::_string_,(int)stringList.size() });
-		stringList.push_back(result);
-	}
-	else {//string + int ou double
-		//erreur? "tostring"? repetition?
-	}
+	delVal(val1);
+	delVal(val2);
 }
 
+//passer en bool / cast
 void executeCrement(string varName, operation operation) {
 	//recupere valeurs
 	valAccess val = depiler();
@@ -202,8 +177,8 @@ void executeCrement(string varName, operation operation) {
 	//else //variable n'existe pas ou types incompatibles
 }
 
+//passer en bool / cast
 void executeComparaison(comparaison operation) {
-	cout << "ici" << endl;
 	//recupere valeurs
 	valAccess val2 = depiler();
 	valAccess val1 = depiler();
@@ -239,7 +214,7 @@ void executeComparaison(comparaison operation) {
 	delVal(val2);
 	//execute operation et enregistre nouvelle valeur
 	if (val1.type != valType::_string_ && val2.type != valType::_string_) {//si non string
-		int result(0);
+		bool result(0);
 		switch (operation) {
 			case comparaison::_inferieur_:
 				result = (val1Int ? val1Int : val1Double) > (val2Int ? val2Int : val2Double);//variables initialisees a 0
@@ -255,8 +230,8 @@ void executeComparaison(comparaison operation) {
 				break;
 		}
 
-		executionPile.push({ valType::_int_,(int)intList.size() });
-		intList.push_back(result);
+		executionPile.push({ valType::_bool_,(int)intList.size() });
+		boolList.push_back(result);
 	}
 	else {//string + autre
 		//erreur
@@ -275,6 +250,10 @@ void executeComparaison(comparaison operation) {
 valAccess addVal(valInstruct instructContent) {
 	int tabPos = 0;
 	switch (instructContent.type) {
+		case valType::_bool_:
+			tabPos = boolList.size();
+			boolList.push_back(instructContent.boolVal);
+			break;
 		case valType::_int_:
 			tabPos = intList.size();
 			intList.push_back(instructContent.intVal);
@@ -287,16 +266,12 @@ valAccess addVal(valInstruct instructContent) {
 			tabPos = stringList.size();
 			stringList.push_back(instructContent.stringVal);
 			break;
-		case valType::_bool_:
-			tabPos = boolList.size();
-			boolList.push_back(instructContent.boolVal);
-			break;
 	}
 	return { instructContent.type,tabPos };
 }
 
 valAccess addVar(valInstruct instructContent) {
-	string name = stringList[depiler().tabPos];
+	string name = stringList[castVal(depiler(),valType::_string_).tabPos];//verif que bien un string
 
 	variables.insert({ name,addVal(instructContent) });
 	return { instructContent.type,variables[name].tabPos };
@@ -325,6 +300,7 @@ void addInstruct(command command, string stringValue) {
 /********************************************************/
 
 /*
+remettre au gout du jour
 void executeTabAction(instruction& instructContent, tabAction action) {
 	string name = stringList[instructContent.second.tabPos];
 	delVal(instructContent.second);//string recupere : peut supprimer du tableau
@@ -480,35 +456,6 @@ void replaceString(string& subject, const string& search, const string& replace)
 	}
 }
 
-valAccess castVal(valAccess value, valType cast) {
-	if (value.type == cast) return value;
-	
-	else if (value.type != valType::_string_ && cast != valType::_string_) {
-		valAccess result = { cast };
-		switch (cast) {
-			case valType::_int_:
-				result.tabPos = intList.size();
-				switch (value.type) {
-					case valType::_double_:
-						intList.push_back(doubleList[value.tabPos]);
-						break;
-				}
-				break;
-			case valType::_double_:
-				result.tabPos = doubleList.size();
-				switch (value.type) {
-					case valType::_int_:
-						doubleList.push_back(intList[value.tabPos]);
-						break;
-				}
-				break;
-		}
-		return result;
-	}
-
-	//else error : types incompatibles
-}
-
 
 const map<command, functionPointer> executeCommand = {
 	{command::_ENTER_BLOCK_,[](valInstruct& instructContent) { enterMemoryLayer();	}},
@@ -524,19 +471,22 @@ const map<command, functionPointer> executeCommand = {
 				//empile une copie qui sera supprimee apres utilisation
 				valAccess copy = { variables[name].type };
 				switch(copy.type) {
-					case valType::_int_:
-						copy.tabPos = intList.size();
-						intList.push_back(intList[variables[name].tabPos]);
-					case valType::_double_:
-						copy.tabPos = doubleList.size();
-						doubleList.push_back(doubleList[variables[name].tabPos]);
-					case valType::_string_:
-						copy.tabPos = stringList.size();
-						stringList.push_back(stringList[variables[name].tabPos]);
 					case valType::_bool_:
 						copy.tabPos = boolList.size();
 						boolList.push_back(boolList[variables[name].tabPos]);
-					break;
+						break;
+					case valType::_int_:
+						copy.tabPos = intList.size();
+						intList.push_back(intList[variables[name].tabPos]);
+						break;
+					case valType::_double_:
+						copy.tabPos = doubleList.size();
+						doubleList.push_back(doubleList[variables[name].tabPos]);
+						break;
+					case valType::_string_:
+						copy.tabPos = stringList.size();
+						stringList.push_back(stringList[variables[name].tabPos]);
+						break;
 				}
 				executionPile.push(copy);
 			}
@@ -603,49 +553,22 @@ const map<command, functionPointer> executeCommand = {
 	{command::_MOINS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_moins_); 		}},
 	{command::_FOIS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_fois_); 		}},
 	{command::_DIVISE_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_divisePar_);	}},
+
 	{command::_PLUS_,			[](valInstruct& instructContent) { executeOperation(operation::_plus_);		}},
 	{command::_MOINS_,			[](valInstruct& instructContent) { executeOperation(operation::_moins_);	}},
 	{command::_FOIS_,			[](valInstruct& instructContent) { executeOperation(operation::_fois_);		}},
 	{command::_DIVISE_PAR_,		[](valInstruct& instructContent) { executeOperation(operation::_divisePar_);}},
-	{command::_INFERIEUR_,
-		[](valInstruct& instructContent) {
-			executeComparaison(comparaison::_inferieur_);
-		}},
-	{command::_SUPERIEUR_,
-		[](valInstruct& instructContent) {
-			executeComparaison(comparaison::_superieur_);
-		}},
-	{command::_SUP_EGAL_,
-		[](valInstruct& instructContent) {
-			executeComparaison(comparaison::_sup_egal_);
-		}},
-	{command::_INF_EGAL_,
-		[](valInstruct& instructContent) {
-			executeComparaison(comparaison::_inf_egal_);
-		}},
-	
-	{command::_PLUS_,
-		[](valInstruct& instructContent) {
-			executeOperation(operation::_plus_);
-		}},
-	{command::_MOINS_,
-		[](valInstruct& instructContent) {
-			executeOperation(operation::_moins_);
-		}},
-	{command::_FOIS_,
-		[](valInstruct& instructContent) {
-			executeOperation(operation::_fois_);
-		}},
-	{command::_DIVISE_PAR_,
-		[](valInstruct& instructContent) {
-			executeOperation(operation::_divisePar_);
-		}},
 
+	{command::_INFERIEUR_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_inferieur_); 	}},
+	{command::_SUPERIEUR_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_superieur_);	}},
+	{command::_SUP_EGAL_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_sup_egal_);		}},
+	{command::_INF_EGAL_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_inf_egal_);		}},
+	
 
 	{command::_GOTO_,		[](valInstruct& instructContent) { indexInstruction = instructContent.intVal;/*instruction est entier naturel*/	}},
 	{command::_GOTO_TEST_,
 		[](valInstruct& instructContent) {
-			valAccess testResult = depiler();
+			valAccess testResult = depiler();//caster en bool et tester juste bool?
 
 			if (testResult.tabPos != -1 &&
 				(testResult.type == valType::_bool_ && boolList[testResult.tabPos] == false) || 
@@ -678,10 +601,10 @@ const map<command, functionPointer> executeCommand = {
 			valType varType = valAdress.type;
 			delVal(valAdress);
 
-			valAccess value = depiler();//adresse de val a associer a var
+			valAccess value = castVal(depiler(), varType);//adresse de val a associer a var, convertie ou plante programme
 
 			if (variables.find(instructContent.stringVal) == variables.end()) {//var est bien nouvelle
-				variables.insert({instructContent.stringVal,castVal(value, varType)});
+				variables.insert({instructContent.stringVal,value});
 			}
 			//else error : variable existe pas
 		}},
@@ -692,7 +615,7 @@ const map<command, functionPointer> executeCommand = {
 
 			valAccess value = depiler();//adresse de val a associer a var
 			if (variables.find(name) != variables.end()) {//var existe bien
-				variables[name] = castVal(value, variables[name].type);
+				variables[name] = castVal(depiler(), variables[name].type);
 			}
 			//else errreur : existe pas
 		}},
@@ -720,18 +643,21 @@ const map<command, functionPointer> executeCommand = {
 		[](valInstruct& instructContent) {
 			valAccess val = depiler();
 			switch (val.type) {
-			case valType::_int_:
-				cout << intList[val.tabPos];
-				break;
-			case valType::_double_:
-				cout << doubleList[val.tabPos];
-				break;
-			case valType::_string_:
-				string display = stringList[val.tabPos];
-				replaceString(display,"\\n","\n");
-				replaceString(display,"\\t","\t");
-				cout << display;
-				break;
+				case valType::_bool_:
+					cout << boolList[val.tabPos];
+					break;
+				case valType::_int_:
+					cout << intList[val.tabPos];
+					break;
+				case valType::_double_:
+					cout << doubleList[val.tabPos];
+					break;
+				case valType::_string_:
+					string display = stringList[val.tabPos];
+					replaceString(display,"\\n","\n");
+					replaceString(display,"\\t","\t");
+					cout << display;
+					break;
 			}
 
 			delVal(val);

@@ -15,10 +15,10 @@ using namespace std;
 
 //I. ENUMERATIONS
 enum class valType {//fixe types
+	_bool_,
 	_int_,
 	_double_,
-	_string_,
-	_bool_
+	_string_
 };
 
 enum class operation {//fixe operations
@@ -108,6 +108,7 @@ typedef struct {//stockage tableau a part : doit preserver valeur ajoutee dans c
 } tabAccess;
 
 typedef struct {
+	unsigned int boolListSize = 0;
 	unsigned int intListSize = 0;
 	unsigned int doubleListSize = 0;
 	unsigned int stringListSize = 0;
@@ -127,19 +128,19 @@ typedef void (*functionPointer)(valInstruct& instructContent);//necessaire pour 
 
 
 //III. VARIABLES GLOBALES
+deque<bool>     boolList;
 deque<int>		intList;
 deque<double>	doubleList;
 deque<string>	stringList;
-deque<bool>     boolList;
 
 stack<valAccess> executionPile;
 
 map<string, valAccess> variables;
 
+deque<bool>     boolArray;
 deque<int>		intArray;
 deque<double>	doubleArray;
 deque<string>	stringArray;
-deque<bool>     boolArray;
 map<string, tabAccess> tableaux;
 
 stack<memoryState> memoryLayer;

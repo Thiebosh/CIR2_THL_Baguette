@@ -15,22 +15,23 @@
 %}
 
 %union{//variables
-  int intValeur;
-  double doubleValeur;
-  char* stringValeur;
-  char* nom;
+  bool    boolValeur;
+  int     intValeur;
+  double  doubleValeur;
+  char*   stringValeur;
+  char*   nom;
   instructAdress adresse;
 }
 
+%token <boolValeur>   BOOL_VALUE
 %token <intValeur>    INT_VALUE
 %token <doubleValeur> DOUBLE_VALUE
 %token <stringValeur> STRING_VALUE
-%token <boolValeur> BOOL_VALUE
 
+%token BOOL
 %token INT
 %token DOUBLE
 %token STRING
-%token BOOL
 %token TAB
 %token <nom> VARIABLE_NAME
 
@@ -89,6 +90,7 @@ output_inter : ',' output | /*Epsilon*/ ;
 operation :
     '(' operation ')'   { } //reduit operation
     
+    | BOOL_VALUE      { addInstruct(command::_EMPILE_VALUE_,$1); }
     | INT_VALUE       { addInstruct(command::_EMPILE_VALUE_,$1); }
     | DOUBLE_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
     | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,$1); }
@@ -116,7 +118,11 @@ operation :
     ;
 
 affectation :
-    VARIABLE_NAME INT '=' operation       {
+    VARIABLE_NAME BOOL '=' operation      {
+                                            addInstruct(command::_EMPILE_VALUE_,(bool)1);//type var
+                                            addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
+                                          }
+    | VARIABLE_NAME INT '=' operation     {
                                             addInstruct(command::_EMPILE_VALUE_,(int)1);//type var
                                             addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
                                           }
@@ -130,11 +136,15 @@ affectation :
                                           }
     | VARIABLE_NAME '=' operation         { addInstruct(command::_UPDATE_VARIABLE_,$1);/*nom var*/ }
     
-    | VARIABLE_NAME PLUS_CREMENT operation    { addInstruct(command::_PLUS_CREMENT_,$1); }
-    | VARIABLE_NAME MOINS_CREMENT operation   { addInstruct(command::_MOINS_CREMENT_,$1); }
-    | VARIABLE_NAME FOIS_CREMENT operation    { addInstruct(command::_FOIS_CREMENT_,$1); }
-    | VARIABLE_NAME DIVISE_CREMENT operation  { addInstruct(command::_DIVISE_CREMENT_,$1); }
+    | VARIABLE_NAME PLUS_CREMENT    operation { addInstruct(command::_PLUS_CREMENT_,$1); }
+    | VARIABLE_NAME MOINS_CREMENT   operation { addInstruct(command::_MOINS_CREMENT_,$1); }
+    | VARIABLE_NAME FOIS_CREMENT    operation { addInstruct(command::_FOIS_CREMENT_,$1); }
+    | VARIABLE_NAME DIVISE_CREMENT  operation { addInstruct(command::_DIVISE_CREMENT_,$1); }
     
+    | VARIABLE_NAME TAB BOOL '=' operation    { 
+                                                addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
+                                                addInstruct(command::_CREATE_TABLE_,(bool)1);//type var
+                                              }
     | VARIABLE_NAME TAB INT '=' operation     { 
                                                 addInstruct(command::_EMPILE_VALUE_,$1);//nom tab
                                                 addInstruct(command::_CREATE_TABLE_,(int)1);//type var

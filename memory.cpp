@@ -19,6 +19,9 @@
 void printVal(string beginMessage, valAccess val, string endMessage = "") {
 	cout << beginMessage;
 	switch (val.type) {
+	case valType::_bool_:
+		cout << boolList[val.tabPos];
+		break;
 	case valType::_int_:
 		cout << intList[val.tabPos];
 		break;
@@ -90,18 +93,22 @@ void delVal(valAccess val) {
 
 	//supprimer la valeur du tableau
 	switch (val.type) {
-	case valType::_int_:
-		if (val.tabPos == intList.size() - 1) intList.pop_back();
-		else intList.erase(intList.begin() + val.tabPos);
-		break;
-	case valType::_double_:
-		if (val.tabPos == doubleList.size() - 1) doubleList.pop_back();
-		else doubleList.erase(doubleList.begin() + val.tabPos);
-		break;
-	case valType::_string_:
-		if (val.tabPos == stringList.size() - 1) stringList.pop_back();
-		else stringList.erase(stringList.begin() + val.tabPos);
-		break;
+		case valType::_bool_:
+			if (val.tabPos == boolList.size() - 1) boolList.pop_back();
+			else boolList.erase(boolList.begin() + val.tabPos);
+			break;
+		case valType::_int_:
+			if (val.tabPos == intList.size() - 1) intList.pop_back();
+			else intList.erase(intList.begin() + val.tabPos);
+			break;
+		case valType::_double_:
+			if (val.tabPos == doubleList.size() - 1) doubleList.pop_back();
+			else doubleList.erase(doubleList.begin() + val.tabPos);
+			break;
+		case valType::_string_:
+			if (val.tabPos == stringList.size() - 1) stringList.pop_back();
+			else stringList.erase(stringList.begin() + val.tabPos);
+			break;
 	}
 }
 
@@ -128,6 +135,10 @@ void delTabVal(string tabName, int tabCase) {
 
 	//supprimer le stockage de la valeur
 	switch (tableaux[tabName].type) {
+	case valType::_bool_:
+		if (tabCase == boolArray.size() - 1) boolArray.pop_back();
+		else boolArray.erase(boolArray.begin() + tabCase);
+		break;
 	case valType::_int_:
 		if (tabCase == intArray.size() - 1) intArray.pop_back();
 		else intArray.erase(intArray.begin() + tabCase);
@@ -145,6 +156,17 @@ void delTabVal(string tabName, int tabCase) {
 
 void delTab(string tabName) {
 	switch (tableaux[tabName].type) {
+	case valType::_bool_:
+		while (tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
+			//supprime la valeur
+			int tabPos = tableaux[tabName].valuesPos[tableaux[tabName].valuesPos.size() - 1];
+			if (tabPos == boolArray.size() - 1) boolArray.pop_back();
+			else boolArray.erase(boolArray.begin() + tabPos);
+
+			//supprime l'adresse
+			tableaux[tabName].valuesPos.pop_back();
+		}
+		break;
 	case valType::_int_:
 		while (tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
 			//supprime la valeur
@@ -190,7 +212,7 @@ void delTab(string tabName) {
 
 
 void enterMemoryLayer() {
-	memoryLayer.push({ (unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
+	memoryLayer.push({ (unsigned)boolList.size(),(unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
 }
 
 void exitMemoryLayer() {
@@ -211,7 +233,8 @@ void exitMemoryLayer() {
 	//supprime variables declarees dans le bloc
 	map<string, valAccess> variablesCopy = variables;
 	for (auto var : variablesCopy) {
-		if ((var.second.type == valType::_int_	  && (unsigned)var.second.tabPos > initial.intListSize) ||
+		if ((var.second.type == valType::_bool_	  && (unsigned)var.second.tabPos > initial.boolListSize) ||
+			(var.second.type == valType::_int_	  && (unsigned)var.second.tabPos > initial.intListSize) ||
 			(var.second.type == valType::_double_ && (unsigned)var.second.tabPos > initial.doubleListSize) ||
 			(var.second.type == valType::_string_ && (unsigned)var.second.tabPos > initial.stringListSize)) {
 			delVar(var.first);
@@ -219,7 +242,8 @@ void exitMemoryLayer() {
 	}
 
 	//supprime valeurs (non affectees a des variables) declarees dans le bloc (supprime par la fin pour + d'efficacite (deque) et de surete)
+	while (boolList.size() > initial.boolListSize)		delVal({ valType::_int_,	(int)boolList.size() - 1 });
 	while (intList.size() > initial.intListSize)		delVal({ valType::_int_,	(int)intList.size() - 1 });
-	while (doubleList.size() > initial.doubleListSize)	delVal({ valType::_double_,(int)doubleList.size() - 1 });
-	while (stringList.size() > initial.stringListSize)	delVal({ valType::_string_,(int)stringList.size() - 1 });
+	while (doubleList.size() > initial.doubleListSize)	delVal({ valType::_double_,	(int)doubleList.size() - 1 });
+	while (stringList.size() > initial.stringListSize)	delVal({ valType::_string_,	(int)stringList.size() - 1 });
 }
