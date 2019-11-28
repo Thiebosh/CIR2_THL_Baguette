@@ -132,7 +132,7 @@ unsigned int indexInstruction = 0;   // compteur instruction
 
 //IV. PROTOTYPES
  // Memory
-void printVal(string beginMessage, valAccess val, string endMessage = "");
+void printVal(string beginMessage, valAccess val, string endMessage);
 valAccess depiler();
 void delVal(valAccess val);
 void delVar(string name);
