@@ -51,6 +51,7 @@
 %token ELSE
 %token <adresse> WHILE
 %token <adresse> DO
+%token END_WHILE
 %token <adresse> REPEAT
 %token <adresse> FOREACH
 %token END
@@ -195,18 +196,16 @@ structure :
                       }
       END             { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
 
-    | DO                {
-                          addInstruct(command::_ENTER_BLOCK_);
-                          $1.refInstruct = instructionList.size();//<adresse debut>
-                        }
-      bloc 
-      WHILE comparaison { 
-                              //apres interpretation de operation :
-                          addInstruct(command::_GOTO_TEST_INV_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
-                          instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
-                          
-                          addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/
-                        }
+      | DO                        {
+                                    addInstruct(command::_ENTER_BLOCK_);
+                                    $1.refInstruct = instructionList.size();//<adresse debut>
+                                  }
+      bloc END_WHILE comparaison  {//apres interpretation de operation :
+                                    addInstruct(command::_GOTO_TEST_INV_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
+                                    instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
+                                    
+                                    addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/
+                                  }
 
     // | REPEAT affectation, comparaison, operation '\n' bloc { /* TO DO */ }
     ;

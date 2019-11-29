@@ -1,7 +1,6 @@
 /*COURS 1
 conditions, tests et boucles
 */
-
 valeur entier = 0
 
 AFFICHER "PARTIE 1 : SI\n\n"
@@ -23,13 +22,15 @@ fin
 
 
 AFFICHER "\n\n\nPARTIE 2 : TANT QUE\n\n"
-faire
-    AFFICHER ++valeur," (2 repetitions)\n"
 tantque valeur < 2
-
-tantque valeur > 0
-    AFFICHER --valeur," (1 repetition)\n"
+    AFFICHER "while : ",++valeur," (2 repetition)\n"
 fin
+
+faire
+    AFFICHER "do while : ",--valeur," (2 repetitions)\n"
+finque valeur >= 0
+
+TERMINER
 
 AFFICHER "\n\n\nPARTIE 3 : POUR (à venir)\n\n"
 //pour et pour chaque

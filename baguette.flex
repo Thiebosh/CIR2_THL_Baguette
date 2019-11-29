@@ -39,6 +39,7 @@ PAUSE  { return STOP; }//attendre pour delay
 si 			  { return IF; }
 sinon	    { return ELSE; }
 tantque 	{ return WHILE; }
+finque 	  { return END_WHILE; }
 faire 	  { return DO; }
 répéter   { return REPEAT; }
 parcourir { return FOREACH; }

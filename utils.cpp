@@ -240,6 +240,7 @@ void executeComparaison(comparaison operation) {
 
 	delVal(val1);
 	delVal(val2);
+
 	//execute operation et enregistre nouvelle valeur
 	if (val1.type != valType::_string_ && val2.type != valType::_string_) {//si non string
 		bool result(0);
@@ -264,10 +265,11 @@ void executeComparaison(comparaison operation) {
 			break;
 		}
 
-		executionPile.push({ valType::_bool_,(int)intList.size() });
+		executionPile.push({ valType::_bool_,(int)boolList.size() });
 		boolList.push_back(result);
 	}
 	else error(errorCode::conversionType);//mieux adapté quand utilisera cast
+
 }
 
 /********************************************************/
