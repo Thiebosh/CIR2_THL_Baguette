@@ -149,14 +149,12 @@ void executeOperation(operation operation) {
 	}
 }
 
-//passer en bool / cast
 void executeCrement(string varName, operation operation) {
 	//recupere valeur
 	valAccess valCast = depiler();
 
 	if (variables.find(varName) != variables.end()) {//var existe bien
 		//1 : changer val en double ou string
-		valAccess valCast;
 		double valDouble(0);
 		string valString("");
 		if (valCast.type == valType::_string_) {
@@ -210,8 +208,9 @@ void executeCrement(string varName, operation operation) {
 			stringList[variables[varName].tabPos] = varString;
 			break;
 		}
-
-		delVal(valCast);//ne supprime pas varCast, au cas ou
+		
+		delVal(varCast);
+		delVal(valCast);
 		//5 : ajouter copie a la pile si besoin
 		if (variables[varName].type == valType::_string_) {
 			executionPile.push({ valType::_string_,(int)stringList.size() });
