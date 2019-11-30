@@ -201,8 +201,8 @@ valAccess depiler();
 //		Part 2
 valAccess castVal(valAccess value, valType cast, bool isVar = 0);
 void executeOperation(operation operation);
-void executeCrement(string varName, operation operation);
 void executeComparaison(comparaison comparaison);
+void executeCrement(string varName, operation operation);
 //		Part 3
 void executeTabAction(instruction& instructContent, tabAction action);
 

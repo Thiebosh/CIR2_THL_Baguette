@@ -95,7 +95,7 @@ void delTabVal(string tabName, int tabCase) {
 	//decaler les adresses superieures a l'adresse a supprimer
 	for (auto tab : tableaux) {//parcourt tous les tableaux
 		if (tab.second.type == tableaux[tabName].type) {//si tableau est du type impacte
-			for (int tabPos = 0; tabPos < tab.second.valuesPos.size(); ++tabPos) {//checke toutes ses adresses
+			for (int tabPos = 0; tabPos < (int)tab.second.valuesPos.size(); ++tabPos) {//checke toutes ses adresses
 				if (tab.second.valuesPos[tabPos] > tableaux[tabName].valuesPos[tabCase]) {//si adresse au dela de celle supprimee
 					tableaux[tab.first].valuesPos[tabPos]--;//reduit d'un (1 valeur supprimee)
 				}

@@ -77,7 +77,7 @@ valAccess castVal(valAccess value, valType cast, bool isVar) {
 				intList.push_back(boolList[value.tabPos]);
 				break;
 			case valType::_double_:
-				intList.push_back(doubleList[value.tabPos]);
+				intList.push_back((int)doubleList[value.tabPos]);
 				break;
 			}
 			break;
@@ -99,7 +99,10 @@ valAccess castVal(valAccess value, valType cast, bool isVar) {
 		return result;
 	}
 
-	else error(errorCode::conversionType);
+	else {
+		error(errorCode::conversionType);
+		return {};
+	}
 }
 
 void executeOperation(operation operation) {
@@ -146,6 +149,57 @@ void executeOperation(operation operation) {
 
 		executionPile.push({ valType::_double_,(int)doubleList.size() });
 		doubleList.push_back(result);
+	}
+}
+
+void executeComparaison(comparaison operation) {
+	//recupere valeurs
+	valAccess val2 = depiler();
+	valAccess val1 = depiler();
+
+	if (val1.type != valType::_string_ && val2.type != valType::_string_) {
+		val2 = castVal(val2, valType::_double_);
+		val1 = castVal(val1, valType::_double_);
+
+		double result(0);//cast au plus haut
+		switch (operation) {
+		case comparaison::_and_:
+			result = doubleList[val1.tabPos] && doubleList[val2.tabPos];
+			break;
+		case comparaison::_or_:
+			result = doubleList[val1.tabPos] || doubleList[val2.tabPos];
+			break;
+		case comparaison::_equiv_:
+			result = doubleList[val1.tabPos] == doubleList[val2.tabPos];
+			break;
+		case comparaison::_diff_:
+			result = doubleList[val1.tabPos] != doubleList[val2.tabPos];
+			break;
+		case comparaison::_inferieur_:
+			result = doubleList[val1.tabPos] > doubleList[val2.tabPos];
+			break;
+		case comparaison::_superieur_:
+			result = doubleList[val1.tabPos] < doubleList[val2.tabPos];
+			break;
+		case comparaison::_inf_egal_:
+			result = doubleList[val1.tabPos] >= doubleList[val2.tabPos];
+			break;
+		case comparaison::_sup_egal_:
+			result = doubleList[val1.tabPos] <= doubleList[val2.tabPos];
+			break;
+		}
+		delVal(val1);
+		if (val2.tabPos > val1.tabPos) --val2.tabPos;//prend en compte suppression
+		delVal(val2);
+
+		executionPile.push({ valType::_double_,(int)doubleList.size() });
+		doubleList.push_back(result);
+	}
+	else {
+		delVal(val1);
+		if (val2.tabPos > val1.tabPos) --val2.tabPos;//prend en compte suppression
+		delVal(val2);
+		error(errorCode::conversionType);
 	}
 }
 
@@ -199,7 +253,7 @@ void executeCrement(string varName, operation operation) {
 		//4 : intégrer résultat dans variable (verif de type)
 		switch (variables[varName].type) {
 		case valType::_int_:
-			intList[variables[varName].tabPos] = varDouble;
+			intList[variables[varName].tabPos] = (int)varDouble;
 			break;
 		case valType::_double_:
 			doubleList[variables[varName].tabPos] = varDouble;
@@ -225,85 +279,6 @@ void executeCrement(string varName, operation operation) {
 		delVal(valCast);
 		error(errorCode::unknowVariable);
 	}
-}
-
-//passer en bool / cast
-void executeComparaison(comparaison operation) {
-	//recupere valeurs
-	valAccess val2 = depiler();
-	valAccess val1 = depiler();
-
-	int val1Int(0), val2Int(0);
-	double val1Double(0), val2Double(0);
-	string val1String(""), val2String("");
-
-	switch (val1.type) {
-	case valType::_bool_:
-		val1Int = boolList[val1.tabPos];
-		break;
-	case valType::_int_:
-		val1Int = intList[val1.tabPos];
-		break;
-	case valType::_double_:
-		val1Double = doubleList[val1.tabPos];
-		break;
-	case valType::_string_:
-		val1String = stringList[val1.tabPos];
-		break;
-	}
-	switch (val2.type) {
-	case valType::_bool_:
-		val2Int = boolList[val2.tabPos];
-		break;
-	case valType::_int_:
-		val2Int = intList[val2.tabPos];
-		break;
-	case valType::_double_:
-		val2Double = doubleList[val2.tabPos];
-		break;
-	case valType::_string_:
-		val2String = stringList[val2.tabPos];
-		break;
-	}
-
-	delVal(val1);
-	delVal(val2);
-
-	//execute operation et enregistre nouvelle valeur
-	if (val1.type != valType::_string_ && val2.type != valType::_string_) {//si non string
-		bool result(0);
-		switch (operation) {
-		case comparaison::_and_:
-			result = (val1Int ? val1Int : val1Double) && (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case comparaison::_or_:
-			result = (val1Int ? val1Int : val1Double) || (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case comparaison::_equiv_:
-			result = (val1Int ? val1Int : val1Double) == (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case comparaison::_diff_:
-			result = (val1Int ? val1Int : val1Double) != (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case comparaison::_inferieur_:
-			result = (val1Int ? val1Int : val1Double) > (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case comparaison::_superieur_:
-			result = (val1Int ? val1Int : val1Double) < (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case comparaison::_inf_egal_:
-			result = (val1Int ? val1Int : val1Double) >= (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		case comparaison::_sup_egal_:
-			result = (val1Int ? val1Int : val1Double) <= (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			break;
-		}
-
-		executionPile.push({ valType::_bool_,(int)boolList.size() });
-		boolList.push_back(result);
-	}
-	else error(errorCode::conversionType);//mieux adapté quand utilisera cast
-
 }
 
 
