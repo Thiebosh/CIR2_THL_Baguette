@@ -37,8 +37,6 @@ conservé :
 
 ## pile de choses à faire :
 - passer executeCrement et executeComparaison sous cast et bool (s'inspirer de executeOperation)
-- vérifier exécution des comparaisons pour cours2.choco
-- ajouter test implicites, négation, et / ou logique
 
 - finir reprise tab
 - ajouter for(initialisation / affectation, test, affectation), foreach dans bison
