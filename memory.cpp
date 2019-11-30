@@ -1,62 +1,38 @@
 #include "declarations.cpp"
 
-/********************************************************/
-/*														*/
-/*	PARTIE I : GESTION DE LA MEMOIRE					*/
-/*		SOUS PARTIE 1 : STOCKAGE DE VALEURS TYPEES		*/
-/*		SOUS PARTIE 2 : PILE DE VALEURS	EN UTILISATION	*/
-/*		SOUS PARTIE 3 : UTILISATION DES VARIABLES		*/
-/*		SOUS PARTIE 4 : LIBERATION DE MEMOIRE	    	*/
-/*		SOUS PARTIE 5 : PILE DE BLOCS MEMOIRE			*/
-/*														*/
-/********************************************************/
-
 
 /********************************************************/
-/*		SOUS PARTIE 1 : STOCKAGE DE VALEURS TYPEES		*/
+/*	PARTIE I : AJOUT									*/
 /********************************************************/
-
-void printVal(string beginMessage, valAccess val, string endMessage = "") {
-	cout << beginMessage;
-	switch (val.type) {
-	case valType::_bool_:
-		cout << boolList[val.tabPos];
-		break;
+valAccess addVal(valInstruct instructContent) {
+	int tabPos = 0;
+	switch (instructContent.type) {
 	case valType::_int_:
-		cout << intList[val.tabPos];
+		tabPos = intList.size();
+		intList.push_back(instructContent.intVal);
 		break;
 	case valType::_double_:
-		cout << doubleList[val.tabPos];
+		tabPos = doubleList.size();
+		doubleList.push_back(instructContent.doubleVal);
 		break;
 	case valType::_string_:
-		//si trouve \ suivi de t ou n dans la string, le transforme en un seul caractere
-		cout << stringList[val.tabPos];
+		tabPos = stringList.size();
+		stringList.push_back(instructContent.stringVal);
 		break;
 	}
-	cout << endMessage;
+	return { instructContent.type,tabPos };
+}
+
+valAccess addVar(valInstruct instructContent) {
+	string name = stringList[castVal(depiler(), valType::_string_).tabPos];
+
+	variables.insert({ name,addVal(instructContent) });
+	return { instructContent.type,variables[name].tabPos };
 }
 
 
 /********************************************************/
-/*		SOUS PARTIE 2 : PILE DE VALEURS	EN UTILISATION	*/
-/********************************************************/
-
-
-valAccess depiler() {
-	valAccess var;
-
-	if (!executionPile.empty()) {
-		var = executionPile.top();
-		executionPile.pop();
-	}
-	else error(errorCode::emptyExecutionStack);
-
-	return var;
-}
-
-
-/********************************************************/
-/*		SOUS PARTIE 4 : LIBERATION DE MEMOIRE	    	*/
+/*	PARTIE II : SUPRESSION								*/
 /********************************************************/
 void delVal(valAccess val) {
 	//PILE : decremente references tableau des valeurs suivantes
@@ -189,10 +165,8 @@ void delTab(string tabName) {
 
 
 /********************************************************/
-/*		SOUS PARTIE 5 : PILE DE BLOCS MEMOIRE			*/
+/*	PARTIE III : COUCHES MEMOIRES						*/
 /********************************************************/
-
-
 void enterMemoryLayer() {
 	memoryLayer.push({ (unsigned)boolList.size(),(unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
 }

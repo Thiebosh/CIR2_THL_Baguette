@@ -9,7 +9,7 @@ AFFICHER 1.23,"\n","hello world","\n\n"
 
 AFFICHER 1+6*4,"\n"
 AFFICHER 4*6+1,"\n"
-AFFICHER -1*2+5/3,"\n\n\n"
+AFFICHER -1*(2+5)/3,"\n\n\n"
 
 //partie 2
 AFFICHER "PARTIE 2\n"

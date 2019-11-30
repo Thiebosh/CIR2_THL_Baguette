@@ -1,32 +1,62 @@
 #include "memory.cpp"
 
 /********************************************************/
-/*														*/
-/*	PARTIE II : GESTION DES COMMANDES					*/
-/*		SOUS PARTIE 1 : OPERATION SUR LES VALEURS		*/
-/*		SOUS PARTIE 2 : DECLARATION DES COMMANDES		*/
-/*		SOUS PARTIE 3 : GESTION DES INSTRUCTIONS		*/
-/*		SOUS PARTIE 4 : GESTION DES TABLEAUX			*/
-/*		SOUS PARTIE 5 : EXECUTION SELON LES COMMANDES	*/
-/*														*/
+/*	PARTIE I : UTILITAIRES								*/
 /********************************************************/
+void printVal(string beginMessage, valAccess val, string endMessage) {
+	cout << beginMessage;
+	switch (val.type) {
+	case valType::_bool_:
+		cout << boolList[val.tabPos];
+		break;
+	case valType::_int_:
+		cout << intList[val.tabPos];
+		break;
+	case valType::_double_:
+		cout << doubleList[val.tabPos];
+		break;
+	case valType::_string_:
+		//si trouve \ suivi de t ou n dans la string, le transforme en un seul caractere
+		cout << stringList[val.tabPos];
+		break;
+	}
+	cout << endMessage;
+}
 
-/********************************************************/
-/*		SOUS PARTIE 1 : OPERATION SUR LES VALEURS		*/
-/********************************************************/
-
+void replaceString(string& subject, const string& search, const string& replace) {
+	size_t pos = 0;
+	while ((pos = subject.find(search, pos)) != std::string::npos) {
+		subject.replace(pos, search.length(), replace);
+		pos += replace.length();
+	}
+}
 
 void error(errorCode cause) {
 	cout << "ERREUR : " << errorMessage[cause] << endl;
 	exit((int)cause + 1);//code erreur
 }
 
+valAccess depiler() {
+	valAccess var;
 
-valAccess castVal(valAccess value, valType cast) {
+	if (!executionPile.empty()) {
+		var = executionPile.top();
+		executionPile.pop();
+	}
+	else error(errorCode::emptyExecutionStack);
+
+	return var;
+}
+
+
+/********************************************************/
+/*	PARTIE II : COMBINAISONS							*/
+/********************************************************/
+valAccess castVal(valAccess value, valType cast, bool isVar) {
 	if (value.type == cast) return value;
 
 	else if (value.type != valType::_string_ && cast != valType::_string_) {
-		valAccess result = { cast };
+		valAccess result = { cast };//string vers string
 		switch (cast) {
 		case valType::_bool_:
 			result.tabPos = boolList.size();
@@ -46,9 +76,9 @@ valAccess castVal(valAccess value, valType cast) {
 			case valType::_bool_:
 				intList.push_back(boolList[value.tabPos]);
 				break;
-				case valType::_double_:
-					intList.push_back(doubleList[value.tabPos]);
-					break;
+			case valType::_double_:
+				intList.push_back(doubleList[value.tabPos]);
+				break;
 			}
 			break;
 
@@ -65,13 +95,12 @@ valAccess castVal(valAccess value, valType cast) {
 			break;
 		}
 
-		delVal(value);
+		if (!isVar) delVal(value);
 		return result;
 	}
 
 	else error(errorCode::conversionType);
 }
-
 
 void executeOperation(operation operation) {
 	//recupere valeurs
@@ -90,7 +119,6 @@ void executeOperation(operation operation) {
 
 		executionPile.push({ valType::_string_,(int)stringList.size() });
 		stringList.push_back(stringList[val1.tabPos]);
-		return;
 	}
 
 	else {//si pas deux reels, erreur levee par fonction cast
@@ -118,91 +146,86 @@ void executeOperation(operation operation) {
 
 		executionPile.push({ valType::_double_,(int)doubleList.size() });
 		doubleList.push_back(result);
-		return;
 	}
 }
 
 //passer en bool / cast
 void executeCrement(string varName, operation operation) {
-	//recupere valeurs
-	valAccess val = depiler();
+	//recupere valeur
+	valAccess valCast = depiler();
 
-	int valInt(0);
-	double valDouble(0);
-	string valString("");
+	if (variables.find(varName) != variables.end()) {//var existe bien
+		//1 : changer val en double ou string
+		valAccess valCast;
+		double valDouble(0);
+		string valString("");
+		if (valCast.type == valType::_string_) {
+			valCast = valCast;
+			valString = stringList[valCast.tabPos];
+		}
+		else {
+			valCast = castVal(valCast, valType::_double_);
+			valDouble = doubleList[valCast.tabPos];
+		}
 
-	switch (val.type) {
-	case valType::_int_:
-		valInt = intList[val.tabPos];
-		break;
-	case valType::_double_:
-		valDouble = doubleList[val.tabPos];
-		break;
-	case valType::_string_:
-		valString = stringList[val.tabPos];
-		break;
-	}
+		//2 : changer variable content en double ou string
+		valAccess varCast;
+		double varDouble(0);
+		string varString("");
+		if (variables[varName].type == valType::_string_) {
+			varCast = variables[varName];
+			varString = stringList[varCast.tabPos];
+		}
+		else {
+			varCast = castVal(variables[varName], valType::_double_, 1);
+			varDouble = doubleList[varCast.tabPos];
+		}
 
-	delVal(val);
-
-
-	if (variables.find(varName) != variables.end() &&
-		((variables[varName].type != valType::_string_ && val.type != valType::_string_) ||
-		(variables[varName].type == valType::_string_ && val.type == valType::_string_))) {//var existe bien
-		valAccess copy = { variables[varName].type };
-
-		switch (variables[varName].type) {
-		case valType::_int_:
-			switch (operation) {
-			case operation::_plus_:
-				intList[variables[varName].tabPos] += (valInt ? valInt : valDouble);
-				break;
-			case operation::_moins_:
-				intList[variables[varName].tabPos] -= (valInt ? valInt : valDouble);
-				break;
-			case operation::_fois_:
-				intList[variables[varName].tabPos] *= (valInt ? valInt : valDouble);
-				break;
-			case operation::_divisePar_:
-				intList[variables[varName].tabPos] /= (valInt ? valInt : valDouble);
-				break;
-			}
-
-			copy.tabPos = intList.size();
-			intList.push_back(intList[variables[varName].tabPos]);
-			executionPile.push(copy);
+		//3 : opérer les deux
+		switch (operation) {
+		case operation::_plus_:
+			if (varCast.type == valType::_string_) varString += valString;
+			else varDouble += valDouble;
 			break;
-		case valType::_double_:
-			switch (operation) {
-			case operation::_plus_:
-				doubleList[variables[varName].tabPos] += (valInt ? valInt : valDouble);
-				break;
-			case operation::_moins_:
-				doubleList[variables[varName].tabPos] -= (valInt ? valInt : valDouble);
-				break;
-			case operation::_fois_:
-				doubleList[variables[varName].tabPos] *= (valInt ? valInt : valDouble);
-				break;
-			case operation::_divisePar_:
-				doubleList[variables[varName].tabPos] /= (valInt ? valInt : valDouble);
-				break;
-			}
-
-			copy.tabPos = doubleList.size();
-			doubleList.push_back(doubleList[variables[varName].tabPos]);
-			executionPile.push(copy);
+		case operation::_moins_:
+			varDouble -= valDouble;
 			break;
-		case valType::_string_:
-			if (operation == operation::_plus_) stringList[variables[varName].tabPos] += valString;
-			//else erreur
-
-			copy.tabPos = stringList.size();
-			stringList.push_back(stringList[variables[varName].tabPos]);
-			executionPile.push(copy);
+		case operation::_fois_:
+			varDouble *= valDouble;
+			break;
+		case operation::_divisePar_:
+			varDouble /= valDouble;
 			break;
 		}
+
+		//4 : intégrer résultat dans variable (verif de type)
+		switch (variables[varName].type) {
+		case valType::_int_:
+			intList[variables[varName].tabPos] = varDouble;
+			break;
+		case valType::_double_:
+			doubleList[variables[varName].tabPos] = varDouble;
+			break;
+		case valType::_string_:
+			stringList[variables[varName].tabPos] = varString;
+			break;
+		}
+
+		delVal(valCast);//ne supprime pas varCast, au cas ou
+		//5 : ajouter copie a la pile si besoin
+		if (variables[varName].type == valType::_string_) {
+			executionPile.push({ valType::_string_,(int)stringList.size() });
+			stringList.push_back(varString);
+		}
+		else {
+			executionPile.push({ valType::_double_,(int)doubleList.size() });
+			doubleList.push_back(varDouble);
+		}
 	}
-	else error(errorCode::unknowVariable);
+	else {
+		delVal(valCast);
+		error(errorCode::unknowVariable);
+	}
 }
 
 //passer en bool / cast
@@ -253,35 +276,27 @@ void executeComparaison(comparaison operation) {
 		switch (operation) {
 		case comparaison::_and_:
 			result = (val1Int ? val1Int : val1Double) && (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			cout << (val1Int ? val1Int : val1Double) << " && "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_or_:
 			result = (val1Int ? val1Int : val1Double) || (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			cout << (val1Int ? val1Int : val1Double) << " || "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_equiv_:
 			result = (val1Int ? val1Int : val1Double) == (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			cout << (val1Int ? val1Int : val1Double) << " == "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_diff_:
 			result = (val1Int ? val1Int : val1Double) != (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			cout << (val1Int ? val1Int : val1Double) << " != "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_inferieur_:
 			result = (val1Int ? val1Int : val1Double) > (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			cout << (val1Int ? val1Int : val1Double) << " > "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_superieur_:
 			result = (val1Int ? val1Int : val1Double) < (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			cout << (val1Int ? val1Int : val1Double) << " < "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_inf_egal_:
 			result = (val1Int ? val1Int : val1Double) >= (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			cout << (val1Int ? val1Int : val1Double) << " >= "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_sup_egal_:
 			result = (val1Int ? val1Int : val1Double) <= (val2Int ? val2Int : val2Double);//variables initialisees a 0
-			cout << (val1Int ? val1Int : val1Double) << " <= "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		}
 
@@ -292,55 +307,10 @@ void executeComparaison(comparaison operation) {
 
 }
 
-/********************************************************/
-/*		SOUS PARTIE 3 : GESTION DES INSTRUCTIONS		*/
-/********************************************************/
-
-valAccess addVal(valInstruct instructContent) {
-	int tabPos = 0;
-	switch (instructContent.type) {
-	case valType::_int_:
-		tabPos = intList.size();
-		intList.push_back(instructContent.intVal);
-		break;
-	case valType::_double_:
-		tabPos = doubleList.size();
-		doubleList.push_back(instructContent.doubleVal);
-		break;
-	case valType::_string_:
-		tabPos = stringList.size();
-		stringList.push_back(instructContent.stringVal);
-		break;
-	}
-	return { instructContent.type,tabPos };
-}
-
-valAccess addVar(valInstruct instructContent) {
-	string name = stringList[castVal(depiler(), valType::_string_).tabPos];
-
-	variables.insert({ name,addVal(instructContent) });
-	return { instructContent.type,variables[name].tabPos };
-}
-
-
-void addInstruct(command command) {
-	instructionList.push_back({ command, { valType::_int_,-1,-1,"" } });
-};
-void addInstruct(command command, int intValue) {
-	instructionList.push_back({ command, { valType::_int_,intValue,-1,"" } });
-};
-void addInstruct(command command, double doubleValue) {
-	instructionList.push_back({ command, { valType::_double_,-1,doubleValue,"" } });
-};
-void addInstruct(command command, string stringValue) {
-	instructionList.push_back({ command, { valType::_string_,-1,-1,stringValue } });
-};
-
 
 /********************************************************/
-/*		SOUS PARTIE 4 : GESTION DES TABLEAUX			*/
+/*	PARTIE III : TABLEAUX								*/
 /********************************************************/
-
 /*
 remettre au gout du jour
 void executeTabAction(instruction& instructContent, tabAction action) {
@@ -487,13 +457,3 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 }
 */
 
-/********************************************************/
-/*		SOUS PARTIE 5 : EXECUTION SELON LES COMMANDES	*/
-/********************************************************/
-void replaceString(string& subject, const string& search, const string& replace) {
-	size_t pos = 0;
-	while ((pos = subject.find(search, pos)) != std::string::npos) {
-		subject.replace(pos, search.length(), replace);
-		pos += replace.length();
-	}
-}

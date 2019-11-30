@@ -1,5 +1,22 @@
 #include "utils.cpp"
 
+/********************************************************/
+/*	PARTIE I : AJOUT ET EXECUTION DES COMMANDES			*/
+/********************************************************/
+void addInstruct(command command) {
+	instructionList.push_back({ command, { valType::_int_,-1,-1,"" } });
+};
+void addInstruct(command command, int intValue) {
+	instructionList.push_back({ command, { valType::_int_,intValue,-1,"" } });
+};
+void addInstruct(command command, double doubleValue) {
+	instructionList.push_back({ command, { valType::_double_,-1,doubleValue,"" } });
+};
+void addInstruct(command command, string stringValue) {
+	instructionList.push_back({ command, { valType::_string_,-1,-1,stringValue } });
+};
+
+
 const map<command, functionPointer> executeCommand = {
 	{command::_ENTER_BLOCK_,[](valInstruct& instructContent) { enterMemoryLayer();	}},
 	{command::_EXIT_BLOCK_,	[](valInstruct& instructContent) { exitMemoryLayer();	}},
@@ -102,14 +119,14 @@ const map<command, functionPointer> executeCommand = {
 	{command::_PLUS_,		[](valInstruct& instructContent) { executeOperation(operation::_plus_);		}},
 	{command::_MOINS_,		[](valInstruct& instructContent) { executeOperation(operation::_moins_);	}},
 	{command::_FOIS_,		[](valInstruct& instructContent) { executeOperation(operation::_fois_);		}},
-	{command::_DIVISE_PAR_,	[](valInstruct& instructContent) { executeOperation(operation::_divisePar_);}},
+	{command::_DIVISE_PAR_,	[](valInstruct& instructContent) { executeOperation(operation::_divisePar_); }},
 
 	{command::_AND_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_and_);	}},
 	{command::_OR_,			[](valInstruct& instructContent) { executeComparaison(comparaison::_or_);	}},
-	{command::_EQUIV_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_equiv_);}},
+	{command::_EQUIV_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_equiv_); }},
 	{command::_DIFF_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_diff_);	}},
-	{command::_INFERIEUR_,	[](valInstruct& instructContent) { executeComparaison(comparaison::_inferieur_);}},
-	{command::_SUPERIEUR_,	[](valInstruct& instructContent) { executeComparaison(comparaison::_superieur_);}},
+	{command::_INFERIEUR_,	[](valInstruct& instructContent) { executeComparaison(comparaison::_inferieur_); }},
+	{command::_SUPERIEUR_,	[](valInstruct& instructContent) { executeComparaison(comparaison::_superieur_); }},
 	{command::_SUP_EGAL_,	[](valInstruct& instructContent) { executeComparaison(comparaison::_sup_egal_);	}},
 	{command::_INF_EGAL_,	[](valInstruct& instructContent) { executeComparaison(comparaison::_inf_egal_);	}},
 
@@ -222,11 +239,8 @@ const map<command, functionPointer> executeCommand = {
 
 
 /********************************************************/
-/*														*/
-/*	PARTIE III : MAIN FONCTIONS							*/
-/*														*/
+/*	PARTIE II : MAIN FONCTIONS							*/
 /********************************************************/
-//fonction 3
 void displayGeneratedProgram() {
 	cout << endl << "==== CODE GENERE ====" << endl;
 
@@ -449,8 +463,6 @@ void displayGeneratedProgram() {
 	cout << "=====================" << endl;
 }
 
-
-//fonction 4
 void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
 	cout << endl << "===== EXECUTION =====" << endl;
 	indexInstruction = 0;

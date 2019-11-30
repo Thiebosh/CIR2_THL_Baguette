@@ -13,7 +13,9 @@
 using namespace std;
 
 
-//I. ENUMERATIONS
+/********************************************************/
+/*	PARTIE I : ENUMERATIONS								*/
+/********************************************************/
 enum class valType {//fixe types
 	_bool_,
 	_int_,
@@ -110,7 +112,9 @@ enum class errorCode {
 };
 
 
-//II. TYPES PERSONNALISES
+/********************************************************/
+/*	PARTIE II : TYPES PERSONNALISES						*/
+/********************************************************/
 typedef struct {//initialiser dans ordre de déclaration
 	valType type = valType::_int_;
 	int tabPos = -1;//valeur par defaut : flag d'invalidation
@@ -141,7 +145,9 @@ typedef pair<command, valInstruct> instruction;
 typedef void (*functionPointer)(valInstruct& instructContent);//necessaire pour map de commandes - fonctions lambda
 
 
-//III. VARIABLES GLOBALES
+/********************************************************/
+/*	PARTIE III : VARIABLES GLOBALES						*/
+/********************************************************/
 deque<bool>     boolList;
 deque<int>		intList;
 deque<double>	doubleList;
@@ -162,7 +168,7 @@ deque<instruction> instructionList;
 
 unsigned int indexInstruction = 0;   // compteur instruction 
 
-map<errorCode,string> errorMessage = {
+map<errorCode, string> errorMessage = {
 	{errorCode::conversionType,"types incompatibles - échec de conversion"},
 	{errorCode::unknowVariable,"nom de variable inconnu"},
 	{errorCode::alreadyUseVariable,"nom de variable déjà en utilisation"},
@@ -170,31 +176,44 @@ map<errorCode,string> errorMessage = {
 };
 
 
-//IV. PROTOTYPES
- // Memory
-void printVal(string beginMessage, valAccess val, string endMessage);
-valAccess depiler();
+/********************************************************/
+/*	PARTIE IV : PROTOTYPES								*/
+/********************************************************/
+// Memory
+//		Part 1
+valAccess addVal(valInstruct instructContent);
+valAccess addVar(valInstruct instructContent);
+//		Part 2
 void delVal(valAccess val);
 void delVar(string name);
 void delTabVal(string tabName, int tabCase);
 void delTab(string tabName);
+//		Part 3
 void enterMemoryLayer();
 void exitMemoryLayer();
 
 // Utils
+//		Part 1
+void printVal(string beginMessage, valAccess val, string endMessage = "");
+void replaceString(string& subject, const string& search, const string& replace);
 void error(errorCode cause);
+valAccess depiler();
+//		Part 2
+valAccess castVal(valAccess value, valType cast, bool isVar = 0);
 void executeOperation(operation operation);
-void executeComparaison(comparaison comparaison);
 void executeCrement(string varName, operation operation);
-valAccess addVal(valInstruct instructContent);
-valAccess addVar(valInstruct instructContent);
+void executeComparaison(comparaison comparaison);
+//		Part 3
+void executeTabAction(instruction& instructContent, tabAction action);
+
+
+// Processing
+//		Part 1
 void addInstruct(command command);
 void addInstruct(command command, int intValue);
 void addInstruct(command command, double doubleValue);
 void addInstruct(command command, string stringValue);
-void executeTabAction(instruction& instructContent, tabAction action);
-void replaceString(string& subject, const string& search, const string& replace);
-
-// Processing
+//const map<command, functionPointer> executeCommand;
+//		Part 2
 void displayGeneratedProgram();
 void executeGeneratedProgram();
