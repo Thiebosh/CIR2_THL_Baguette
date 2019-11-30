@@ -21,7 +21,15 @@ sinon
 fin
 
 
-AFFICHER "\n\n\nPARTIE 2 : TANT QUE\n\n"
+AFFICHER "\n\n\nPARTIE 2 : TESTS AVANCES\n\n"
+si ((0 == 0 ET 10 > 0) OU 0) ET (5 OU (0 ET (8 - 2) < 8))
+	AFFICHER "if test - validé\n"
+sinon
+	AFFICHER "if test - échoué\n"
+fin
+
+
+AFFICHER "\n\n\nPARTIE 3 : TANT QUE\n\n"
 tantque valeur < 2
     AFFICHER "while : ",++valeur," (2 repetition)\n"
 fin

@@ -23,18 +23,21 @@ liste                       { return TAB; }
 TAILLE                      { return SIZE; }
 SUPPRIMER                   { return DELETE; }
 
-
-AFFICHER	{ return DISPLAY;}
-PAUSE  { return STOP; }//attendre pour delay
-
-==   { return EQUIV; }
-\!=   { return DIFF; }
-\>=   { return INF_EGAL; }
-\<=   { return SUP_EGAL; }
 \+=   { return PLUS_CREMENT; }
 \-=   { return MOINS_CREMENT; }
 \*=   { return FOIS_CREMENT; }
 \/=   { return DIVISE_CREMENT; }
+
+ET   { return AND; }
+OU   { return OR; }
+==   { return EQUIV; }
+\!=   { return DIFF; }
+\>=   { return INF_EGAL; }
+\<=   { return SUP_EGAL; }
+
+AFFICHER	{ return DISPLAY;}
+PAUSE  { return STOP; }//attendre pour delay
+
 
 si 			  { return IF; }
 sinon	    { return ELSE; }

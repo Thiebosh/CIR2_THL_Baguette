@@ -35,14 +35,17 @@
 %token SIZE
 %token DELETE
 
-%token EQUIV
-%token DIFF
-%token INF_EGAL
-%token SUP_EGAL
 %token PLUS_CREMENT
 %token MOINS_CREMENT
 %token FOIS_CREMENT
 %token DIVISE_CREMENT
+
+%token AND
+%token OR
+%token EQUIV
+%token DIFF
+%token INF_EGAL
+%token SUP_EGAL
 
 %token DISPLAY
 %token STOP
@@ -58,6 +61,7 @@
 
 %token END_PRGM
 
+%left AND OR     /* associativité à gauche */
 %left '+' '-'     /* associativité à gauche */
 %left '*' '/'     /* associativité à gauche */
 
@@ -84,7 +88,8 @@ IO :
     | STOP         { addInstruct(command::_STOP_); }
     ;
 
-output : operation { addInstruct(command::_PRINT_); } output_inter;
+output : 
+    operation { addInstruct(command::_PRINT_); } output_inter;
 output_inter : ',' output | /*Epsilon*/ ;
 
 
@@ -151,8 +156,23 @@ affectation :
                                                   }
     ;
 
+test_logique :
+    comparaison
+    | '(' test_logique ')'          { }
+    | test_logique AND test_logique { addInstruct(command::_AND_);}
+    | test_logique OR test_logique  { addInstruct(command::_OR_);}
+    ;
+
 comparaison :
-    operation EQUIV operation     { addInstruct(command::_EQUIV_);}
+    operation                       { 
+                                      addInstruct(command::_EMPILE_VALUE_,(int)0);
+                                      addInstruct(command::_DIFF_);
+                                    }
+    | '!' operation                 {
+                                      addInstruct(command::_EMPILE_VALUE_,(int)0);
+                                      addInstruct(command::_EQUIV_);
+                                    }
+    | operation EQUIV operation     { addInstruct(command::_EQUIV_);}
     | operation DIFF operation      { addInstruct(command::_DIFF_);}
     | operation '>' operation       { addInstruct(command::_INFERIEUR_);}
     | operation '<' operation       { addInstruct(command::_SUPERIEUR_);}
@@ -163,7 +183,7 @@ comparaison :
 
 structure :
     IF                { addInstruct(command::_ENTER_BLOCK_); }
-      comparaison '\n'{
+      test_logique '\n'{
                             //apres interpretation de operation :
                         $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                         addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans then, sinon sauter à <adresse fin then / debut else>)
@@ -182,7 +202,7 @@ structure :
                         addInstruct(command::_ENTER_BLOCK_);
                         $1.refInstruct = instructionList.size();//<adresse test>
                       }
-      comparaison '\n'{
+      test_logique '\n'{
                             //apres interpretation de operation :
                         $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                         addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans bloc, sinon sauter à <adresse end while>)
@@ -200,7 +220,7 @@ structure :
                                     addInstruct(command::_ENTER_BLOCK_);
                                     $1.refInstruct = instructionList.size();//<adresse debut>
                                   }
-      bloc END_WHILE comparaison  {//apres interpretation de operation :
+      bloc END_WHILE test_logique  {//apres interpretation de operation :
                                     addInstruct(command::_GOTO_TEST_INV_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
                                     instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
                                     

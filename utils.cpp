@@ -216,6 +216,9 @@ void executeComparaison(comparaison operation) {
 	string val1String(""), val2String("");
 
 	switch (val1.type) {
+	case valType::_bool_:
+		val1Int = boolList[val1.tabPos];
+		break;
 	case valType::_int_:
 		val1Int = intList[val1.tabPos];
 		break;
@@ -227,6 +230,9 @@ void executeComparaison(comparaison operation) {
 		break;
 	}
 	switch (val2.type) {
+	case valType::_bool_:
+		val2Int = boolList[val2.tabPos];
+		break;
 	case valType::_int_:
 		val2Int = intList[val2.tabPos];
 		break;
@@ -245,23 +251,37 @@ void executeComparaison(comparaison operation) {
 	if (val1.type != valType::_string_ && val2.type != valType::_string_) {//si non string
 		bool result(0);
 		switch (operation) {
+		case comparaison::_and_:
+			result = (val1Int ? val1Int : val1Double) && (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			cout << (val1Int ? val1Int : val1Double) << " && "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
+			break;
+		case comparaison::_or_:
+			result = (val1Int ? val1Int : val1Double) || (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			cout << (val1Int ? val1Int : val1Double) << " || "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
+			break;
 		case comparaison::_equiv_:
 			result = (val1Int ? val1Int : val1Double) == (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			cout << (val1Int ? val1Int : val1Double) << " == "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_diff_:
 			result = (val1Int ? val1Int : val1Double) != (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			cout << (val1Int ? val1Int : val1Double) << " != "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_inferieur_:
 			result = (val1Int ? val1Int : val1Double) > (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			cout << (val1Int ? val1Int : val1Double) << " > "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_superieur_:
 			result = (val1Int ? val1Int : val1Double) < (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			cout << (val1Int ? val1Int : val1Double) << " < "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_inf_egal_:
 			result = (val1Int ? val1Int : val1Double) >= (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			cout << (val1Int ? val1Int : val1Double) << " >= "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		case comparaison::_sup_egal_:
 			result = (val1Int ? val1Int : val1Double) <= (val2Int ? val2Int : val2Double);//variables initialisees a 0
+			cout << (val1Int ? val1Int : val1Double) << " <= "<< (val2Int ? val2Int : val2Double) << "-> " << result<< endl;
 			break;
 		}
 

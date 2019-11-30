@@ -29,6 +29,8 @@ enum class operation {//fixe operations
 };
 
 enum class comparaison {//fixe comparaison
+	_and_,
+	_or_,
 	_equiv_,
 	_diff_,
 	_inferieur_,
@@ -71,6 +73,8 @@ enum class command {
 	_DIVISE_PAR_,
 
 	//COMPARAISON
+	_AND_,
+	_OR_,
 	_EQUIV_,
 	_DIFF_,
 	_SUPERIEUR_,
