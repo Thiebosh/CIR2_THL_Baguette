@@ -7,6 +7,9 @@
 
 %%
 
+vrai    { yylval.intValeur = 1; return INT_VALUE; }
+faux    { yylval.intValeur = 0; return INT_VALUE; }
+
 -?[0-9]+               { yylval.intValeur = atoi(yytext); return INT_VALUE; }
 -?[0-9]+[\.][0-9]*     { yylval.doubleValeur = atof(yytext); return DOUBLE_VALUE; }
 
@@ -44,7 +47,7 @@ sinon	    { return ELSE; }
 tantque 	{ return WHILE; }
 finque 	  { return END_WHILE; }
 faire 	  { return DO; }
-répéter   { return REPEAT; }
+pour      { return FOR; }
 parcourir { return FOREACH; }
 fin	      { return END; }
 

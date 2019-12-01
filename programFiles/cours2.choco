@@ -8,7 +8,7 @@ si valeur > 0
 	AFFICHER "premier if (pas accessible)\n"
 fin
 
-si valeur == 0
+si !faux
 	AFFICHER "deuxieme if - then (accès)\n"
 sinon
 	AFFICHER "deuxieme if - else (pas accessible)\n"
@@ -38,22 +38,11 @@ faire
     AFFICHER "do while : ",--valeur," (2 repetitions)\n"
 finque valeur >= 0
 
-TERMINER
 
-AFFICHER "\n\n\nPARTIE 3 : POUR (à venir)\n\n"
+AFFICHER "\n\n\nPARTIE 4 : POUR\n\n"
+pour i entier = 0 : i < 3 : i = i + 1
+    AFFICHER "for : ",i,"\n"
+fin
 //pour et pour chaque
 
 TERMINER
-
-
-
-
-    '!' comparaison                 {
-                                      addInstruct(command::_EMPILE_VALUE_,(int)0);
-                                      addInstruct(command::_EQUIV_);
-                                    }
-    | operation                     { 
-                                      addInstruct(command::_EMPILE_VALUE_,(int)0);
-                                      addInstruct(command::_DIFF_);
-                                    }
-    

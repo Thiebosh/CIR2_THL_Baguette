@@ -55,7 +55,7 @@
 %token <adresse> WHILE
 %token <adresse> DO
 %token END_WHILE
-%token <adresse> REPEAT
+%token <adresse> FOR
 %token <adresse> FOREACH
 %token END
 
@@ -195,8 +195,10 @@ structure :
 
                         instructionList[$1.refInstructTest].second.intVal = instructionList.size();//<adresse fin then / debut else>
                       }
-      bloc_else       { instructionList[$1.refInstruct].second.intVal = instructionList.size(); }//<adresse fin else / debut end_if>
-      END             { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
+      bloc_else END   { 
+                        instructionList[$1.refInstruct].second.intVal = instructionList.size();//<adresse fin else / debut end_if>
+                        addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/
+                      }
 
     | WHILE           { 
                         addInstruct(command::_ENTER_BLOCK_);
@@ -207,27 +209,41 @@ structure :
                         $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                         addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans bloc, sinon sauter à <adresse end while>)
                       }
-      bloc            {
+      bloc END        {
                             //apres interpretation de bloc :
                         addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse test>)
                         instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse test>
 
                         instructionList[$1.refInstructTest].second.intVal = instructionList.size();//<adresse end while>
+                      
+                        addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/
                       }
-      END             { addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/ }
 
-      | DO                        {
+    | DO                          {
                                     addInstruct(command::_ENTER_BLOCK_);
                                     $1.refInstruct = instructionList.size();//<adresse debut>
                                   }
-      bloc END_WHILE test_logique  {//apres interpretation de operation :
+      bloc END_WHILE test_logique {//apres interpretation de operation :
                                     addInstruct(command::_GOTO_TEST_INV_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
                                     instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
                                     
                                     addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/
                                   }
 
-    // | REPEAT affectation, comparaison, operation '\n' bloc { /* TO DO */ }
+    | FOR                           { addInstruct(command::_ENTER_BLOCK_); }
+      affectation                   { $1.refInstruct = instructionList.size();/*<adresse test>*/ }
+      ':' test_logique              { 
+                                      $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
+                                      addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans bloc, sinon sauter à <adresse end while>)
+                                    } 
+      ':' affectation '\n' bloc END { 
+                                      addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse test>)
+                                      instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse test>
+
+                                      instructionList[$1.refInstructTest].second.intVal = instructionList.size();//<adresse end while>
+                                    
+                                      addInstruct(command::_EXIT_BLOCK_);/*garbage collector*/
+                                    }
     ;
 
 bloc_else : ELSE '\n' bloc | /* Epsilon */ ;
