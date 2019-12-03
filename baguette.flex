@@ -7,6 +7,9 @@
 
 %%
 
+ouvrir_zone_memoire { return ADD_MEMORY_LAYER; }
+fermer_zone_memoire { return REMOVE_MEMORY_LAYER; }
+
 vrai    { yylval.intValeur = 1; return INT_VALUE; }
 faux    { yylval.intValeur = 0; return INT_VALUE; }
 
@@ -16,31 +19,34 @@ faux    { yylval.intValeur = 0; return INT_VALUE; }
 entier                      { return INT; }
 reel                        { return DOUBLE; }
 texte                       { return STRING; }
-\"[0-9A-Za-zéèàçâôùê_!?\'\+\-\*\/\(\)\.(\\(n|t)),;:_ ]*\"  { //OK car guillemets 
-                                                      string read = strdup(yytext);
-                                                      yylval.stringValeur = strdup(read.substr(1,read.size()-2).c_str());//retire les guillemets
-                                                      return STRING_VALUE;
-                                                    }
+\"[^\"\n]*\"  { //OK car guillemets 
+                string read = strdup(yytext);
+                yylval.stringValeur = strdup(read.substr(1,read.size()-2).c_str());//retire les guillemets
+                return STRING_VALUE;
+              }
 
-liste                       { return TAB; }
-TAILLE                      { return SIZE; }
-SUPPRIMER                   { return DELETE; }
+liste       { return TAB; }
+TAILLE      { return SIZE; }
+SUPPRIMER   { return DELETE; }
 
-\+=   { return PLUS_CREMENT; }
-\-=   { return MOINS_CREMENT; }
-\*=   { return FOIS_CREMENT; }
-\/=   { return DIVISE_CREMENT; }
+"++"  { return INCREMENT; }
+"--"  { return DECREMENT; }
+"+="  { return PLUS_CREMENT; }
+"-="  { return MOINS_CREMENT; }
+"*="  { return FOIS_CREMENT; }
+"/="  { return DIVISE_CREMENT; }
 
-ET   { return AND; }
-OU   { return OR; }
-==   { return EQUIV; }
-\!=   { return DIFF; }
-\>=   { return INF_EGAL; }
-\<=   { return SUP_EGAL; }
+ET    { return AND; }
+OU    { return OR; }
+"=="  { return EQUIV; }
+"!="  { return DIFF; }
+">="  { return INF_EGAL; }
+"<="  { return SUP_EGAL; }
 
-AFFICHER	{ return DISPLAY;}
-PAUSE  { return STOP; }//attendre pour delay
-
+AFFICHER  	{ return DISPLAY;}
+PAUSE       { return STOP; }//attendre pour delay
+LIRE_NOMBRE { return GET_NUMBER; }
+LIRE_TEXTE  { return GET_TEXT; }
 
 si 			  { return IF; }
 sinon	    { return ELSE; }
@@ -57,7 +63,7 @@ TERMINER(.|\n)*	{ return END_PRGM; }
 [A-Za-z_][0-9A-Za-z_]*   		{ yylval.nom = strdup(yytext); return VARIABLE_NAME; }
 
 \r\n|\r|\n  	                { return '\n'; }
-[ \t]|\/\/.*|\/\*(.|\n)*\*\/	{ }
+[ \t]|"//".*|"/*"(.|\n)*"*/"	{ }
 .							                { return yytext[0]; }
 
 %%

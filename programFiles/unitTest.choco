@@ -1,5 +1,15 @@
-autreVar reel = -7.5
-calcul entier = 5 + ++autreVar
-AFFICHER "-1 attendu : ",calcul
+var entier = 0
+
+si ++entier == entier 
+    AFFICHER "precrementation"
+sinon
+    AFFICHER "postcrementation
+fin
+
+si entier == ++entier 
+    AFFICHER "precrementation"
+sinon
+    AFFICHER "postcrementation
+fin
 
 TERMINER

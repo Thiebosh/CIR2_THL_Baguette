@@ -2,7 +2,7 @@
 afficher, opérations, variables
 */
 
-//partie 1
+//partie 1 
 AFFICHER "PARTIE 1\n"
 AFFICHER 1,"\n"
 AFFICHER 1.23,"\n","hello world","\n\n"
