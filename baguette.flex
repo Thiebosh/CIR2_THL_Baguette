@@ -61,7 +61,7 @@ fin	      { return END; }
 TERMINER(.|\n)*	{ return END_PRGM; }
 
 
-[A-Za-z_][0-9A-Za-z_]*   		{ yylval.nom = strdup(yytext); return VARIABLE_NAME; }
+[A-Za-z_][0-9A-Za-z_]*   		{ yylval.nom = strdup(yytext); return NAME; }
 
 \r\n|\r|\n  	                { return '\n'; }
 [ \t]|"//".*|"/*"(.|\n)*"*/"	{ }

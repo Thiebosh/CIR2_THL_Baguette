@@ -31,7 +31,7 @@
 %token DOUBLE
 %token STRING
 %token TAB
-%token <nom> VARIABLE_NAME
+%token <nom> NAME
 
 %token SIZE
 %token DELETE
@@ -84,6 +84,7 @@ instruction :
     | affectVar
     | IO
     | structure
+    | function
     ;
 
 memoryBloc :
@@ -101,21 +102,21 @@ output : value { addInstruct(command::_PRINT_); } output_inter ;
 output_inter : /*Epsilon*/ | ',' output ;
 
 oneCrement :
-      INCREMENT VARIABLE_NAME   { 
+      INCREMENT NAME   { 
                                     addInstruct(command::_EMPILE_VALUE_,(int)1);
                                     addInstruct(command::_PLUS_CREMENT_,$2);
                                 }
-    | DECREMENT VARIABLE_NAME   { 
+    | DECREMENT NAME   { 
                                     addInstruct(command::_EMPILE_VALUE_,(int)1);
                                     addInstruct(command::_MOINS_CREMENT_,$2);
                                 }
     
-    | INCREMENT VARIABLE_NAME '['INT_VALUE']'   { 
+    | INCREMENT NAME '['INT_VALUE']'   { 
                                                     addInstruct(command::_EMPILE_VALUE_,(int)1);
                                                     addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
                                                     addInstruct(command::_PLUS_CREMENT_,$2); 
                                                 }
-    | DECREMENT VARIABLE_NAME '['INT_VALUE']'   {
+    | DECREMENT NAME '['INT_VALUE']'   {
                                                     addInstruct(command::_EMPILE_VALUE_,(int)1);
                                                     addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
                                                     addInstruct(command::_MOINS_CREMENT_,$2); 
@@ -123,24 +124,24 @@ oneCrement :
     ;
 
 valCrement :
-      VARIABLE_NAME PLUS_CREMENT    value { addInstruct(command::_PLUS_CREMENT_,$1); }
-    | VARIABLE_NAME MOINS_CREMENT   value { addInstruct(command::_MOINS_CREMENT_,$1); }
-    | VARIABLE_NAME FOIS_CREMENT    value { addInstruct(command::_FOIS_CREMENT_,$1); }
-    | VARIABLE_NAME DIVISE_CREMENT  value { addInstruct(command::_DIVISE_CREMENT_,$1); }
+      NAME PLUS_CREMENT    value { addInstruct(command::_PLUS_CREMENT_,$1); }
+    | NAME MOINS_CREMENT   value { addInstruct(command::_MOINS_CREMENT_,$1); }
+    | NAME FOIS_CREMENT    value { addInstruct(command::_FOIS_CREMENT_,$1); }
+    | NAME DIVISE_CREMENT  value { addInstruct(command::_DIVISE_CREMENT_,$1); }
 
-    | VARIABLE_NAME'['INT_VALUE']' PLUS_CREMENT    value    { 
+    | NAME'['INT_VALUE']' PLUS_CREMENT    value    { 
                                                                 addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
                                                                 addInstruct(command::_PLUS_CREMENT_,$1);//ajouter verif : si pas var, cherche dans tab et recupere indice tab
                                                             }
-    | VARIABLE_NAME'['INT_VALUE']' MOINS_CREMENT   value    { 
+    | NAME'['INT_VALUE']' MOINS_CREMENT   value    { 
                                                                 addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
                                                                 addInstruct(command::_MOINS_CREMENT_,$1); 
                                                             }
-    | VARIABLE_NAME'['INT_VALUE']' FOIS_CREMENT    value    { 
+    | NAME'['INT_VALUE']' FOIS_CREMENT    value    { 
                                                                 addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
                                                                 addInstruct(command::_FOIS_CREMENT_,$1);
                                                             }
-    | VARIABLE_NAME'['INT_VALUE']' DIVISE_CREMENT  value    { 
+    | NAME'['INT_VALUE']' DIVISE_CREMENT  value    { 
                                                                 addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
                                                                 addInstruct(command::_DIVISE_CREMENT_,$1);
                                                             }
@@ -149,41 +150,41 @@ valCrement :
 varCrement : oneCrement | valCrement ;
 
 affectVar :
-    VARIABLE_NAME INT '=' value         {
-                                            addInstruct(command::_EMPILE_VALUE_,(int)1);//type var
-                                            addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
-                                        }
-    | VARIABLE_NAME DOUBLE '=' value    { 
-                                            addInstruct(command::_EMPILE_VALUE_,(double)1);//type var
-                                            addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
-                                        }
-    | VARIABLE_NAME STRING '=' value    { 
-                                            addInstruct(command::_EMPILE_VALUE_,(string)"");//type var
-                                            addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
-                                        }
-    | VARIABLE_NAME '=' value           { addInstruct(command::_UPDATE_VARIABLE_,$1); } //nom var
+    NAME INT '=' value      {
+                                addInstruct(command::_EMPILE_VALUE_,(int)1);//type var
+                                addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
+                            }
+    | NAME DOUBLE '=' value { 
+                                addInstruct(command::_EMPILE_VALUE_,(double)1);//type var
+                                addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
+                            }
+    | NAME STRING '=' value { 
+                                addInstruct(command::_EMPILE_VALUE_,(string)"");//type var
+                                addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
+                            }
+    | NAME '=' value        { addInstruct(command::_UPDATE_VARIABLE_,$1); } //nom var
     
     | valCrement
 
-    | VARIABLE_NAME TAB INT '=' value           { 
+    | NAME TAB INT '=' value           { 
                                                     addInstruct(command::_EMPILE_VALUE_,(string)$1);//nom tab
                                                     addInstruct(command::_CREATE_TABLE_,(int)1);//type var
                                                 }
-    | VARIABLE_NAME TAB DOUBLE '=' value        { 
+    | NAME TAB DOUBLE '=' value        { 
                                                     addInstruct(command::_EMPILE_VALUE_,(string)$1);//nom tab
                                                     addInstruct(command::_CREATE_TABLE_,(double)1);//type var
                                                 }
-    | VARIABLE_NAME TAB STRING '=' value        { 
+    | NAME TAB STRING '=' value        { 
                                                     addInstruct(command::_EMPILE_VALUE_,(string)$1);//nom tab
                                                     addInstruct(command::_CREATE_TABLE_,"");//type var
                                                 }
-    | VARIABLE_NAME'['']' '=' value             { addInstruct(command::_ADD_TABLE_ELEMENT_,$1); } //nom tab
-    | VARIABLE_NAME'['INT_VALUE']' '=' value    { 
+    | NAME'['']' '=' value             { addInstruct(command::_ADD_TABLE_ELEMENT_,$1); } //nom tab
+    | NAME'['INT_VALUE']' '=' value    { 
                                                     addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
                                                     addInstruct(command::_UPDATE_TABLE_ELEMENT_,$1);//nom tab
                                                   }
 
-    | DELETE VARIABLE_NAME'['INT_VALUE']'   { 
+    | DELETE NAME'['INT_VALUE']'   { 
                                                 addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
                                                 addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);//nom tab
                                             }
@@ -196,15 +197,15 @@ value :
     | DOUBLE_VALUE    { addInstruct(command::_EMPILE_VALUE_,(double)$1); }
     | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,(string)$1); }
     
-    | SIZE VARIABLE_NAME            { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
+    | SIZE NAME            { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
 
     | value '+' value     { addInstruct(command::_PLUS_);}
     | value '-' value     { addInstruct(command::_MOINS_);}
     | value '*' value     { addInstruct(command::_FOIS_);}
     | value '/' value     { addInstruct(command::_DIVISE_PAR_);}
     
-    | VARIABLE_NAME                 { addInstruct(command::_EMPILE_VARIABLE_,$1); }
-    | VARIABLE_NAME'['INT_VALUE']'  { 
+    | NAME                 { addInstruct(command::_EMPILE_VARIABLE_,$1); }
+    | NAME'['INT_VALUE']'  { 
                                       addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
                                       addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
                                     }
@@ -302,17 +303,46 @@ structure :
     ;
 
 bloc_else : /* Epsilon */ | ELSE '\n' instructBloc ;
-%%
-/*
-functions :
-    FUNCTION type {createFunction}//se charge d'enregistrer instruct ref
-      '(' arguments ')'
-      instructBloc
-      END
 
-    | FUNCTION '(' valeurs ')' {call function} //se charge d'ajouter couche mémoire
-        END { exit function} //se charge de retirer couche memoire
-      */
+function :
+    NAME INT                { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
+      '(' argument ')''\n'  { 
+                                addInstruct(command::_EMPILE_VALUE_,(int)1);//type de retours
+                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse debut fonction
+                                addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
+                                addInstruct(command::_ENTER_FUNCTION_);
+                                addInstruct(command::_ENTER_BLOCK_);
+                            }
+      instructBloc END      { 
+                                addInstruct(command::_EXIT_BLOCK_);
+                                addInstruct(command::_EXIT_FUNCTION_);
+                                addInstruct(command::_GOTO_PILE_);//ok
+                            }
+
+    | NAME              { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
+      '(' argument ')'  { 
+                            addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse de retour dans la pile
+                            addInstruct(command::_CALL_FUNCTION_);//todo
+                        }
+    ;
+
+argument :
+    NAME INT argument_inter         {
+                                        addInstruct(command::_EMPILE_VALUE_,(int)1);//type var
+                                        addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
+                                    }
+    | NAME DOUBLE argument_inter    { 
+                                        addInstruct(command::_EMPILE_VALUE_,(double)1);//type var
+                                        addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
+                                    }
+    | NAME STRING argument_inter    { 
+                                        addInstruct(command::_EMPILE_VALUE_,(string)"");//type var
+                                        addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
+                                    }
+    ;
+argument_inter : /*Epsilon*/ | ',' argument ;
+    
+%%
 
 int main(int argc, char **argv) {
   if (!folderExist()) exit(0);//ne peut pas fonctionner sans

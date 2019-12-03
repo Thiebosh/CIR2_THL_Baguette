@@ -58,9 +58,10 @@ enum class command {
 	_EXIT_BLOCK_,
 
 	//FONCTIONS
-	_CREATE_FUNCTION_,
 	_ENTER_FUNCTION_,
 	_EXIT_FUNCTION_,
+	_CREATE_FUNCTION_,
+	_CALL_FUNCTION_,
 
 	//EMPILEMENT
 	_EMPILE_VALUE_,
@@ -91,6 +92,7 @@ enum class command {
 	//SAUTS (conditions, boucles, fonctions)
 	_GOTO_,
 	_GOTO_TEST_,
+	_GOTO_PILE_,
 
 	//VARIABLES
 	_CREATE_VARIABLE_,
