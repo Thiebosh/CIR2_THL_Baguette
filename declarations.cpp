@@ -92,7 +92,6 @@ enum class command {
 	//SAUTS (conditions, boucles, fonctions)
 	_GOTO_,
 	_GOTO_TEST_,
-	_GOTO_PILE_,
 
 	//VARIABLES
 	_CREATE_VARIABLE_,

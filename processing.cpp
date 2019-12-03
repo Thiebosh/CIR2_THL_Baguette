@@ -22,15 +22,39 @@ const map<command, functionPointer> executeCommand = {
 	{command::_EXIT_BLOCK_,	[](valInstruct& instructContent) { exitMemoryLayer();	}},
 
 
-	{command::_ENTER_FUNCTION_,	[](valInstruct& instructContent) { variables.push({}); }},//separation memoire
-	{command::_EXIT_FUNCTION_,	[](valInstruct& instructContent) { variables.pop(); }},
+	{command::_ENTER_FUNCTION_,	
+		[](valInstruct& instructContent) { 
+			variables.push({});//separation memoire
+			enterMemoryLayer();//nettoyage plus simple
+		}},
+	{command::_EXIT_FUNCTION_,	
+		[](valInstruct& instructContent) {
+			exitMemoryLayer();
+			variables.pop();
+
+			valAccess returnInstruct = castVal(depiler(),valType::_int_);
+			indexInstruction = intList[returnInstruct.tabPos];
+			delVal(returnInstruct);
+		}},
 	{command::_CREATE_FUNCTION_,
 		[](valInstruct& instructContent) {
-			
+			/*
+				nom fonction dans instruct content
+				adresse debut fonctin dans pile
+				type fonction dans pile
+
+				tant que val pile != -1, parametre (nom puis type var)
+			*/
 		}},
 	{command::_CALL_FUNCTION_,
 		[](valInstruct& instructContent) {
-			
+			/*
+				nom fonction dans instruct content
+				recupere adresse retour
+				tant que val pile != -1, parametre (nom puis type var)
+				saute a adresse debut fonction
+				remet adresse retour dans pile
+			*/
 		}},
 
 
@@ -107,12 +131,6 @@ const map<command, functionPointer> executeCommand = {
 				indexInstruction = instructContent.intVal;//cas if not 0 : incrementation prealable
 			}
 
-			delVal(testResult);
-		}},
-	{command::_GOTO_PILE_,
-		[](valInstruct& instructContent) {
-			valAccess testResult = castVal(depiler(),valType::_int_);
-			indexInstruction = intList[testResult.tabPos];
 			delVal(testResult);
 		}},
 
