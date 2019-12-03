@@ -207,7 +207,7 @@ void executeCrement(string varName, operation operation) {
 	//recupere valeur
 	valAccess valCast = depiler();
 
-	if (variables.find(varName) != variables.end()) {//var existe bien
+	if (variables.top().find(varName) != variables.top().end()) {//var existe bien
 		//1 : changer val en double ou string
 		double valDouble(0);
 		string valString("");
@@ -224,12 +224,12 @@ void executeCrement(string varName, operation operation) {
 		valAccess varCast;
 		double varDouble(0);
 		string varString("");
-		if (variables[varName].type == valType::_string_) {
-			varCast = variables[varName];
+		if (variables.top()[varName].type == valType::_string_) {
+			varCast = variables.top()[varName];
 			varString = stringList[varCast.tabPos];
 		}
 		else {
-			varCast = castVal(variables[varName], valType::_double_, 1);
+			varCast = castVal(variables.top()[varName], valType::_double_, 1);
 			varDouble = doubleList[varCast.tabPos];
 		}
 
@@ -251,22 +251,22 @@ void executeCrement(string varName, operation operation) {
 		}
 
 		//4 : intégrer résultat dans variable (verif de type)
-		switch (variables[varName].type) {
+		switch (variables.top()[varName].type) {
 		case valType::_int_:
-			intList[variables[varName].tabPos] = (int)varDouble;
+			intList[variables.top()[varName].tabPos] = (int)varDouble;
 			break;
 		case valType::_double_:
-			doubleList[variables[varName].tabPos] = varDouble;
+			doubleList[variables.top()[varName].tabPos] = varDouble;
 			break;
 		case valType::_string_:
-			stringList[variables[varName].tabPos] = varString;
+			stringList[variables.top()[varName].tabPos] = varString;
 			break;
 		}
 		
 		delVal(varCast);
 		delVal(valCast);
 		//5 : ajouter copie a la pile si besoin
-		if (variables[varName].type == valType::_string_) {
+		if (variables.top()[varName].type == valType::_string_) {
 			executionPile.push({ valType::_string_,(int)stringList.size() });
 			stringList.push_back(varString);
 		}

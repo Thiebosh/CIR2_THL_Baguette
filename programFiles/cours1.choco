@@ -28,8 +28,8 @@ autreVar reel = maVar / 2 - 12
 AFFICHER "j'affecte une opération complexe à une variable réelle : ",autreVar,"\n\n"
 
 //pb : prend 5 et pas somme mais marche quand isolé
-//calcul entier = 5 + ++autreVar
-//AFFICHER "j'incrémente la variable réelle, je lui ajoute 5 et je caste le résultat : ",calcul," (var réelle : ",autreVar,")\n\n"
+calcul entier = 5 + ++autreVar    //pb : prend mauvaise val
+AFFICHER "j'incrémente la variable réelle, je lui ajoute 5 et je caste le résultat : ",calcul," (var réelle : ",autreVar,")\n\n"
 
 placeAuxStrings texte = "hello"
 placeAuxStrings += " world"

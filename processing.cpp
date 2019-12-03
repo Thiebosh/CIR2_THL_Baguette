@@ -22,30 +22,45 @@ const map<command, functionPointer> executeCommand = {
 	{command::_EXIT_BLOCK_,	[](valInstruct& instructContent) { exitMemoryLayer();	}},
 
 
+	{command::_CREATE_FUNCTION_,
+		[](valInstruct& instructContent) {
+			
+		}},
+	{command::_ENTER_FUNCTION_,
+		[](valInstruct& instructContent) {
+			variables.push({});//separation memoire
+			
+		}},
+	{command::_EXIT_FUNCTION_,
+		[](valInstruct& instructContent) {
+			variables.pop();
+		}},
+
+
 	{command::_EMPILE_VALUE_,[](valInstruct& instructContent) { executionPile.push(addVal(instructContent)); }},
 	{command::_EMPILE_VARIABLE_,
 		[](valInstruct& instructContent) {
 			string name = instructContent.stringVal;
 
-			if (variables.find(name) != variables.end()) {//var existe bien
+			if (variables.top().find(name) != variables.top().end()) {//var existe bien
 				//empile une copie qui sera supprimee apres utilisation
-				valAccess copy = { variables[name].type };
+				valAccess copy = { variables.top()[name].type };
 				switch (copy.type) {
 					case valType::_bool_:
 						copy.tabPos = boolList.size();
-						boolList.push_back(boolList[variables[name].tabPos]);
+						boolList.push_back(boolList[variables.top()[name].tabPos]);
 						break;
 					case valType::_int_:
 						copy.tabPos = intList.size();
-						intList.push_back(intList[variables[name].tabPos]);
+						intList.push_back(intList[variables.top()[name].tabPos]);
 						break;
 					case valType::_double_:
 						copy.tabPos = doubleList.size();
-						doubleList.push_back(doubleList[variables[name].tabPos]);
+						doubleList.push_back(doubleList[variables.top()[name].tabPos]);
 						break;
 					case valType::_string_:
 						copy.tabPos = stringList.size();
-						stringList.push_back(stringList[variables[name].tabPos]);
+						stringList.push_back(stringList[variables.top()[name].tabPos]);
 						break;
 				}
 				executionPile.push(copy);
@@ -63,54 +78,6 @@ const map<command, functionPointer> executeCommand = {
 		}},
 	*/
 
-	{command::_INCREMENT_,
-		[](valInstruct& instructContent) {
-			string name = instructContent.stringVal;
-
-			if (variables.find(name) != variables.end()) {//var existe bien
-				valAccess copy = { variables[name].type };//copie supprimee apres utilisation
-
-				if (variables[name].type == valType::_int_) {
-					++intList[variables[name].tabPos];
-
-					copy.tabPos = intList.size();
-					intList.push_back(intList[variables[name].tabPos]);
-					executionPile.push(copy);
-				}
-				else if (variables[name].type == valType::_double_) {
-					++doubleList[variables[name].tabPos];
-
-					copy.tabPos = intList.size();
-					doubleList.push_back(doubleList[variables[name].tabPos]);
-					executionPile.push(copy);
-				}
-			}
-			else error(errorCode::unknowVariable);
-		}},
-	{command::_DECREMENT_,
-		[](valInstruct& instructContent) {
-			string name = instructContent.stringVal;
-
-			if (variables.find(name) != variables.end()) {//var existe bien
-				valAccess copy = { variables[name].type };
-
-				if (variables[name].type == valType::_int_) {
-					--intList[variables[name].tabPos];
-
-					copy.tabPos = intList.size();
-					intList.push_back(intList[variables[name].tabPos]);
-					executionPile.push(copy);
-				}
-				else if (variables[name].type == valType::_double_) {
-					--doubleList[variables[name].tabPos];
-
-					copy.tabPos = intList.size();
-					doubleList.push_back(doubleList[variables[name].tabPos]);
-					executionPile.push(copy);
-				}
-			}
-			else error(errorCode::unknowVariable);
-		}},
 	{command::_PLUS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_plus_);		}},
 	{command::_MOINS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_moins_); 		}},
 	{command::_FOIS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_fois_); 		}},
@@ -145,19 +112,6 @@ const map<command, functionPointer> executeCommand = {
 
 			delVal(testResult);
 		}},
-	{command::_GOTO_TEST_INV_,
-		[](valInstruct& instructContent) {
-			valAccess testResult = depiler();
-
-			if (testResult.tabPos != -1 &&
-				(testResult.type == valType::_bool_ && boolList[testResult.tabPos] == true) ||
-				(testResult.type == valType::_int_ && intList[testResult.tabPos] != 0) ||
-				(testResult.type == valType::_double_ && doubleList[testResult.tabPos] != 0)) {
-				indexInstruction = instructContent.intVal;//cas if not 0 : incrementation prealable
-			}
-
-			delVal(testResult);
-		}},
 
 
 	{command::_CREATE_VARIABLE_,
@@ -169,8 +123,8 @@ const map<command, functionPointer> executeCommand = {
 
 			valAccess value = castVal(depiler(), varType);//adresse de val a associer a var, convertie ou plante programme
 
-			if (variables.find(instructContent.stringVal) == variables.end()) {//var est bien nouvelle
-				variables.insert({instructContent.stringVal,value});
+			if (variables.top().find(instructContent.stringVal) == variables.top().end()) {//var est bien nouvelle
+				variables.top().insert({instructContent.stringVal,value});
 			}
 			else error(errorCode::alreadyUseVariable);
 		}},
@@ -180,8 +134,8 @@ const map<command, functionPointer> executeCommand = {
 			string name = instructContent.stringVal;
 
 			valAccess value = depiler();//adresse de val a associer a var
-			if (variables.find(name) != variables.end()) {//var existe bien
-				variables[name] = castVal(value, variables[name].type);
+			if (variables.top().find(name) != variables.top().end()) {//var existe bien
+				variables.top()[name] = castVal(value, variables.top()[name].type);
 			}
 			else error(errorCode::unknowVariable);
 		}},
@@ -321,12 +275,6 @@ void displayGeneratedProgram() {
 						break;
 			*/
 
-		case command::_INCREMENT_:
-			cout << "AJOUTE 1 A LA VARIABLE '" << instructContent.second.stringVal << "'";
-			break;
-		case command::_DECREMENT_:
-			cout << "ENLEVE 1 A LA VARIABLE '" << instructContent.second.stringVal << "'";
-			break;
 		case command::_PLUS_CREMENT_:
 			cout << "SOMME LA VARIABLE '" << instructContent.second.stringVal << "' ET LA DERNIERE VALEUR";
 			break;
@@ -372,16 +320,10 @@ void displayGeneratedProgram() {
 		case command::_GOTO_TEST_:
 			cout << "SI DERNIERE VALEUR VAUT 0, CONTINUER A L'INSTRUCTION " << instructContent.second.intVal;
 			break;
-		case command::_GOTO_TEST_INV_:
-			cout << "SI DERNIERE VALEUR DIFFERENTE DE 0, CONTINUER A L'INSTRUCTION " << instructContent.second.intVal;
-			break;
 
 
 		case command::_CREATE_VARIABLE_:
-			if (variables.find(instructContent.second.stringVal) == variables.end()) {//var est bien nouvelle
-				cout << "INITIALISE VARIABLE '" << instructContent.second.stringVal << "'";
-			}
-			else cout << "ERREUR : VARIABLE '" << name << "' EXISTE DEJA";
+			cout << "INITIALISE VARIABLE '" << instructContent.second.stringVal << "'";
 			break;
 		case command::_UPDATE_VARIABLE_:
 			cout << "ACTUALISE VARIABLE '" << instructContent.second.stringVal << "'";
@@ -466,6 +408,7 @@ void displayGeneratedProgram() {
 void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
 	cout << endl << "===== EXECUTION =====" << endl;
 	indexInstruction = 0;
+	variables.push({});//niveau 0 : main
 	while (indexInstruction < instructionList.size()) {
 		instruction instructContent = instructionList[indexInstruction];
 		indexInstruction++;
@@ -476,5 +419,6 @@ void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
 			cout << "unknow command : " << (int)instructContent.first << endl;
 		}
 	}
+	variables.pop();//niveau 0
 	cout << endl << "=====================" << endl;
 }

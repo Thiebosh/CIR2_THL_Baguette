@@ -26,8 +26,8 @@ valAccess addVal(valInstruct instructContent) {
 valAccess addVar(valInstruct instructContent) {
 	string name = stringList[castVal(depiler(), valType::_string_).tabPos];
 
-	variables.insert({ name,addVal(instructContent) });
-	return { instructContent.type,variables[name].tabPos };
+	variables.top().insert({ name,addVal(instructContent) });
+	return { instructContent.type,variables.top()[name].tabPos };
 }
 
 
@@ -58,9 +58,9 @@ void delVal(valAccess val) {
 	}
 
 	//VARIABLES : decremente references tableau des valeurs suivantes
-	for (auto var : variables) {
+	for (auto var : variables.top()) {
 		if (var.second.type == val.type && var.second.tabPos > val.tabPos) {
-			variables[var.first].tabPos--;
+			variables.top()[var.first].tabPos--;
 		}
 	}
 
@@ -87,8 +87,8 @@ void delVal(valAccess val) {
 
 void delVar(string name) {
 	//decremente references tableau des valeurs suivantes dans la pile et la liste de variables + supprime valeur du tableau
-	delVal(variables[name]);
-	variables.erase(name);
+	delVal(variables.top()[name]);
+	variables.top().erase(name);
 }
 
 void delTabVal(string tabName, int tabCase) {
@@ -187,12 +187,12 @@ void exitMemoryLayer() {
 	}
 
 	//supprime variables declarees dans le bloc
-	map<string, valAccess> variablesCopy = variables;
+	map<string, valAccess> variablesCopy = variables.top();
 	for (auto var : variablesCopy) {
-		if ((var.second.type == valType::_bool_ && (unsigned)var.second.tabPos > initial.boolListSize) ||
-			(var.second.type == valType::_int_ && (unsigned)var.second.tabPos > initial.intListSize) ||
-			(var.second.type == valType::_double_ && (unsigned)var.second.tabPos > initial.doubleListSize) ||
-			(var.second.type == valType::_string_ && (unsigned)var.second.tabPos > initial.stringListSize)) {
+		if ((var.second.type == valType::_bool_ 	&& (unsigned)var.second.tabPos > initial.boolListSize) ||
+			(var.second.type == valType::_int_ 		&& (unsigned)var.second.tabPos > initial.intListSize) ||
+			(var.second.type == valType::_double_ 	&& (unsigned)var.second.tabPos > initial.doubleListSize) ||
+			(var.second.type == valType::_string_ 	&& (unsigned)var.second.tabPos > initial.stringListSize)) {
 			delVar(var.first);
 		}
 	}

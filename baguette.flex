@@ -55,6 +55,7 @@ finque 	  { return END_WHILE; }
 faire 	  { return DO; }
 pour      { return FOR; }
 parcourir { return FOREACH; }
+recette   { return FUNCTION; }
 fin	      { return END; }
 
 TERMINER(.|\n)*	{ return END_PRGM; }

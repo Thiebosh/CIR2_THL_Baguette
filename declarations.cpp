@@ -1,5 +1,6 @@
 //memory
 #include <string>
+#include <vector>
 #include <deque>
 #include <stack>
 #include <map>
@@ -56,6 +57,11 @@ enum class command {
 	_ENTER_BLOCK_,
 	_EXIT_BLOCK_,
 
+	//FONCTIONS
+	_CREATE_FUNCTION_,
+	_ENTER_FUNCTION_,
+	_EXIT_FUNCTION_,
+
 	//EMPILEMENT
 	_EMPILE_VALUE_,
 	_EMPILE_VARIABLE_,
@@ -63,8 +69,6 @@ enum class command {
 	_EMPILE_TABLE_ELEMENT_,
 
 	//OPERATIONS (var to var)
-	_INCREMENT_,
-	_DECREMENT_,
 	_PLUS_CREMENT_,
 	_MOINS_CREMENT_,
 	_FOIS_CREMENT_,
@@ -87,7 +91,6 @@ enum class command {
 	//SAUTS (conditions, boucles, fonctions)
 	_GOTO_,
 	_GOTO_TEST_,
-	_GOTO_TEST_INV_,
 
 	//VARIABLES
 	_CREATE_VARIABLE_,
@@ -140,6 +143,14 @@ typedef struct {//initialiser dans ordre de déclaration
 	string stringVal = "";
 } valInstruct;
 
+typedef pair<string,valType> param;
+
+typedef struct {
+	int refInstruct;
+	valType returnVal;
+	vector<param> listParam;
+} functionAccess;
+
 typedef pair<command, valInstruct> instruction;
 
 typedef void (*functionPointer)(valInstruct& instructContent);//necessaire pour map de commandes - fonctions lambda
@@ -155,7 +166,7 @@ deque<string>	stringList;
 
 stack<valAccess> executionPile;
 
-map<string, valAccess> variables;
+stack<map<string, valAccess>> variables;
 
 deque<int>		intArray;
 deque<double>	doubleArray;
@@ -163,6 +174,8 @@ deque<string>	stringArray;
 map<string, tabAccess> tableaux;
 
 stack<memoryState> memoryLayer;
+
+map<string, functionAccess> fonctions;
 
 deque<instruction> instructionList;
 

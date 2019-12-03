@@ -20,6 +20,7 @@
   char*   stringValeur;
   char*   nom;
   instructAdress adresse;
+  instructAdress declareFonction;
 }
 
 %token <intValeur>    INT_VALUE
@@ -61,6 +62,7 @@
 %token END_WHILE
 %token <adresse> FOR
 %token <adresse> FOREACH
+%token <adresse> FUNCTION //refinstruct : instruction de debut de la fonction
 %token END
 
 %token ADD_MEMORY_LAYER
@@ -99,16 +101,24 @@ output : value { addInstruct(command::_PRINT_); } output_inter ;
 output_inter : /*Epsilon*/ | ',' output ;
 
 oneCrement :
-      INCREMENT VARIABLE_NAME  { addInstruct(command::_INCREMENT_,$2); }
-    | DECREMENT VARIABLE_NAME  { addInstruct(command::_DECREMENT_,$2); }
+      INCREMENT VARIABLE_NAME   { 
+                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
+                                    addInstruct(command::_PLUS_CREMENT_,$2);
+                                }
+    | DECREMENT VARIABLE_NAME   { 
+                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
+                                    addInstruct(command::_MOINS_CREMENT_,$2);
+                                }
     
     | INCREMENT VARIABLE_NAME '['INT_VALUE']'   { 
+                                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
                                                     addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
-                                                    addInstruct(command::_INCREMENT_,$2); 
+                                                    addInstruct(command::_PLUS_CREMENT_,$2); 
                                                 }
     | DECREMENT VARIABLE_NAME '['INT_VALUE']'   {
+                                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
                                                     addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
-                                                    addInstruct(command::_DECREMENT_,$2); 
+                                                    addInstruct(command::_MOINS_CREMENT_,$2); 
                                                 }
     ;
 
@@ -267,7 +277,9 @@ structure :
                                             $1.refInstruct = instructionList.size();//<adresse debut>
                                         }
       instructBloc END_WHILE logic_test {//apres interpretation de operation :
-                                            addInstruct(command::_GOTO_TEST_INV_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
+                                            addInstruct(command::_EMPILE_VALUE_,(int)0);
+                                            addInstruct(command::_EQUIV_);
+                                            addInstruct(command::_GOTO_TEST_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
                                             instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
                                             
                                             addInstruct(command::_EXIT_BLOCK_);
@@ -291,6 +303,16 @@ structure :
 
 bloc_else : /* Epsilon */ | ELSE '\n' instructBloc ;
 %%
+/*
+functions :
+    FUNCTION type {createFunction}//se charge d'enregistrer instruct ref
+      '(' arguments ')'
+      instructBloc
+      END
+
+    | FUNCTION '(' valeurs ')' {call function} //se charge d'ajouter couche mémoire
+        END { exit function} //se charge de retirer couche memoire
+      */
 
 int main(int argc, char **argv) {
   if (!folderExist()) exit(0);//ne peut pas fonctionner sans
