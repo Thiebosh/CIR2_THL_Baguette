@@ -20,8 +20,6 @@ void addInstruct(command command, string stringValue) {
 const map<command, functionPointer> executeCommand = {
 	{command::_ENTER_BLOCK_,[](valInstruct& instructContent) { enterMemoryLayer();	}},
 	{command::_EXIT_BLOCK_,	[](valInstruct& instructContent) { exitMemoryLayer();	}},
-
-
 	{command::_ENTER_FUNCTION_,	
 		[](valInstruct& instructContent) { 
 			variables.push({});//separation memoire
@@ -32,10 +30,14 @@ const map<command, functionPointer> executeCommand = {
 			exitMemoryLayer();
 			variables.pop();
 
-			valAccess returnInstruct = castVal(depiler(),valType::_int_);
-			indexInstruction = intList[returnInstruct.tabPos];
-			delVal(returnInstruct);
+			if (!variables.empty()) { //si ne quitte pas le programme, cherche l'instruction qui suit l'appel
+				valAccess returnInstruct = castVal(depiler(),valType::_int_);
+				indexInstruction = intList[returnInstruct.tabPos];
+				delVal(returnInstruct);
+			}
 		}},
+
+
 	{command::_CREATE_FUNCTION_,
 		[](valInstruct& instructContent) {
 			/*
@@ -50,10 +52,9 @@ const map<command, functionPointer> executeCommand = {
 		[](valInstruct& instructContent) {
 			/*
 				nom fonction dans instruct content
-				recupere adresse retour
 				tant que val pile != -1, parametre (nom puis type var)
 				saute a adresse debut fonction
-				remet adresse retour dans pile
+				met adresse retour dans pile (push indexInstruction+1)
 			*/
 		}},
 
@@ -427,9 +428,9 @@ void displayGeneratedProgram() {
 }
 
 void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
-	cout << endl << "===== EXECUTION =====" << endl;
 	indexInstruction = 0;
-	variables.push({});//niveau 0 : main
+
+	cout << endl << "===== EXECUTION =====" << endl;
 	while (indexInstruction < instructionList.size()) {
 		instruction instructContent = instructionList[indexInstruction];
 		indexInstruction++;
@@ -440,6 +441,5 @@ void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
 			cout << "unknow command : " << (int)instructContent.first << endl;
 		}
 	}
-	variables.pop();//niveau 0
 	cout << endl << "=====================" << endl;
 }

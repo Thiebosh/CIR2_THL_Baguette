@@ -180,11 +180,8 @@ void exitMemoryLayer() {
 		}
 	}
 
-	memoryState initial;
-	if (!memoryLayer.empty()) {//pas besoin de declarer nouvel espace memoire au demarrage
-		initial = memoryLayer.top();
-		memoryLayer.pop();
-	}
+	memoryState initial = memoryLayer.top();//memoryState a 1 minimum
+	memoryLayer.pop();
 
 	//supprime variables declarees dans le bloc
 	map<string, valAccess> variablesCopy = variables.top();

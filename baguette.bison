@@ -74,7 +74,7 @@
 %left '*' '/'     /* associativité à gauche */
 
 %%
-program : instructBloc END_PRGM { addInstruct(command::_EXIT_BLOCK_); };
+program : { addInstruct(command::_ENTER_FUNCTION_); } instructBloc END_PRGM { addInstruct(command::_EXIT_FUNCTION_); };
 
 instructBloc : /*Epsilon*/ | instruction '\n' instructBloc ;
 
@@ -315,10 +315,7 @@ function :
       instructBloc END      { addInstruct(command::_EXIT_FUNCTION_); }
 
     | NAME              { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
-      '(' argument ')'  { 
-                            addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse de retour dans la pile
-                            addInstruct(command::_CALL_FUNCTION_,$1);//todo
-                        }
+      '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }//todo
     ;
 
 argument :
