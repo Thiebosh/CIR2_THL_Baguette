@@ -50,6 +50,7 @@
 %token INF_EGAL
 %token SUP_EGAL
 
+%token INPUT
 %token DISPLAY
 %token STOP
 %token GET_NUMBER
