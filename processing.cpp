@@ -23,12 +23,14 @@ const map<command, functionPointer> executeCommand = {
 	{command::_ENTER_FUNCTION_,	
 		[](valInstruct& instructContent) { 
 			variables.push({});//separation memoire
+			tableaux.push({});//separation memoire
 			enterMemoryLayer();//nettoyage plus simple
 		}},
 	{command::_EXIT_FUNCTION_,	
 		[](valInstruct& instructContent) {
 			exitMemoryLayer();
 			variables.pop();
+			tableaux.pop();
 
 			if (!variables.empty()) { //si ne quitte pas le programme, cherche l'instruction qui suit l'appel
 				valAccess returnInstruct = castVal(depiler(),valType::_int_);
@@ -136,26 +138,6 @@ const map<command, functionPointer> executeCommand = {
 		}},
 
 
-			delVal(testResult);
-		}},
-	{command::_READ_,
-		[](valInstruct& instructContent) {
-			string valName = valInstruct.second;
-			if (variables.top().find(valName) != variables.top().end()){
-				switch (Variables.top()[vaLName].type){
-
-					case valType::_int_ :
-						cin >> intList[variables.top()[valName].tabPos];
-					case valType::_double_ :
-						cin >> doubleList[variables.top()[valName].tabPos];
-					case valType::_string_ :
-						cin >> stringList[variables.top()[valName].tabPos]; 
-				}
-			}
-			else cout << "ERREUR : VARIABLE " << valName << " N'EXISTE PAS";
-		}},
-
-
 	{command::_CREATE_VARIABLE_,
 		[](valInstruct& instructContent) {
 			//recupere type de val
@@ -229,8 +211,25 @@ const map<command, functionPointer> executeCommand = {
 			cout << endl << "Entrez un caractère pour continuer... ";
 			void* tmp;
 			cin >> tmp;
+		}},
+	{command::_READ_,
+		[](valInstruct& instructContent) {
+			string valName = instructContent.stringVal;
+			if (variables.top().find(valName) != variables.top().end()){
+				switch (variables.top()[valName].type){
+					case valType::_int_ :
+						cin >> intList[variables.top()[valName].tabPos];
+						break;
+					case valType::_double_ :
+						cin >> doubleList[variables.top()[valName].tabPos];
+						break;
+					case valType::_string_ :
+						cin >> stringList[variables.top()[valName].tabPos]; 
+						break;
+				}
+			}
+			else error(errorCode::unknowVariable);
 		}}
-			//entree
 };
 
 
@@ -279,8 +278,8 @@ void displayGeneratedProgram() {
 			/*
 					case command::_EMPILE_TABLE_SIZE_:
 						name = stringList[instructContent.second.tabPos];
-						if (tableaux.find(name) != tableaux.end()) {//var existe bien
-							switch(tableaux[name].type) {
+						if (tableaux.top().find(name) != tableaux.top().end()) {//var existe bien
+							switch(tableaux.top()[name].type) {
 							case valType::_int_:
 								size = intList.size();
 								break;
@@ -299,9 +298,9 @@ void displayGeneratedProgram() {
 						name = stringList[instructContent.second.tabPos];
 						tabPos = intList[executionPile.top().tabPos];//recupere val associee a adresse
 
-						if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
-							tabPos = tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
-							switch(tableaux[name].type) {
+						if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
+							tabPos = tableaux.top()[name].valuesPos[tabPos];//recupere val a case souhaitee
+							switch(tableaux.top()[name].type) {
 							case valType::_int_:
 								cout << "AJOUTE ", intArray[tabPos]," A LA PILE";
 								break;
@@ -374,7 +373,7 @@ void displayGeneratedProgram() {
 			/*
 					case command::_CREATE_TABLE_:
 						name = stringList[instructContent.second.tabPos];
-						if (tableaux.find(name) == tableaux.end()) {
+						if (tableaux.top().find(name) == tableaux.top().end()) {
 							value = executionPile.top();
 
 							if (instructContent.second.type == value.type) {
@@ -386,7 +385,7 @@ void displayGeneratedProgram() {
 						break;
 					case command::_ADD_TABLE_ELEMENT_:
 						name = stringList[instructContent.second.tabPos];
-						if (tableaux.find(name) != tableaux.end()) {
+						if (tableaux.top().find(name) != tableaux.top().end()) {
 							value = executionPile.top();
 
 							if (instructContent.second.type == value.type) {
@@ -398,12 +397,12 @@ void displayGeneratedProgram() {
 						break;
 					case command::_UPDATE_TABLE_ELEMENT_:
 						name = stringList[instructContent.second.tabPos];
-						if (tableaux.find(name) != tableaux.end()) {
+						if (tableaux.top().find(name) != tableaux.top().end()) {
 							value = executionPile.top();
 							tabPos = intList[value.tabPos];
 
-							if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
-								tabPos = tableaux[name].valuesPos[tabPos];
+							if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
+								tabPos = tableaux.top()[name].valuesPos[tabPos];
 								value = executionPile.top();
 								if (instructContent.second.type == value.type) {
 									cout << "MODIFIE INDICE " << tabPos << " DU TABLEAU " << name;
@@ -417,12 +416,12 @@ void displayGeneratedProgram() {
 						break;
 					case command::_REMOVE_TABLE_ELEMENT_:
 						name = stringList[instructContent.second.tabPos];
-						if (tableaux.find(name) != tableaux.end()) {
+						if (tableaux.top().find(name) != tableaux.top().end()) {
 							value = executionPile.top();
 							tabPos = intList[value.tabPos];
 
-							if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
-								tabPos = tableaux[name].valuesPos[tabPos];
+							if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
+								tabPos = tableaux.top()[name].valuesPos[tabPos];
 								cout << "SUPPRIME INDICE " << tabPos << " DU TABLEAU " << name;
 							}
 							else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";

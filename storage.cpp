@@ -49,43 +49,31 @@ FILE* programGeneration(int argc, char **argv) {
     if (argc) {
         return readOnlyFileFlow(argv[0]);
     }
-    else {
-        int saisie;
-        cout << "0 - Interprétation en fichier" << endl
-            << "1 - Interprétation en console" << endl; 
-        do cin >> saisie; while (saisie < 0 || saisie > 1);
+    
+    //else implicite
+    vector<string> fileList;
+    DIR *fluxFolder;
+    struct dirent *fileFolder;
+    string filename;
 
-        //initialisation de variables pour cas 0
-        vector<string> fileList;
-        DIR *fluxFolder;
-        struct dirent *fileFolder;
-        string filename;
-
-        switch(saisie) {
-            case 0 :
-                //liste contenu du dossier
-                cout << endl << "Contenu du dossier " << FOLDER << " :" << endl;
-                fluxFolder = opendir(FOLDER);
-                    while (fileFolder = readdir(fluxFolder)) {
-                        filename = (string)fileFolder->d_name;
-                        if (filename.find(EXTENSION, filename.size() - ((string)EXTENSION).size()) !=  string::npos) {
-                            cout << fileList.size()+1 << " - \"" << filename << "\"" << endl;
-                            fileList.push_back(filename);
-                        }
-                    }
-                closedir (fluxFolder);
-            
-                //choisit fichier à traiter
-                cout << endl << "Votre sélection : ";
-                do cin >> saisie; while (saisie <= 0 || saisie > fileList.size());
-
-                return readOnlyFileFlow(fileList[--saisie]);
-                break;
-            default ://case 1 :
-                return stdin;
-                break;
+    //liste contenu du dossier
+    cout << endl << "Contenu du dossier " << FOLDER << " :" << endl;
+    fluxFolder = opendir(FOLDER);
+    while (fileFolder = readdir(fluxFolder)) {
+        filename = (string)fileFolder->d_name;
+        if (filename.find(EXTENSION, filename.size() - ((string)EXTENSION).size()) !=  string::npos) {
+            cout << fileList.size()+1 << " - \"" << filename << "\"" << endl;
+            fileList.push_back(filename);
         }
     }
+    closedir (fluxFolder);
 
-    return NULL;
+    //choisit fichier à traiter
+    int saisie;
+    cout << endl << "Votre sélection (0 pour quitter) : ";
+    do cin >> saisie; while (saisie < -1 || saisie > fileList.size());
+
+    if (!saisie) exit(0);
+
+    return readOnlyFileFlow(fileList[--saisie]);
 }

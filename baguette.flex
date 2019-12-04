@@ -42,12 +42,10 @@ OU    { return OR; }
 "!="  { return DIFF; }
 ">="  { return INF_EGAL; }
 "<="  { return SUP_EGAL; }
-LIRE      { return INPUT;}
 
 AFFICHER  	{ return DISPLAY;}
 PAUSE       { return STOP; }//attendre pour delay
-LIRE_NOMBRE { return GET_NUMBER; }
-LIRE_TEXTE  { return GET_TEXT; }
+LIRE        { return INPUT;}
 
 si 			  { return IF; }
 sinon	    { return ELSE; }

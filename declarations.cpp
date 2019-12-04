@@ -105,7 +105,8 @@ enum class command {
 
 	//ENTREE SORTIE
 	_PRINT_,
-	_STOP_
+	_STOP_,
+	_READ_
 };
 
 enum class errorCode {
@@ -172,7 +173,7 @@ stack<map<string, valAccess>> variables;
 deque<int>		intArray;
 deque<double>	doubleArray;
 deque<string>	stringArray;
-map<string, tabAccess> tableaux;
+stack<map<string, tabAccess>> tableaux;
 
 stack<memoryState> memoryLayer;
 

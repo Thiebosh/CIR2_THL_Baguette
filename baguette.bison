@@ -50,11 +50,9 @@
 %token INF_EGAL
 %token SUP_EGAL
 
-%token INPUT
 %token DISPLAY
 %token STOP
-%token GET_NUMBER
-%token GET_TEXT
+%token INPUT
 
 %token <adresse> IF
 %token ELSE
@@ -84,7 +82,6 @@ instruction :
     | memoryBloc
     | affectVar
     | IO
-    | INPUT { addInstruct(command::_READ_,$1);}
     | structure
     | function
     ;
@@ -97,7 +94,8 @@ memoryBloc :
 
 IO :
       DISPLAY output
-    | STOP         { addInstruct(command::_STOP_); }
+    | STOP          { addInstruct(command::_STOP_); }
+    | INPUT NAME    { addInstruct(command::_READ_,$2); }
     ;
 
 output : value { addInstruct(command::_PRINT_); } output_inter ;

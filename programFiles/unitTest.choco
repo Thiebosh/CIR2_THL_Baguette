@@ -1,5 +1,5 @@
 maVar entier = 2
-AFFICHER maVar
+AFFICHER maVar,"\n entrez une valeur : "
 LIRE maVar
 AFFICHER maVar
 

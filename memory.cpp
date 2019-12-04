@@ -93,21 +93,21 @@ void delVar(string name) {
 
 void delTabVal(string tabName, int tabCase) {
 	//decaler les adresses superieures a l'adresse a supprimer
-	for (auto tab : tableaux) {//parcourt tous les tableaux
-		if (tab.second.type == tableaux[tabName].type) {//si tableau est du type impacte
+	for (auto tab : tableaux.top()) {//parcourt tous les tableaux
+		if (tab.second.type == tableaux.top()[tabName].type) {//si tableau est du type impacte
 			for (int tabPos = 0; tabPos < (int)tab.second.valuesPos.size(); ++tabPos) {//checke toutes ses adresses
-				if (tab.second.valuesPos[tabPos] > tableaux[tabName].valuesPos[tabCase]) {//si adresse au dela de celle supprimee
-					tableaux[tab.first].valuesPos[tabPos]--;//reduit d'un (1 valeur supprimee)
+				if (tab.second.valuesPos[tabPos] > tableaux.top()[tabName].valuesPos[tabCase]) {//si adresse au dela de celle supprimee
+					tableaux.top()[tab.first].valuesPos[tabPos]--;//reduit d'un (1 valeur supprimee)
 				}
 			}
 		}
 	}
 
 	//supprimer le stockage de l'adresse
-	tableaux[tabName].valuesPos.erase(tableaux[tabName].valuesPos.begin() + tabCase);
+	tableaux.top()[tabName].valuesPos.erase(tableaux.top()[tabName].valuesPos.begin() + tabCase);
 
 	//supprimer le stockage de la valeur
-	switch (tableaux[tabName].type) {
+	switch (tableaux.top()[tabName].type) {
 	case valType::_int_:
 		if (tabCase == intArray.size() - 1) intArray.pop_back();
 		else intArray.erase(intArray.begin() + tabCase);
@@ -124,43 +124,43 @@ void delTabVal(string tabName, int tabCase) {
 }
 
 void delTab(string tabName) {
-	switch (tableaux[tabName].type) {
+	switch (tableaux.top()[tabName].type) {
 	case valType::_int_:
-		while (tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
+		while (tableaux.top()[tabName].valuesPos.size() > 0) {//tant que non vide
 			//supprime la valeur
-			int tabPos = tableaux[tabName].valuesPos[tableaux[tabName].valuesPos.size() - 1];
+			int tabPos = tableaux.top()[tabName].valuesPos[tableaux.top()[tabName].valuesPos.size() - 1];
 			if (tabPos == intArray.size() - 1) intArray.pop_back();
 			else intArray.erase(intArray.begin() + tabPos);
 
 			//supprime l'adresse
-			tableaux[tabName].valuesPos.pop_back();
+			tableaux.top()[tabName].valuesPos.pop_back();
 		}
 		break;
 	case valType::_double_:
-		while (tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
+		while (tableaux.top()[tabName].valuesPos.size() > 0) {//tant que non vide
 			//supprime la valeur
-			int tabPos = tableaux[tabName].valuesPos[tableaux[tabName].valuesPos.size() - 1];
+			int tabPos = tableaux.top()[tabName].valuesPos[tableaux.top()[tabName].valuesPos.size() - 1];
 			if (tabPos == doubleArray.size() - 1) doubleArray.pop_back();
 			else doubleArray.erase(doubleArray.begin() + tabPos);
 
 			//supprime l'adresse
-			tableaux[tabName].valuesPos.pop_back();
+			tableaux.top()[tabName].valuesPos.pop_back();
 		}
 		break;
 	case valType::_string_:
-		while (tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
+		while (tableaux.top()[tabName].valuesPos.size() > 0) {//tant que non vide
 			//supprime la valeur
-			int tabPos = tableaux[tabName].valuesPos[tableaux[tabName].valuesPos.size() - 1];
+			int tabPos = tableaux.top()[tabName].valuesPos[tableaux.top()[tabName].valuesPos.size() - 1];
 			if (tabPos == stringArray.size() - 1) stringArray.pop_back();
 			else stringArray.erase(stringArray.begin() + tabPos);
 
 			//supprime l'adresse
-			tableaux[tabName].valuesPos.pop_back();
+			tableaux.top()[tabName].valuesPos.pop_back();
 		}
 		break;
 	}
 	//supprime tableau
-	tableaux.erase(tabName);
+	tableaux.top().erase(tabName);
 }
 
 
@@ -173,7 +173,7 @@ void enterMemoryLayer() {
 
 void exitMemoryLayer() {
 	//supprime tableaux declares dans le bloc
-	map<string, tabAccess> tableauxCopy = tableaux;
+	map<string, tabAccess> tableauxCopy = tableaux.top();
 	for (auto tab : tableauxCopy) {
 		if (tab.second.memoryLayer == memoryLayer.size()) {
 			delTab(tab.first);

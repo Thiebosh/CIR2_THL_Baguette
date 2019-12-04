@@ -291,14 +291,14 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 	string name = stringList[instructContent.second.tabPos];
 	delVal(instructContent.second);//string recupere : peut supprimer du tableau
 
-	if ((action == tabAction::_create_ && tableaux.find(name) == tableaux.end()) ||//tab est bien nouveau
-		(action != tabAction::_create_ && tableaux.find(name) != tableaux.end())) {//tab existe bien
+	if ((action == tabAction::_create_ && tableaux.top().find(name) == tableaux.top().end()) ||//tab est bien nouveau
+		(action != tabAction::_create_ && tableaux.top().find(name) != tableaux.top().end())) {//tab existe bien
 		int tabPos;
 		valAccess value;
 		tabAccess declaration;
 		switch (action) {
 		case tabAction::_empile_size_:
-			switch(tableaux[name].type) {
+			switch(tableaux.top()[name].type) {
 			case valType::_int_:
 				executionPile.push({ valType::_int_,(int)intList.size() });
 				break;
@@ -309,7 +309,7 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 				executionPile.push({ valType::_int_,(int)stringList.size() });
 				break;
 			}
-			intList.push_back(tableaux[name].valuesPos.size());//name
+			intList.push_back(tableaux.top()[name].valuesPos.size());//name
 			break;
 
 		case tabAction::_empile_case_:
@@ -317,10 +317,10 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 			tabPos = intList[value.tabPos];//recupere val associee a adresse
 			delVal(value);
 
-			if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
-				tabPos = tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
+			if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
+				tabPos = tableaux.top()[name].valuesPos[tabPos];//recupere val a case souhaitee
 
-				switch(tableaux[name].type) {
+				switch(tableaux.top()[name].type) {
 				case valType::_int_:
 					executionPile.push({ valType::_int_,(int)intList.size() });
 					intList.push_back(intArray[tabPos]);
@@ -358,7 +358,7 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 					break;
 				}
 
-				tableaux.insert({name,declaration});
+				tableaux.top().insert({name,declaration});
 			}
 			//else ? cast here
 
@@ -367,18 +367,18 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 
 		case tabAction::_add_:
 			value = depiler();//supprime pas : besoin de transmettre valeur associee
-			if (tableaux[name].type == value.type) {
+			if (tableaux.top()[name].type == value.type) {
 				switch(value.type) {
 				case valType::_int_:
-					tableaux[name].valuesPos.push_back(intArray.size());
+					tableaux.top()[name].valuesPos.push_back(intArray.size());
 					intArray.push_back(intList[value.tabPos]);
 					break;
 				case valType::_double_:
-					tableaux[name].valuesPos.push_back(doubleArray.size());
+					tableaux.top()[name].valuesPos.push_back(doubleArray.size());
 					doubleArray.push_back(doubleList[value.tabPos]);
 					break;
 				case valType::_string_:
-					tableaux[name].valuesPos.push_back(doubleArray.size());
+					tableaux.top()[name].valuesPos.push_back(doubleArray.size());
 					stringArray.push_back(stringList[value.tabPos]);
 					break;
 				}
@@ -393,11 +393,11 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 			tabPos = intList[value.tabPos];//recupere val associee a adresse
 			delVal(value);
 
-			if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
-				tabPos = tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
+			if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
+				tabPos = tableaux.top()[name].valuesPos[tabPos];//recupere val a case souhaitee
 
 				valAccess value = depiler();//supprime pas : besoin de transmettre valeur associee
-				if (tableaux[name].type == value.type) {
+				if (tableaux.top()[name].type == value.type) {
 					switch(value.type) {
 					case valType::_int_:
 						intArray[tabPos] = intList[value.tabPos];
@@ -421,7 +421,7 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 			tabPos = intList[value.tabPos];//recupere val associee a adresse
 			delVal(value);
 
-			if (tabPos > -1 && tabPos < tableaux[name].valuesPos.size()) {
+			if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
 				delTabVal(name,tabPos);
 			}
 			break;
