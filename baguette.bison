@@ -69,6 +69,7 @@ bloc : instruction '\n' bloc | /*Epsilon*/ ;
 
 instruction : 
     IO
+    | INPUT { addInstruct(command::_READ_,$1);}
     | operation
     | affectation
     | DELETE VARIABLE_NAME'['INT_VALUE']' { 

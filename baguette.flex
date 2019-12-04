@@ -25,6 +25,7 @@ SUPPRIMER                   { return DELETE; }
 
 
 AFFICHER	{ return DISPLAY;}
+LIRE      { return INPUT;}
 PAUSE  { return STOP; }//attendre pour delay
 
 ==   { return EQUIV; }

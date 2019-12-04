@@ -1,5 +1,6 @@
-autreVar reel = -7.5
-calcul entier = 5 + ++autreVar
-AFFICHER "-1 attendu : ",calcul
+maVar entier = 2
+AFFICHER maVar
+LIRE maVar
+AFFICHER maVar
 
 TERMINER
