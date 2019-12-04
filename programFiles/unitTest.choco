@@ -1,4 +1,7 @@
-var entier = 0
+maVar entier = 2
+AFFICHER maVar
+LIRE maVar
+AFFICHER maVar
 
 si ++entier == entier 
     AFFICHER "precrementation"

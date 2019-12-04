@@ -136,6 +136,26 @@ const map<command, functionPointer> executeCommand = {
 		}},
 
 
+			delVal(testResult);
+		}},
+	{command::_READ_,
+		[](valInstruct& instructContent) {
+			string valName = valInstruct.second;
+			if (variables.top().find(valName) != variables.top().end()){
+				switch (Variables.top()[vaLName].type){
+
+					case valType::_int_ :
+						cin >> intList[variables.top()[valName].tabPos];
+					case valType::_double_ :
+						cin >> doubleList[variables.top()[valName].tabPos];
+					case valType::_string_ :
+						cin >> stringList[variables.top()[valName].tabPos]; 
+				}
+			}
+			else cout << "ERREUR : VARIABLE " << valName << " N'EXISTE PAS";
+		}},
+
+
 	{command::_CREATE_VARIABLE_,
 		[](valInstruct& instructContent) {
 			//recupere type de val

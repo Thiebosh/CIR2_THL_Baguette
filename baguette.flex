@@ -42,6 +42,7 @@ OU    { return OR; }
 "!="  { return DIFF; }
 ">="  { return INF_EGAL; }
 "<="  { return SUP_EGAL; }
+LIRE      { return INPUT;}
 
 AFFICHER  	{ return DISPLAY;}
 PAUSE       { return STOP; }//attendre pour delay

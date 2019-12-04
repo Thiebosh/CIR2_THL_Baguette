@@ -50,6 +50,7 @@
 %token INF_EGAL
 %token SUP_EGAL
 
+%token INPUT
 %token DISPLAY
 %token STOP
 %token GET_NUMBER
@@ -83,6 +84,7 @@ instruction :
     | memoryBloc
     | affectVar
     | IO
+    | INPUT { addInstruct(command::_READ_,$1);}
     | structure
     | function
     ;
