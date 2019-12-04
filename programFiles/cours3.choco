@@ -1,0 +1,12 @@
+/*
+zones mémoires
+*/
+
+ouvrir_zone_memoire
+mavar entier = 3
+
+fermer_zone_memoire
+
+//AFFICHER mavar impossible : n'existe plusou
+
+TERMINER

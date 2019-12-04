@@ -1,62 +1,38 @@
 #include "declarations.cpp"
 
-/********************************************************/
-/*														*/
-/*	PARTIE I : GESTION DE LA MEMOIRE					*/
-/*		SOUS PARTIE 1 : STOCKAGE DE VALEURS TYPEES		*/
-/*		SOUS PARTIE 2 : PILE DE VALEURS	EN UTILISATION	*/
-/*		SOUS PARTIE 3 : UTILISATION DES VARIABLES		*/
-/*		SOUS PARTIE 4 : LIBERATION DE MEMOIRE	    	*/
-/*		SOUS PARTIE 5 : PILE DE BLOCS MEMOIRE			*/
-/*														*/
-/********************************************************/
-
 
 /********************************************************/
-/*		SOUS PARTIE 1 : STOCKAGE DE VALEURS TYPEES		*/
+/*	PARTIE I : AJOUT									*/
 /********************************************************/
-
-void printVal(string beginMessage, valAccess val, string endMessage = "") {
-	cout << beginMessage;
-	switch (val.type) {
-	case valType::_bool_:
-		cout << boolList[val.tabPos];
-		break;
+valAccess addVal(valInstruct instructContent) {
+	int tabPos = 0;
+	switch (instructContent.type) {
 	case valType::_int_:
-		cout << intList[val.tabPos];
+		tabPos = intList.size();
+		intList.push_back(instructContent.intVal);
 		break;
 	case valType::_double_:
-		cout << doubleList[val.tabPos];
+		tabPos = doubleList.size();
+		doubleList.push_back(instructContent.doubleVal);
 		break;
 	case valType::_string_:
-		//si trouve \ suivi de t ou n dans la string, le transforme en un seul caractere
-		cout << stringList[val.tabPos];
+		tabPos = stringList.size();
+		stringList.push_back(instructContent.stringVal);
 		break;
 	}
-	cout << endMessage;
+	return { instructContent.type,tabPos };
+}
+
+valAccess addVar(valInstruct instructContent) {
+	string name = stringList[castVal(depiler(), valType::_string_).tabPos];
+
+	variables.top().insert({ name,addVal(instructContent) });
+	return { instructContent.type,variables.top()[name].tabPos };
 }
 
 
 /********************************************************/
-/*		SOUS PARTIE 2 : PILE DE VALEURS	EN UTILISATION	*/
-/********************************************************/
-
-
-valAccess depiler() {
-	valAccess var;
-
-	if (!executionPile.empty()) {
-		var = executionPile.top();
-		executionPile.pop();
-	}
-	else error(errorCode::emptyExecutionStack);
-
-	return var;
-}
-
-
-/********************************************************/
-/*		SOUS PARTIE 4 : LIBERATION DE MEMOIRE	    	*/
+/*	PARTIE II : SUPRESSION								*/
 /********************************************************/
 void delVal(valAccess val) {
 	//PILE : decremente references tableau des valeurs suivantes
@@ -82,9 +58,9 @@ void delVal(valAccess val) {
 	}
 
 	//VARIABLES : decremente references tableau des valeurs suivantes
-	for (auto var : variables) {
+	for (auto var : variables.top()) {
 		if (var.second.type == val.type && var.second.tabPos > val.tabPos) {
-			variables[var.first].tabPos--;
+			variables.top()[var.first].tabPos--;
 		}
 	}
 
@@ -111,15 +87,15 @@ void delVal(valAccess val) {
 
 void delVar(string name) {
 	//decremente references tableau des valeurs suivantes dans la pile et la liste de variables + supprime valeur du tableau
-	delVal(variables[name]);
-	variables.erase(name);
+	delVal(variables.top()[name]);
+	variables.top().erase(name);
 }
 
 void delTabVal(string tabName, int tabCase) {
 	//decaler les adresses superieures a l'adresse a supprimer
 	for (auto tab : tableaux) {//parcourt tous les tableaux
 		if (tab.second.type == tableaux[tabName].type) {//si tableau est du type impacte
-			for (int tabPos = 0; tabPos < tab.second.valuesPos.size(); ++tabPos) {//checke toutes ses adresses
+			for (int tabPos = 0; tabPos < (int)tab.second.valuesPos.size(); ++tabPos) {//checke toutes ses adresses
 				if (tab.second.valuesPos[tabPos] > tableaux[tabName].valuesPos[tabCase]) {//si adresse au dela de celle supprimee
 					tableaux[tab.first].valuesPos[tabPos]--;//reduit d'un (1 valeur supprimee)
 				}
@@ -189,10 +165,8 @@ void delTab(string tabName) {
 
 
 /********************************************************/
-/*		SOUS PARTIE 5 : PILE DE BLOCS MEMOIRE			*/
+/*	PARTIE III : COUCHES MEMOIRES						*/
 /********************************************************/
-
-
 void enterMemoryLayer() {
 	memoryLayer.push({ (unsigned)boolList.size(),(unsigned)intList.size(),(unsigned)doubleList.size(),(unsigned)stringList.size() });
 }
@@ -213,12 +187,12 @@ void exitMemoryLayer() {
 	}
 
 	//supprime variables declarees dans le bloc
-	map<string, valAccess> variablesCopy = variables;
+	map<string, valAccess> variablesCopy = variables.top();
 	for (auto var : variablesCopy) {
-		if ((var.second.type == valType::_bool_ && (unsigned)var.second.tabPos > initial.boolListSize) ||
-			(var.second.type == valType::_int_ && (unsigned)var.second.tabPos > initial.intListSize) ||
-			(var.second.type == valType::_double_ && (unsigned)var.second.tabPos > initial.doubleListSize) ||
-			(var.second.type == valType::_string_ && (unsigned)var.second.tabPos > initial.stringListSize)) {
+		if ((var.second.type == valType::_bool_ 	&& (unsigned)var.second.tabPos > initial.boolListSize) ||
+			(var.second.type == valType::_int_ 		&& (unsigned)var.second.tabPos > initial.intListSize) ||
+			(var.second.type == valType::_double_ 	&& (unsigned)var.second.tabPos > initial.doubleListSize) ||
+			(var.second.type == valType::_string_ 	&& (unsigned)var.second.tabPos > initial.stringListSize)) {
 			delVar(var.first);
 		}
 	}

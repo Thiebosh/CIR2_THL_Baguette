@@ -1,5 +1,5 @@
-/*COURS 1
-conditions, tests et boucles
+/* COURS 1
+conditions,tests et boucles
 */
 valeur entier = 0
 
@@ -8,7 +8,7 @@ si valeur > 0
 	AFFICHER "premier if (pas accessible)\n"
 fin
 
-si valeur == 0
+si !faux
 	AFFICHER "deuxieme if - then (accès)\n"
 sinon
 	AFFICHER "deuxieme if - else (pas accessible)\n"
@@ -21,7 +21,15 @@ sinon
 fin
 
 
-AFFICHER "\n\n\nPARTIE 2 : TANT QUE\n\n"
+AFFICHER "\n\n\nPARTIE 2 : TESTS AVANCES\n\n"
+si [[0 == 0 ET 10 > 0] OU 0] ET [5 OU [0 ET (8 - 2) < 8]]
+	AFFICHER "if test - validé\n"
+sinon
+	AFFICHER "if test - échoué\n"
+fin
+
+
+AFFICHER "\n\n\nPARTIE 3 : TANT QUE\n\n"
 tantque valeur < 2
     AFFICHER "while : ",++valeur," (2 repetition)\n"
 fin
@@ -30,22 +38,20 @@ faire
     AFFICHER "do while : ",--valeur," (2 repetitions)\n"
 finque valeur >= 0
 
+
+AFFICHER "\n\n\nPARTIE 4 : POUR\n\n"
+pour i entier = 0 : i < 3 : ++i
+    AFFICHER "for : ",i,"\n"
+fin
+
+pour i  = 0 : i < 15 : i += 7
+    AFFICHER "for : ",i,"\n"
+fin
+
+//pour i liste entier = 0 : taille i < 3 : i[] = 0
+//    AFFICHER "for : ",i[taille i - 1],"\n"
+//fin
+
+//pour chaque
+
 TERMINER
-
-AFFICHER "\n\n\nPARTIE 3 : POUR (à venir)\n\n"
-//pour et pour chaque
-
-TERMINER
-
-
-
-
-    '!' comparaison                 {
-                                      addInstruct(command::_EMPILE_VALUE_,(int)0);
-                                      addInstruct(command::_EQUIV_);
-                                    }
-    | operation                     { 
-                                      addInstruct(command::_EMPILE_VALUE_,(int)0);
-                                      addInstruct(command::_DIFF_);
-                                    }
-    

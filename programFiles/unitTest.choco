@@ -3,4 +3,16 @@ AFFICHER maVar
 LIRE maVar
 AFFICHER maVar
 
+si ++entier == entier 
+    AFFICHER "precrementation"
+sinon
+    AFFICHER "postcrementation
+fin
+
+si entier == ++entier 
+    AFFICHER "precrementation"
+sinon
+    AFFICHER "postcrementation
+fin
+
 TERMINER

@@ -1,5 +1,6 @@
 //memory
 #include <string>
+#include <vector>
 #include <deque>
 #include <stack>
 #include <map>
@@ -13,7 +14,9 @@
 using namespace std;
 
 
-//I. ENUMERATIONS
+/********************************************************/
+/*	PARTIE I : ENUMERATIONS								*/
+/********************************************************/
 enum class valType {//fixe types
 	_bool_,
 	_int_,
@@ -29,6 +32,8 @@ enum class operation {//fixe operations
 };
 
 enum class comparaison {//fixe comparaison
+	_and_,
+	_or_,
 	_equiv_,
 	_diff_,
 	_inferieur_,
@@ -52,6 +57,12 @@ enum class command {
 	_ENTER_BLOCK_,
 	_EXIT_BLOCK_,
 
+	//FONCTIONS
+	_ENTER_FUNCTION_,
+	_EXIT_FUNCTION_,
+	_CREATE_FUNCTION_,
+	_CALL_FUNCTION_,
+
 	//EMPILEMENT
 	_EMPILE_VALUE_,
 	_EMPILE_VARIABLE_,
@@ -59,8 +70,6 @@ enum class command {
 	_EMPILE_TABLE_ELEMENT_,
 
 	//OPERATIONS (var to var)
-	_INCREMENT_,
-	_DECREMENT_,
 	_PLUS_CREMENT_,
 	_MOINS_CREMENT_,
 	_FOIS_CREMENT_,
@@ -71,6 +80,8 @@ enum class command {
 	_DIVISE_PAR_,
 
 	//COMPARAISON
+	_AND_,
+	_OR_,
 	_EQUIV_,
 	_DIFF_,
 	_SUPERIEUR_,
@@ -81,7 +92,6 @@ enum class command {
 	//SAUTS (conditions, boucles, fonctions)
 	_GOTO_,
 	_GOTO_TEST_,
-	_GOTO_TEST_INV_,
 
 	//VARIABLES
 	_CREATE_VARIABLE_,
@@ -106,7 +116,9 @@ enum class errorCode {
 };
 
 
-//II. TYPES PERSONNALISES
+/********************************************************/
+/*	PARTIE II : TYPES PERSONNALISES						*/
+/********************************************************/
 typedef struct {//initialiser dans ordre de déclaration
 	valType type = valType::_int_;
 	int tabPos = -1;//valeur par defaut : flag d'invalidation
@@ -132,12 +144,22 @@ typedef struct {//initialiser dans ordre de déclaration
 	string stringVal = "";
 } valInstruct;
 
+typedef pair<string,valType> param;
+
+typedef struct {
+	int refInstruct;
+	valType returnVal;
+	vector<param> listParam;
+} functionAccess;
+
 typedef pair<command, valInstruct> instruction;
 
 typedef void (*functionPointer)(valInstruct& instructContent);//necessaire pour map de commandes - fonctions lambda
 
 
-//III. VARIABLES GLOBALES
+/********************************************************/
+/*	PARTIE III : VARIABLES GLOBALES						*/
+/********************************************************/
 deque<bool>     boolList;
 deque<int>		intList;
 deque<double>	doubleList;
@@ -145,7 +167,7 @@ deque<string>	stringList;
 
 stack<valAccess> executionPile;
 
-map<string, valAccess> variables;
+stack<map<string, valAccess>> variables;
 
 deque<int>		intArray;
 deque<double>	doubleArray;
@@ -154,11 +176,13 @@ map<string, tabAccess> tableaux;
 
 stack<memoryState> memoryLayer;
 
+map<string, functionAccess> fonctions;
+
 deque<instruction> instructionList;
 
 unsigned int indexInstruction = 0;   // compteur instruction 
 
-map<errorCode,string> errorMessage = {
+map<errorCode, string> errorMessage = {
 	{errorCode::conversionType,"types incompatibles - échec de conversion"},
 	{errorCode::unknowVariable,"nom de variable inconnu"},
 	{errorCode::alreadyUseVariable,"nom de variable déjà en utilisation"},
@@ -166,31 +190,44 @@ map<errorCode,string> errorMessage = {
 };
 
 
-//IV. PROTOTYPES
- // Memory
-void printVal(string beginMessage, valAccess val, string endMessage);
-valAccess depiler();
+/********************************************************/
+/*	PARTIE IV : PROTOTYPES								*/
+/********************************************************/
+// Memory
+//		Part 1
+valAccess addVal(valInstruct instructContent);
+valAccess addVar(valInstruct instructContent);
+//		Part 2
 void delVal(valAccess val);
 void delVar(string name);
 void delTabVal(string tabName, int tabCase);
 void delTab(string tabName);
+//		Part 3
 void enterMemoryLayer();
 void exitMemoryLayer();
 
 // Utils
+//		Part 1
+void printVal(string beginMessage, valAccess val, string endMessage = "");
+void replaceString(string& subject, const string& search, const string& replace);
 void error(errorCode cause);
+valAccess depiler();
+//		Part 2
+valAccess castVal(valAccess value, valType cast, bool isVar = 0);
 void executeOperation(operation operation);
 void executeComparaison(comparaison comparaison);
 void executeCrement(string varName, operation operation);
-valAccess addVal(valInstruct instructContent);
-valAccess addVar(valInstruct instructContent);
+//		Part 3
+void executeTabAction(instruction& instructContent, tabAction action);
+
+
+// Processing
+//		Part 1
 void addInstruct(command command);
 void addInstruct(command command, int intValue);
 void addInstruct(command command, double doubleValue);
 void addInstruct(command command, string stringValue);
-void executeTabAction(instruction& instructContent, tabAction action);
-void replaceString(string& subject, const string& search, const string& replace);
-
-// Processing
+//const map<command, functionPointer> executeCommand;
+//		Part 2
 void displayGeneratedProgram();
 void executeGeneratedProgram();
