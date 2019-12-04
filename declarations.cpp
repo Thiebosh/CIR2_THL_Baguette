@@ -1,6 +1,5 @@
 //memory
 #include <string>
-#include <vector>
 #include <deque>
 #include <stack>
 #include <map>
@@ -56,12 +55,6 @@ enum class command {
 	//MEMOIRE
 	_ENTER_BLOCK_,
 	_EXIT_BLOCK_,
-	_ENTER_FUNCTION_,
-	_EXIT_FUNCTION_,
-
-	//FONCTIONS
-	_CREATE_FUNCTION_,
-	_CALL_FUNCTION_,
 
 	//EMPILEMENT
 	_EMPILE_VALUE_,
@@ -103,8 +96,14 @@ enum class command {
 	_UPDATE_TABLE_ELEMENT_,
 	_REMOVE_TABLE_ELEMENT_,
 
+	//FONCTIONS
+	_ENTER_FUNCTION_,
+	_EXIT_FUNCTION_,
+	_CREATE_FUNCTION_,
+	_CALL_FUNCTION_,
+
 	//ENTREE SORTIE
-	_PRINT_,
+	_WRITE_,
 	_STOP_,
 	_READ_
 };
@@ -113,7 +112,11 @@ enum class errorCode {
 	conversionType,
 	unknowVariable,
 	alreadyUseVariable,
-	emptyExecutionStack
+	emptyExecutionStack,
+	alreadyDeclaredFunction,
+	unknowFunction,
+	notEnoughArgument,
+	tooMuchArgument
 };
 
 
@@ -149,8 +152,8 @@ typedef pair<string,valType> param;
 
 typedef struct {
 	int refInstruct;
-	valType returnVal;
-	vector<param> listParam;
+	valType returnType;
+	deque<param> listParam;
 } functionAccess;
 
 typedef pair<command, valInstruct> instruction;
@@ -184,10 +187,14 @@ deque<instruction> instructionList;
 unsigned int indexInstruction = 0;   // compteur instruction 
 
 map<errorCode, string> errorMessage = {
-	{errorCode::conversionType,"types incompatibles - échec de conversion"},
-	{errorCode::unknowVariable,"nom de variable inconnu"},
-	{errorCode::alreadyUseVariable,"nom de variable déjà en utilisation"},
-	{errorCode::emptyExecutionStack,"pile vide"}
+	{errorCode::conversionType,			"[TYPE] types incompatibles - échec de conversion"},
+	{errorCode::unknowVariable,			"[VARIABLE] nom de variable inconnu"},
+	{errorCode::alreadyUseVariable,		"[VARIABLE] nom de variable déjà en utilisation"},
+	{errorCode::emptyExecutionStack,	"[EXECUTION] pile vide"},
+	{errorCode::alreadyDeclaredFunction,"[FONCTION] nom de fonction déjà utilisé"},
+	{errorCode::unknowFunction,			"[FONCTION] nom de fonction inconnu"},
+	{errorCode::notEnoughArgument,		"[FONCTION] pas assez de valeurs en paramètres"},
+	{errorCode::tooMuchArgument,		"[FONCTION] trop de valeurs en paramètres"}
 };
 
 

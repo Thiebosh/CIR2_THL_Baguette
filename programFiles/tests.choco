@@ -1,33 +1,33 @@
 
-AFFICHER "texte 1!","texte2?\t\thehe","texte3+4\n\ncoucou",2,"\n"
+ECRIRE "texte 1!","texte2?\t\thehe","texte3+4\n\ncoucou",2,"\n"
 
 //PAUSE
 TERMINER
 
 si 1
-	AFFICHER 2,"\n"
+	ECRIRE 2,"\n"
 sinon
-	AFFICHER 3,"\n"
+	ECRIRE 3,"\n"
 fin
 
 var entier = 1 + 4 *2/2 - 3
 
-AFFICHER "texte\n"
+ECRIRE "texte\n"
 
-AFFICHER "j'obtiens ","cette valeur : ",var,"\n"
+ECRIRE "j'obtiens ","cette valeur : ",var,"\n"
 
 TERMINER
 
 // listes pas encore fonctionnelles
 var liste entier = 8
 var[] = 9
-AFFICHER TAILLE var
-AFFICHER var[0]
-AFFICHER var[1]
+ECRIRE TAILLE var
+ECRIRE var[0]
+ECRIRE var[1]
 
 SUPPRIMER var[1]
 var[] = 10
 SUPPRIMER var[0]
-AFFICHER var[0]
+ECRIRE var[0]
 
 TERMINER

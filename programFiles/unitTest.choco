@@ -1,18 +1,5 @@
-maVar entier = 2
-AFFICHER maVar,"\n entrez une valeur : "
-LIRE maVar
-AFFICHER maVar
-
-si ++entier == entier 
-    AFFICHER "precrementation"
-sinon
-    AFFICHER "postcrementation
-fin
-
-si entier == ++entier 
-    AFFICHER "precrementation"
-sinon
-    AFFICHER "postcrementation
-fin
+//maVar entier = 245
+245 = entier maVar
+ECRIRE maVar
 
 TERMINER

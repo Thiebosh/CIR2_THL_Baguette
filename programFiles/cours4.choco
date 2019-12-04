@@ -1,0 +1,7 @@
+recette entier ()
+    ECRIRE "fonction de confirmation"
+fin
+
+ECRIRE "ok"
+
+TERMINER

@@ -1,39 +1,42 @@
-/*COURS 1
+/* COURS 1
 afficher, opérations, variables
 */
 
 //partie 1 
-AFFICHER "PARTIE 1\n"
-AFFICHER 1,"\n"
-AFFICHER 1.23,"\n","hello world","\n\n"
+ECRIRE "PARTIE 1\n"
+ECRIRE 1,"\n"
+ECRIRE 1.23,"\n","hello world","\n\n"
 
-AFFICHER 1+6*4,"\n"
-AFFICHER 4*6+1,"\n"
-AFFICHER -1*(2+5)/3,"\n\n\n"
+ECRIRE 1+6*4,"\n"
+ECRIRE 4*6+1,"\n"
+ECRIRE -1*(2+5)/3,"\n\n\n"
 
 //partie 2
-AFFICHER "PARTIE 2\n"
+ECRIRE "PARTIE 2\n"
 maVar entier = 2
-AFFICHER "j'initialise maVar à ",maVar,"\n"
-maVar = 3.5
-AFFICHER "j'affecte 3.5 à maVar entière (cast) : ",maVar,"\n\n"
+ECRIRE "j'initialise maVar à ",maVar,"\nentrez une valeur : "
+LIRE maVar
+ECRIRE "Nouvelle valeur de maVar : ",maVar,"\n\n"
 
-AFFICHER "j'incrémente : ",++maVar,"\n"
-AFFICHER "je décrémente : ",--maVar,"\n\n"
+maVar = 3.5
+ECRIRE "j'affecte 3.5 à maVar entière (cast) : ",maVar,"\n\n"
+
+ECRIRE "j'incrémente : ",++maVar,"\n"
+ECRIRE "je décrémente : ",--maVar,"\n\n"
 
 maVar *= 3
-AFFICHER "je multiplie maVar par 3 et lui affecte directement : ",maVar,"\n","\n"
+ECRIRE "je multiplie maVar par 3 et lui affecte directement : ",maVar,"\n"
 
 autreVar reel = maVar / 2 - 12
-AFFICHER "j'affecte une opération complexe à une variable réelle : ",autreVar,"\n\n"
+ECRIRE "j'affecte une opération complexe à une variable réelle 'autreVar' : ",autreVar,"\n"
 
 //pb : prend 5 et pas somme mais marche quand isolé
-calcul entier = 5 + ++autreVar    //pb : prend mauvaise val
-AFFICHER "j'incrémente la variable réelle, je lui ajoute 5 et je caste le résultat : ",calcul," (var réelle : ",autreVar,")\n\n"
+calcul entier = 5 + ++autreVar
+ECRIRE "j'incrémente autreVar, je lui ajoute 5 et je caste le résultat : ",calcul," (autreVar : ",autreVar,")\n\n"//pb : autreVar s'incremente mal
 
 placeAuxStrings texte = "hello"
 placeAuxStrings += " world"
-AFFICHER "je concatène des strings : ",placeAuxStrings,"\n"
+ECRIRE "je concatène des strings : ",placeAuxStrings,"\n"
 
 TERMINER
 

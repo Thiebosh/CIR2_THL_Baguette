@@ -27,6 +27,7 @@
 %token <doubleValeur> DOUBLE_VALUE
 %token <stringValeur> STRING_VALUE
 
+%token VOID
 %token INT
 %token DOUBLE
 %token STRING
@@ -50,7 +51,7 @@
 %token INF_EGAL
 %token SUP_EGAL
 
-%token DISPLAY
+%token WRITE
 %token STOP
 %token INPUT
 
@@ -61,7 +62,6 @@
 %token END_WHILE
 %token <adresse> FOR
 %token <adresse> FOREACH
-%token <adresse> FUNCTION //refinstruct : instruction de debut de la fonction
 %token END
 
 %token ADD_MEMORY_LAYER
@@ -93,12 +93,12 @@ memoryBloc :
     ;
 
 IO :
-      DISPLAY output
+      WRITE output
     | STOP          { addInstruct(command::_STOP_); }
     | INPUT NAME    { addInstruct(command::_READ_,$2); }
     ;
 
-output : value { addInstruct(command::_PRINT_); } output_inter ;
+output : value { addInstruct(command::_WRITE_); } output_inter ;
 output_inter : /*Epsilon*/ | ',' output ;
 
 oneCrement :
@@ -149,19 +149,14 @@ valCrement :
 
 varCrement : oneCrement | valCrement ;
 
+type :
+    INT         { addInstruct(command::_EMPILE_VALUE_,(int)1); }
+    | DOUBLE    { addInstruct(command::_EMPILE_VALUE_,(double)1); }
+    | STRING    { addInstruct(command::_EMPILE_VALUE_,""); }
+    ;
+
 affectVar :
-    NAME INT '=' value      {
-                                addInstruct(command::_EMPILE_VALUE_,(int)1);//type var
-                                addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
-                            }
-    | NAME DOUBLE '=' value { 
-                                addInstruct(command::_EMPILE_VALUE_,(double)1);//type var
-                                addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
-                            }
-    | NAME STRING '=' value { 
-                                addInstruct(command::_EMPILE_VALUE_,(string)"");//type var
-                                addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
-                            }
+    value '=' type NAME { addInstruct(command::_CREATE_VARIABLE_,$4); }
     | NAME '=' value        { addInstruct(command::_UPDATE_VARIABLE_,$1); } //nom var
     
     | valCrement
@@ -310,7 +305,23 @@ function :
                                 addInstruct(command::_EMPILE_VALUE_,(int)1);//type de retours
                                 addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse debut fonction
                                 addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
-                                addInstruct(command::_ENTER_FUNCTION_);
+                                addInstruct(command::_ENTER_FUNCTION_,$1);
+                            }
+      instructBloc END      { addInstruct(command::_EXIT_FUNCTION_); }
+    | NAME DOUBLE           { addInstruct(command::_EMPILE_VALUE_,(double)-1); }//guette -1 pour fin de declaration des parametres
+      '(' argument ')''\n'  { 
+                                addInstruct(command::_EMPILE_VALUE_,(int)1);//type de retours
+                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse debut fonction
+                                addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
+                                addInstruct(command::_ENTER_FUNCTION_,$1);
+                            }
+      instructBloc END      { addInstruct(command::_EXIT_FUNCTION_); }
+    | NAME STRING           { addInstruct(command::_EMPILE_VALUE_,""); }//guette -1 pour fin de declaration des parametres
+      '(' argument ')''\n'  { 
+                                addInstruct(command::_EMPILE_VALUE_,(int)1);//type de retours
+                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse debut fonction
+                                addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
+                                addInstruct(command::_ENTER_FUNCTION_,$1);
                             }
       instructBloc END      { addInstruct(command::_EXIT_FUNCTION_); }
 
@@ -319,7 +330,8 @@ function :
     ;
 
 argument :
-    NAME INT argument_inter         {
+    /*Epsilon*/
+    | NAME INT argument_inter       {
                                         addInstruct(command::_EMPILE_VALUE_,(int)1);//type var
                                         addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
                                     }
