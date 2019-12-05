@@ -44,7 +44,7 @@ pour 0 = entier i : i < 3 : ++i {
     ecrire "for : ",i,"\n"
 }
 
-pour 0 = i : i < 15 : 7 += i { //doit redeclarer variable i
+pour 0 = entier i : i < 15 : 7 += i { //doit redeclarer variable i
     ecrire "for : ",i,"\n"
 }
 

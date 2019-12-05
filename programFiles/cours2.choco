@@ -4,9 +4,9 @@ zones mémoires
 
 ouvrir_zone_memoire
 3 = entier mavar
-
+ecrire mavar,"\n"
 fermer_zone_memoire
 
-ecrire mavar//pb : existe encore
+ecrire mavar//existe bien plus
 
 TERMINER

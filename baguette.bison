@@ -105,24 +105,24 @@ output_inter : /*Epsilon*/ | ',' output ;
 
 oneCrement :
       INCREMENT NAME   { 
-                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
-                                    addInstruct(command::_PLUS_CREMENT_,$2);
-                                }
+                            addInstruct(command::_EMPILE_VALUE_,(int)1);
+                            addInstruct(command::_PLUS_CREMENT_,$2);
+                        }
     | DECREMENT NAME   { 
-                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
-                                    addInstruct(command::_MOINS_CREMENT_,$2);
-                                }
+                            addInstruct(command::_EMPILE_VALUE_,(int)1);
+                            addInstruct(command::_MOINS_CREMENT_,$2);
+                        }
     
     | INCREMENT NAME '['INT_VALUE']'   { 
-                                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
-                                                    addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
-                                                    addInstruct(command::_PLUS_CREMENT_,$2); 
-                                                }
+                                            addInstruct(command::_EMPILE_VALUE_,(int)1);
+                                            addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
+                                            addInstruct(command::_PLUS_CREMENT_,$2); 
+                                        }
     | DECREMENT NAME '['INT_VALUE']'   {
-                                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
-                                                    addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
-                                                    addInstruct(command::_MOINS_CREMENT_,$2); 
-                                                }
+                                            addInstruct(command::_EMPILE_VALUE_,(int)1);
+                                            addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
+                                            addInstruct(command::_MOINS_CREMENT_,$2); 
+                                        }
     ;
 
 valCrement :

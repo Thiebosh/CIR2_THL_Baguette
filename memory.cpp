@@ -186,10 +186,10 @@ void exitMemoryLayer() {
 	//supprime variables declarees dans le bloc
 	map<string, valAccess> variablesCopy = variables.top();
 	for (auto var : variablesCopy) {
-		if ((var.second.type == valType::_bool_ 	&& (unsigned)var.second.tabPos > initial.boolListSize) ||
-			(var.second.type == valType::_int_ 		&& (unsigned)var.second.tabPos > initial.intListSize) ||
-			(var.second.type == valType::_double_ 	&& (unsigned)var.second.tabPos > initial.doubleListSize) ||
-			(var.second.type == valType::_string_ 	&& (unsigned)var.second.tabPos > initial.stringListSize)) {
+		if ((var.second.type == valType::_bool_ 	&& (unsigned)var.second.tabPos >= initial.boolListSize) ||
+			(var.second.type == valType::_int_ 		&& (unsigned)var.second.tabPos >= initial.intListSize) ||
+			(var.second.type == valType::_double_ 	&& (unsigned)var.second.tabPos >= initial.doubleListSize) ||
+			(var.second.type == valType::_string_ 	&& (unsigned)var.second.tabPos >= initial.stringListSize)) {
 			delVar(var.first);
 		}
 	}

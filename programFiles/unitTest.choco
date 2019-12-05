@@ -1,25 +1,10 @@
-0 = entier valeur
+3.5 = entier maVar
 
-tantque valeur < 2 {
-    ECRIRE "while : ",++valeur," (2 repetition)\n"
-}
+maVar / 2 - 12 = reel autreVar
+ecrire "j'affecte une opération complexe à une variable réelle 'autreVar' : ",autreVar,"\n"
 
-faire {
-    ECRIRE "do while : ",--valeur," (2 repetitions)\n"
- } valeur >= 0
+5 + ++autreVar = entier calcul
+ecrire "j'incrémente autreVar, je lui ajoute 5 et je caste le résultat : ",calcul," (autreVar : ",autreVar,")\n\n"//pb : autreVar s'incremente mal
 
-pour 0 = entier i : i < 3 : ++i {
-    ECRIRE "for : ",i,"\n"
-}
-
-si !faux {
-	ECRIRE "then (accès)\n"
-}
-
-si !vrai {
-	ECRIRE "deuxieme if - then (pas accès)\n"
-sinon
-	ECRIRE "deuxieme if - else (accessible)\n"
-}
 
 TERMINER

@@ -32,7 +32,6 @@ ecrire "je multiplie maVar par 3 et lui affecte directement : ",maVar,"\n"
 maVar / 2 - 12 = reel autreVar
 ecrire "j'affecte une opération complexe à une variable réelle 'autreVar' : ",autreVar,"\n"
 
-//pb : prend 5 et pas somme mais marche quand isolé
 5 + ++autreVar = entier calcul
 ecrire "j'incrémente autreVar, je lui ajoute 5 et je caste le résultat : ",calcul," (autreVar : ",autreVar,")\n\n"//pb : autreVar s'incremente mal
 
