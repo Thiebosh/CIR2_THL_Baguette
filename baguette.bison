@@ -1,7 +1,6 @@
 /*fichier bison : parse*/
 %{
-  #include "storage.cpp"
-  #include "processing.cpp"
+  #include "files.cpp"
 
   //sauts conditionnels
   typedef struct {
@@ -308,14 +307,17 @@ argument_inter : /*Epsilon*/ | ',' argument ;
 %%
 
 int main(int argc, char **argv) {
-  if (!folderExist()) exit(0);//ne peut pas fonctionner sans
+    //commence par verifier si argument (dossier)
+    if (!folderExist()) exit(0);//ne peut pas fonctionner sans
 
-  if ((yyin = programGeneration(argc, argv)) == NULL) exit(0);//ne peut pas fonctionner sans
-  yyparse();
+    if ((yyin = programGeneration(argc, argv)) == NULL) exit(0);//ne peut pas fonctionner sans
+    yyparse();
 
-  displayGeneratedProgram();
+    displayGeneratedProgram();
 
-  executeGeneratedProgram();
-  
-  return 0;
+    saveGeneratedProgramFile();
+
+    executeGeneratedProgram();
+
+    return 0;
 }

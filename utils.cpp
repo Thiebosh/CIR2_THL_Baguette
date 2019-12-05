@@ -212,13 +212,13 @@ void executeCrement(string varName, operation operation) {
 		double valDouble(0);
 		string valString("");
 		if (valCast.type == valType::_string_) {
-			valCast = valCast;
 			valString = stringList[valCast.tabPos];
 		}
 		else {
 			valCast = castVal(valCast, valType::_double_);
 			valDouble = doubleList[valCast.tabPos];
 		}
+		delVal(valCast);
 
 		//2 : changer variable content en double ou string
 		valAccess varCast;
@@ -263,8 +263,6 @@ void executeCrement(string varName, operation operation) {
 			break;
 		}
 		
-		delVal(varCast);
-		delVal(valCast);
 		//5 : ajouter copie a la pile si besoin
 		if (variables.top()[varName].type == valType::_string_) {
 			executionPile.push({ valType::_string_,(int)stringList.size() });
@@ -276,7 +274,6 @@ void executeCrement(string varName, operation operation) {
 		}
 	}
 	else {
-		delVal(valCast);
 		error(errorCode::unknowVariable);
 	}
 }

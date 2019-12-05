@@ -344,7 +344,7 @@ void displayGeneratedProgram() {
 	int size;
 	int tabPos;
 	valAccess value;
-	for (auto instructContent : instructionList) {
+	for (instruction instructContent : instructionList) {
 		if (instructContent.first == command::_ENTER_BLOCK_) cout << endl;
 		cout << "INSTRUCTION " << setw((streamsize)(1 + log10(instructionList.size()))) << i++ << " - ";
 

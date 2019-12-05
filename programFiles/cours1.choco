@@ -33,7 +33,7 @@ maVar / 2 - 12 = reel autreVar
 ecrire "j'affecte une opération complexe à une variable réelle 'autreVar' : ",autreVar,"\n"
 
 5 + ++autreVar = entier calcul
-ecrire "j'incrémente autreVar, je lui ajoute 5 et je caste le résultat : ",calcul," (autreVar : ",autreVar,")\n\n"//pb : autreVar s'incremente mal
+ecrire "j'incrémente autreVar, je lui ajoute 5 et je caste le résultat : ",calcul," (autreVar : ",autreVar,")\n\n"
 
 "hello" = texte placeAuxStrings
 " world" += placeAuxStrings
