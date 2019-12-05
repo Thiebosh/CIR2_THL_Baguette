@@ -26,8 +26,8 @@ texte                       { return STRING; }
               }
 
 liste       { return TAB; }
-TAILLE      { return SIZE; }
-SUPPRIMER   { return DELETE; }
+taille      { return SIZE; }
+supprimer   { return DELETE; }
 
 "++"  { return INCREMENT; }
 "--"  { return DECREMENT; }
@@ -43,18 +43,17 @@ OU    { return OR; }
 ">="  { return INF_EGAL; }
 "<="  { return SUP_EGAL; }
 
-ECRIRE  	{ return WRITE;}
-PAUSE       { return STOP; }//attendre pour delay
-LIRE        { return INPUT;}
+ecrire  	{ return WRITE;}
+pause     { return STOP; }//attendre pour delay
+lire      { return INPUT;}
 
 si 			  { return IF; }
 sinon	    { return ELSE; }
+sinonsi	  { return ELIF; }
 tantque 	{ return WHILE; }
-finque 	  { return END_WHILE; }
 faire 	  { return DO; }
 pour      { return FOR; }
 parcourir { return FOREACH; }
-fin	      { return END; }
 
 TERMINER(.|\n)*	{ return END_PRGM; }
 

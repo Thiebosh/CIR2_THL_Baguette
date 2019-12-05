@@ -1,7 +1,7 @@
-recette entier ()
-    ECRIRE "fonction de confirmation"
-fin
+recette entier () {
+    ecrire "fonction de confirmation"
+}
 
-ECRIRE "ok"
+ecrire "ok"
 
 TERMINER

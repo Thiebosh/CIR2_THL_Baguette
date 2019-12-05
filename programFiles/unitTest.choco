@@ -1,5 +1,25 @@
-//maVar entier = 245
-245 = entier maVar
-ECRIRE maVar
+0 = entier valeur
+
+tantque valeur < 2 {
+    ECRIRE "while : ",++valeur," (2 repetition)\n"
+}
+
+faire {
+    ECRIRE "do while : ",--valeur," (2 repetitions)\n"
+ } valeur >= 0
+
+pour 0 = entier i : i < 3 : ++i {
+    ECRIRE "for : ",i,"\n"
+}
+
+si !faux {
+	ECRIRE "then (accès)\n"
+}
+
+si !vrai {
+	ECRIRE "deuxieme if - then (pas accès)\n"
+sinon
+	ECRIRE "deuxieme if - else (accessible)\n"
+}
 
 TERMINER

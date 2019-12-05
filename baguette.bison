@@ -56,13 +56,12 @@
 %token INPUT
 
 %token <adresse> IF
+%token <adresse> ELIF
 %token ELSE
 %token <adresse> WHILE
 %token <adresse> DO
-%token END_WHILE
 %token <adresse> FOR
 %token <adresse> FOREACH
-%token END
 
 %token ADD_MEMORY_LAYER
 %token REMOVE_MEMORY_LAYER
@@ -75,19 +74,22 @@
 %%
 program : { addInstruct(command::_ENTER_FUNCTION_); } instructBloc END_PRGM { addInstruct(command::_EXIT_FUNCTION_); };
 
-instructBloc : /*Epsilon*/ | instruction '\n' instructBloc ;
+endligne : '\n' | ';' ;
+
+instructBloc : /*Epsilon*/ | instruction endligne instructBloc ;
 
 instruction :
     /* Ligne vide*/
     | memoryBloc
     | affectVar
     | IO
-    | structure
+    | condition
+    | boucle
     | function
     ;
 
 memoryBloc :
-    ADD_MEMORY_LAYER { addInstruct(command::_ENTER_BLOCK_); }
+    ADD_MEMORY_LAYER    { addInstruct(command::_ENTER_BLOCK_); }
     instructBloc
     REMOVE_MEMORY_LAYER {addInstruct(command::_EXIT_BLOCK_); } //garbage collector
     ;
@@ -124,65 +126,53 @@ oneCrement :
     ;
 
 valCrement :
-      NAME PLUS_CREMENT    value { addInstruct(command::_PLUS_CREMENT_,$1); }
-    | NAME MOINS_CREMENT   value { addInstruct(command::_MOINS_CREMENT_,$1); }
-    | NAME FOIS_CREMENT    value { addInstruct(command::_FOIS_CREMENT_,$1); }
-    | NAME DIVISE_CREMENT  value { addInstruct(command::_DIVISE_CREMENT_,$1); }
+      value PLUS_CREMENT    NAME { addInstruct(command::_PLUS_CREMENT_,$3); }
+    | value MOINS_CREMENT   NAME { addInstruct(command::_MOINS_CREMENT_,$3); }
+    | value FOIS_CREMENT    NAME { addInstruct(command::_FOIS_CREMENT_,$3); }
+    | value DIVISE_CREMENT  NAME { addInstruct(command::_DIVISE_CREMENT_,$3); }
 
-    | NAME'['INT_VALUE']' PLUS_CREMENT    value    { 
-                                                                addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
-                                                                addInstruct(command::_PLUS_CREMENT_,$1);//ajouter verif : si pas var, cherche dans tab et recupere indice tab
-                                                            }
-    | NAME'['INT_VALUE']' MOINS_CREMENT   value    { 
-                                                                addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
-                                                                addInstruct(command::_MOINS_CREMENT_,$1); 
-                                                            }
-    | NAME'['INT_VALUE']' FOIS_CREMENT    value    { 
-                                                                addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
-                                                                addInstruct(command::_FOIS_CREMENT_,$1);
-                                                            }
-    | NAME'['INT_VALUE']' DIVISE_CREMENT  value    { 
-                                                                addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
-                                                                addInstruct(command::_DIVISE_CREMENT_,$1);
-                                                            }
+    | value PLUS_CREMENT NAME'['INT_VALUE']'    { 
+                                                    addInstruct(command::_EMPILE_VALUE_,(int)$5);//index tab
+                                                    addInstruct(command::_PLUS_CREMENT_,$3);//ajouter verif : si pas var, cherche dans tab et recupere indice tab
+                                                }
+    | value MOINS_CREMENT NAME'['INT_VALUE']'   { 
+                                                    addInstruct(command::_EMPILE_VALUE_,(int)$5);//index tab
+                                                    addInstruct(command::_MOINS_CREMENT_,$3); 
+                                                }
+    | value FOIS_CREMENT NAME'['INT_VALUE']'    { 
+                                                    addInstruct(command::_EMPILE_VALUE_,(int)$5);//index tab
+                                                    addInstruct(command::_FOIS_CREMENT_,$3);
+                                                }
+    | value DIVISE_CREMENT NAME'['INT_VALUE']'  { 
+                                                    addInstruct(command::_EMPILE_VALUE_,(int)$5);//index tab
+                                                    addInstruct(command::_DIVISE_CREMENT_,$3);
+                                                }
     ;
 
 varCrement : oneCrement | valCrement ;
 
 type :
-    INT         { addInstruct(command::_EMPILE_VALUE_,(int)1); }
+      INT       { addInstruct(command::_EMPILE_VALUE_,(int)1); }
     | DOUBLE    { addInstruct(command::_EMPILE_VALUE_,(double)1); }
     | STRING    { addInstruct(command::_EMPILE_VALUE_,""); }
     ;
 
 affectVar :
     value '=' type NAME { addInstruct(command::_CREATE_VARIABLE_,$4); }
-    | NAME '=' value        { addInstruct(command::_UPDATE_VARIABLE_,$1); } //nom var
-    
+    | value '=' NAME    { addInstruct(command::_UPDATE_VARIABLE_,$3); } //nom var
+
     | valCrement
 
-    | NAME TAB INT '=' value           { 
-                                                    addInstruct(command::_EMPILE_VALUE_,(string)$1);//nom tab
-                                                    addInstruct(command::_CREATE_TABLE_,(int)1);//type var
-                                                }
-    | NAME TAB DOUBLE '=' value        { 
-                                                    addInstruct(command::_EMPILE_VALUE_,(string)$1);//nom tab
-                                                    addInstruct(command::_CREATE_TABLE_,(double)1);//type var
-                                                }
-    | NAME TAB STRING '=' value        { 
-                                                    addInstruct(command::_EMPILE_VALUE_,(string)$1);//nom tab
-                                                    addInstruct(command::_CREATE_TABLE_,"");//type var
-                                                }
-    | NAME'['']' '=' value             { addInstruct(command::_ADD_TABLE_ELEMENT_,$1); } //nom tab
-    | NAME'['INT_VALUE']' '=' value    { 
-                                                    addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
-                                                    addInstruct(command::_UPDATE_TABLE_ELEMENT_,$1);//nom tab
-                                                  }
-
-    | DELETE NAME'['INT_VALUE']'   { 
-                                                addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
-                                                addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);//nom tab
-                                            }
+    | value '=' TAB type NAME       { addInstruct(command::_CREATE_TABLE_,$5); }//nom tab
+    | value '=' NAME'['']'          { addInstruct(command::_ADD_TABLE_ELEMENT_,$3); } //nom tab
+    | value '=' NAME'['INT_VALUE']' { 
+                                        addInstruct(command::_EMPILE_VALUE_,(int)$5);//index tab
+                                        addInstruct(command::_UPDATE_TABLE_ELEMENT_,$3);//nom tab
+                                    }
+    | DELETE NAME'['INT_VALUE']'    {
+                                        addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
+                                        addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);//nom tab
+                                    }
     ;
 
 value :
@@ -230,35 +220,36 @@ logic_test :
     ;
 
 
-structure :
-    IF                  { addInstruct(command::_ENTER_BLOCK_); }
-      logic_test '\n'   {
-                                //apres interpretation de operation :
-                            $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
-                            addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans then, sinon sauter à <adresse fin then / debut else>)
-                        }
-      instructBloc      { 
-                                //apres interpretation de bloc :
-                            $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction :
-                            addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse fin else / debut end_if>)
+condition :
+    IF              { addInstruct(command::_ENTER_BLOCK_); }
+    logic_test '{' {
+                        $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
+                        addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans then, sinon sauter à <adresse fin then / debut else>)
+                    }
+    instructBloc    { 
+                        $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction :
+                        addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse fin else / debut end_if>)
 
-                            instructionList[$1.refInstructTest].second.intVal = instructionList.size();//<adresse fin then / debut else>
-                        }
-      bloc_else END     { 
-                            instructionList[$1.refInstruct].second.intVal = instructionList.size();//<adresse fin else / debut end_if>
-                            addInstruct(command::_EXIT_BLOCK_);
-                        }
+                        instructionList[$1.refInstructTest].second.intVal = instructionList.size();//<adresse fin then / debut else>
+                    }
+    bloc_else '}'   {
+                        instructionList[$1.refInstruct].second.intVal = instructionList.size();//<adresse fin else / debut end_if>
+                        addInstruct(command::_EXIT_BLOCK_);
+                    }
+    ;//ELIF ... ?
+bloc_else : /* Epsilon */ | ELSE '\n' instructBloc ;
 
-    | WHILE             { 
+boucle :
+    WHILE               { 
                             addInstruct(command::_ENTER_BLOCK_);
                             $1.refInstruct = instructionList.size();//<adresse test>
                         }
-      logic_test '\n'   {
+      logic_test '{'    {
                                 //apres interpretation de operation :
                             $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                             addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans bloc, sinon sauter à <adresse end while>)
                         }
-      instructBloc END  {
+      instructBloc '}'  {
                                 //apres interpretation de bloc :
                             addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse test>)
                             instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse test>
@@ -268,18 +259,18 @@ structure :
                             addInstruct(command::_EXIT_BLOCK_);
                         }
 
-    | DO                                {
-                                            addInstruct(command::_ENTER_BLOCK_);
-                                            $1.refInstruct = instructionList.size();//<adresse debut>
-                                        }
-      instructBloc END_WHILE logic_test {//apres interpretation de operation :
-                                            addInstruct(command::_EMPILE_VALUE_,(int)0);
-                                            addInstruct(command::_EQUIV_);
-                                            addInstruct(command::_GOTO_TEST_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
-                                            instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
-                                            
-                                            addInstruct(command::_EXIT_BLOCK_);
-                                        }
+    | DO '{'                        {
+                                        addInstruct(command::_ENTER_BLOCK_);
+                                        $1.refInstruct = instructionList.size();//<adresse debut>
+                                    }
+      instructBloc '}' logic_test   {
+                                        addInstruct(command::_EMPILE_VALUE_,(int)0);
+                                        addInstruct(command::_EQUIV_);
+                                        addInstruct(command::_GOTO_TEST_);/*testnot0*///realise cette instruction (sauter à <adresse debut> si vrai, quitter sinon)
+                                        instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse debut>
+                                        
+                                        addInstruct(command::_EXIT_BLOCK_);
+                                    }
 
     | FOR                                   { addInstruct(command::_ENTER_BLOCK_); }
       affectVar                             { $1.refInstruct = instructionList.size();/*<adresse test>*/ }
@@ -287,7 +278,7 @@ structure :
                                                 $1.refInstructTest = instructionList.size();//quand arrive à ce numero d'instruction :
                                                 addInstruct(command::_GOTO_TEST_);//realise cette instruction (si vrai : continuer dans bloc, sinon sauter à <adresse end while>)
                                             } 
-      ':' varCrement '\n' instructBloc END   { 
+      ':' varCrement '{' instructBloc '}'   { 
                                                 addInstruct(command::_GOTO_);//realise cette instruction (sauter à <adresse test>)
                                                 instructionList[instructionList.size()-1].second.intVal = $1.refInstruct;//<adresse test>
 
@@ -297,53 +288,21 @@ structure :
                                             }
     ;
 
-bloc_else : /* Epsilon */ | ELSE '\n' instructBloc ;
 
 function :
-    NAME INT                { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
-      '(' argument ')''\n'  { 
-                                addInstruct(command::_EMPILE_VALUE_,(int)1);//type de retours
+    NAME type               { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
+      '(' argument ')' '{'  {
                                 addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse debut fonction
                                 addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
                                 addInstruct(command::_ENTER_FUNCTION_,$1);
                             }
-      instructBloc END      { addInstruct(command::_EXIT_FUNCTION_); }
-    | NAME DOUBLE           { addInstruct(command::_EMPILE_VALUE_,(double)-1); }//guette -1 pour fin de declaration des parametres
-      '(' argument ')''\n'  { 
-                                addInstruct(command::_EMPILE_VALUE_,(int)1);//type de retours
-                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse debut fonction
-                                addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
-                                addInstruct(command::_ENTER_FUNCTION_,$1);
-                            }
-      instructBloc END      { addInstruct(command::_EXIT_FUNCTION_); }
-    | NAME STRING           { addInstruct(command::_EMPILE_VALUE_,""); }//guette -1 pour fin de declaration des parametres
-      '(' argument ')''\n'  { 
-                                addInstruct(command::_EMPILE_VALUE_,(int)1);//type de retours
-                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse debut fonction
-                                addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
-                                addInstruct(command::_ENTER_FUNCTION_,$1);
-                            }
-      instructBloc END      { addInstruct(command::_EXIT_FUNCTION_); }
+      instructBloc '}'      { addInstruct(command::_EXIT_FUNCTION_); }
 
     | NAME              { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
       '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }//todo
     ;
 
-argument :
-    /*Epsilon*/
-    | NAME INT argument_inter       {
-                                        addInstruct(command::_EMPILE_VALUE_,(int)1);//type var
-                                        addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
-                                    }
-    | NAME DOUBLE argument_inter    { 
-                                        addInstruct(command::_EMPILE_VALUE_,(double)1);//type var
-                                        addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
-                                    }
-    | NAME STRING argument_inter    { 
-                                        addInstruct(command::_EMPILE_VALUE_,(string)"");//type var
-                                        addInstruct(command::_CREATE_VARIABLE_,$1);//nom var
-                                    }
-    ;
+argument : /*Epsilon*/ | NAME type argument_inter { addInstruct(command::_CREATE_VARIABLE_,$1); };
 argument_inter : /*Epsilon*/ | ',' argument ;
     
 %%

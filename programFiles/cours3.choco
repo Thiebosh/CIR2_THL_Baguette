@@ -1,56 +1,56 @@
 /* COURS 3
 conditions,tests et boucles
 */
-valeur entier = 0
+0 = entier valeur
 
-ECRIRE "PARTIE 1 : SI\n\n"
-si valeur > 0
-	ECRIRE "premier if (pas accessible)\n"
-fin
+ecrire "PARTIE 1 : SI\n\n"
+si valeur > 0 {
+	ecrire "premier if (pas accessible)\n"
+}
 
-si !faux
-	ECRIRE "deuxieme if - then (accès)\n"
+si !faux {
+	ecrire "deuxieme if - then (accès)\n"
 sinon
-	ECRIRE "deuxieme if - else (pas accessible)\n"
-fin
+	ecrire "deuxieme if - else (pas accessible)\n"
+}
 
-si valeur + 8 != 0
-	ECRIRE "troisième if - then (accès)\n"
+si valeur + 8 != 0 {
+	ecrire "troisième if - then (accès)\n"
 sinon
-	ECRIRE "troisième if - else (pas accessible)\n"
-fin
+	ecrire "troisième if - else (pas accessible)\n"
+}
 
 
-ECRIRE "\n\n\nPARTIE 2 : TESTS AVANCES\n\n"
-si [[0 == 0 ET 10 > 0] OU 0] ET [5 OU [0 ET (8 - 2) < 8]]
-	ECRIRE "if test - validé\n"
+ecrire "\n\n\nPARTIE 2 : TESTS AVANCES\n\n"
+si [[0 == 0 ET 10 > 0] OU 0] ET [5 OU [0 ET (8 - 2) < 8]] {
+	ecrire "if test - validé\n"
 sinon
-	ECRIRE "if test - échoué\n"
-fin
+	ecrire "if test - échoué\n"
+}
 
 
-ECRIRE "\n\n\nPARTIE 3 : TANT QUE\n\n"
-tantque valeur < 2
-    ECRIRE "while : ",++valeur," (2 repetition)\n"
-fin
+ecrire "\n\n\nPARTIE 3 : TANT QUE\n\n"
+tantque valeur < 2 {
+    ecrire "while : ",++valeur," (2 repetition)\n"
+}
 
-faire
-    ECRIRE "do while : ",--valeur," (2 repetitions)\n"
-finque valeur >= 0
+faire {
+    ecrire "do while : ",--valeur," (2 repetitions)\n"
+} valeur >= 0
 
 
-ECRIRE "\n\n\nPARTIE 4 : POUR\n\n"
-pour i entier = 0 : i < 3 : ++i
-    ECRIRE "for : ",i,"\n"
-fin
+ecrire "\n\n\nPARTIE 4 : POUR\n\n"
+pour 0 = entier i : i < 3 : ++i {
+    ecrire "for : ",i,"\n"
+}
 
-pour i  = 0 : i < 15 : i += 7
-    ECRIRE "for : ",i,"\n"
-fin
+pour 0 = i : i < 15 : 7 += i { //doit redeclarer variable i
+    ecrire "for : ",i,"\n"
+}
 
-//pour i liste entier = 0 : taille i < 3 : i[] = 0
-//    ECRIRE "for : ",i[taille i - 1],"\n"
-//fin
+//pour 0 = liste entier i : taille i < 3 : 0 = i[] {
+//    ecrire "for : ",i[taille i - 1],"\n"
+//}
 
 //pour chaque
 

@@ -3,10 +3,10 @@ zones mémoires
 */
 
 ouvrir_zone_memoire
-mavar entier = 3
+3 = entier mavar
 
 fermer_zone_memoire
 
-ECRIRE mavar//pb : existe encore
+ecrire mavar//pb : existe encore
 
 TERMINER
