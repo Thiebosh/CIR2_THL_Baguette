@@ -15,7 +15,7 @@
 #define PROGRAM_EXTENSION ".choco"
 #define COMPILED_EXTENSION ".chocapic"
 
-using namespace std;
+string programName;
 
 bool folderExist() {
     if (access(DEFAULT_FOLDER, F_OK) == -1) {//le / assure que c'est un dossier
@@ -52,42 +52,52 @@ FILE* readOnlyFileFlow(string filename) {
 FILE* programGeneration(int argc, char** argv) {
     ++argv, --argc;
     if (argc) {//remplacer par dossier de fichiers
+        programName = argv[0];
         return readOnlyFileFlow(argv[0]);
     }
     
-    //else implicite
-    vector<string> fileList;
-    DIR *fluxFolder;
-    struct dirent *fileFolder;
-    string filename;
+    vector<string> programList;
+    vector<string> compiledList;
 
-    //liste contenu du dossier
-    cout << endl << "Contenu du dossier " << DEFAULT_FOLDER << " :" << endl;
-    fluxFolder = opendir(DEFAULT_FOLDER);
-    while (fileFolder = readdir(fluxFolder)) {
-        filename = (string)fileFolder->d_name;
+    DIR *fluxFolder = opendir(DEFAULT_FOLDER);
+    while (struct dirent *fileFolder = readdir(fluxFolder)) {
+        string filename = (string)fileFolder->d_name;
         if (filename.find(PROGRAM_EXTENSION, filename.size() - ((string)PROGRAM_EXTENSION).size()) !=  string::npos) {
-            cout << fileList.size()+1 << " - \"" << filename << "\"" << endl;
-            fileList.push_back(filename);
+            programList.push_back(filename);
+        }
+        else if (filename.find(COMPILED_EXTENSION, filename.size() - ((string)COMPILED_EXTENSION).size()) !=  string::npos) {
+            compiledList.push_back(filename);
         }
     }
     closedir (fluxFolder);
+    
+    int i = 0;
+    cout << endl << "Dossier " << DEFAULT_FOLDER << " : Fichiers programmes" << endl;//a compiler
+    for (auto file : programList) cout << ++i << " - \"" << file << "\"" << endl;
+
+    cout << endl << "Dossier " << DEFAULT_FOLDER << " : Programmes compilés (inaccessible : wip)" << endl;//a executer
+    for (auto file : compiledList) cout << ++i << " - \"" << file << "\"" << endl;
 
     //choisit fichier à traiter
     int saisie;
-    cout << endl << "Votre sélection (0 pour quitter) : ";
-    do cin >> saisie; while (saisie < -1 || saisie > fileList.size());
+    cout << endl << "Votre sélection (programme à compiler, compilé à exécuter ou 0 pour quitter) : ";
+    do cin >> saisie; while (saisie < -1 || saisie > programList.size() /*+ compiledList.size()*/);
 
-    if (!saisie) exit(0);
-
-    return readOnlyFileFlow(fileList[--saisie]);
+    if (--saisie < 0) exit(0);
+    else if (saisie < programList.size()) {
+        programName = programList[saisie].substr(0, programList[saisie].size() - ((string)PROGRAM_EXTENSION).size());
+        return readOnlyFileFlow(programList[saisie]);
+    }
+    else {
+        saisie -= programList.size();
+        programName = compiledList[saisie].substr(0, compiledList[saisie].size() - ((string)COMPILED_EXTENSION).size());
+        return readOnlyFileFlow(compiledList[saisie]);
+    }
 }
 
 
 void saveGeneratedProgramFile() {
-    //string const nomFichier("C:/Nanoc/scores.txt");
-    //ofstream monFlux(nomFichier.c_str());
-    ofstream file("programFiles/program.chocapic");
+    ofstream file((DEFAULT_FOLDER + programName + COMPILED_EXTENSION).c_str());
 
     if (file) {
         file << endl << "===== EXECUTION =====" << endl;

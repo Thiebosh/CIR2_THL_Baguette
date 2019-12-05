@@ -7,6 +7,7 @@ ouvrir_zone_memoire
 ecrire mavar,"\n"
 fermer_zone_memoire
 
+ecrire "on s'attend à ce que le programme plante car il ne connait plus la variable : \n"
 ecrire mavar//existe bien plus
 
 TERMINER

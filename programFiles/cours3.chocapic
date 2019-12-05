@@ -132,8 +132,7 @@ addInstruct(command::_CREATE_VARIABLE_,"i");
 addInstruct(command::_EMPILE_VARIABLE_,"i");
 addInstruct(command::_EMPILE_VALUE_,15);
 addInstruct(command::_SUPERIEUR_);
-addInstruct(command:: ýÿ ýÿ8zýÿµzýÿ2{ýÿ¯{ýÿ,|ýÿG|ýÿb|ýÿ}|ýÿ˜|ýÿ³|ýÿÎ|ýÿé|ýÿ}ýÿ}ýÿ:}ýÿU}ýÿp}ýÿš}ýÿÄ}ýÿA~ýÿ ýÿ ýÿ ýÿ ýÿ¾~ýÿÙ~ýÿ ýÿ ýÿô~ýÿýÿ'ýÿ%s
-);
+addInstruct(command::YýÿYýÿñyýÿnzýÿëzýÿh{ýÿå{ýÿ);
 addInstruct(command::_EMPILE_VALUE_,7);
 addInstruct(command::_PLUS_CREMENT_,"i");
 addInstruct(command::_EMPILE_VALUE_,"for : ");
