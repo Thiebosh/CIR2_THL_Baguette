@@ -337,25 +337,48 @@ void displayGeneratedProgram() {
 			cout << "SUPPRIME STRATE MEMOIRE" << endl;
 			break;
 
-		case command::_EMPILE_TABLE_SIZE_:
-		name =instructContent.second.stringVal;
-		if (tableaux.top().find(name) != tableaux.top().end()) {//var existe bien
-			switch(tableaux.top()[name].type) {
+
+		case command::_EMPILE_VALUE_:
+			cout << "AJOUTE ";
+			switch (instructContent.second.type) {
 			case valType::_int_:
-				size = intList.size();
+				cout << instructContent.second.intVal;
 				break;
 			case valType::_double_:
-				size = doubleList.size();
+				cout << instructContent.second.doubleVal;
 				break;
 			case valType::_string_:
-				size = stringList.size();
+				cout << "\"" << instructContent.second.stringVal << "\"";
 				break;
+
 			}
-			cout << "AJOUTE " << size << " A LA PILE";
-		}
-		else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
-		break;
+			cout << " A LA PILE";
+			break;
+		case command::_EMPILE_VARIABLE_:
+			cout << "AJOUTE VALEUR DE '" << instructContent.second.stringVal << "' A LA PILE";
+			break;
+		case command::_EMPILE_TABLE_SIZE_:
+				//IDEM
+			name =instructContent.second.stringVal;
+			if (tableaux.top().find(name) != tableaux.top().end()) {//var existe bien
+				switch(tableaux.top()[name].type) {
+				case valType::_int_:
+					size = intList.size();
+					break;
+				case valType::_double_:
+					size = doubleList.size();
+					break;
+				case valType::_string_:
+					size = stringList.size();
+					break;
+				}
+				cout << "AJOUTE " << size << " A LA PILE";
+			}
+			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+			break;
 		case command::_EMPILE_TABLE_ELEMENT_:
+				//IDEM
+				/*
 			name = instructContent.second.stringVal;
 			tabPos = executionPile.top().tabPos;//recupere val associee a adresse
 
@@ -374,6 +397,7 @@ void displayGeneratedProgram() {
 				}
 			}
 			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+			*/
 			break;
 
 
@@ -446,19 +470,10 @@ void displayGeneratedProgram() {
 
 		
 			case command::_CREATE_TABLE_:
-				cout << "jerentreeter icvi" << endl;
-				name = instructContent.second.stringVal;
-				if (tableaux.top().find(name) == tableaux.top().end()) {
-					value = executionPile.top();
-
-					if (instructContent.second.type == value.type) {
-						printVal("INITIALISE TABLEAU " + name + " AVEC ",value);
-					}
-					else cout << "ERREUR : TYPES DIFFERENTS";
-				}
-				else cout << "ERREUR : TABLEAU " << name << " EXISTE DEJA";
+				cout << "INITIALISE LISTE '" << instructContent.second.stringVal << "'";
 				break;
 			case command::_ADD_TABLE_ELEMENT_:
+				//IDEM
 				name = instructContent.second.stringVal;
 				if (tableaux.top().find(name) != tableaux.top().end()) {
 					value = executionPile.top();
@@ -471,6 +486,7 @@ void displayGeneratedProgram() {
 				else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
 				break;
 			case command::_UPDATE_TABLE_ELEMENT_:
+				//IDEM
 				name = instructContent.second.stringVal;
 				if (tableaux.top().find(name) != tableaux.top().end()) {
 					value = executionPile.top();
@@ -490,6 +506,7 @@ void displayGeneratedProgram() {
 				else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
 				break;
 			case command::_REMOVE_TABLE_ELEMENT_:
+				//IDEM
 				name = instructContent.second.stringVal;
 				if (tableaux.top().find(name) != tableaux.top().end()) {
 					value = executionPile.top();

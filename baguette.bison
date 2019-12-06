@@ -166,7 +166,7 @@ affectVar :
 
     | value '=' TAB type NAME       { addInstruct(command::_CREATE_TABLE_,$5); }//nom tab
     | value '=' NAME'['']'          { addInstruct(command::_ADD_TABLE_ELEMENT_,$3); } //nom tab
-    | value '=' NAME'['INT_VALUE']' { 
+    | value '=' NAME'['INT_VALUE']' {
                                         addInstruct(command::_EMPILE_VALUE_,(int)$5);//index tab
                                         addInstruct(command::_UPDATE_TABLE_ELEMENT_,$3);//nom tab
                                     }
@@ -192,9 +192,9 @@ value :
     
     | NAME                 { addInstruct(command::_EMPILE_VARIABLE_,$1); }
     | NAME'['INT_VALUE']'  { 
-                                      addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
-                                      addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
-                                    }
+                                addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
+                                addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
+                            }
 
     | oneCrement
     ;

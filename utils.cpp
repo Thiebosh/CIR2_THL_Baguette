@@ -99,10 +99,7 @@ valAccess castVal(valAccess value, valType cast, bool isVar) {
 		return result;
 	}
 
-	else {
-		error(errorCode::conversionType);
-		return {};
-	}
+	else error(errorCode::conversionType);
 }
 
 void executeOperation(operation operation) {
