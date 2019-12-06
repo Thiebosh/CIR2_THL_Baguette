@@ -13,16 +13,18 @@
 
 #define DEFAULT_FOLDER "programFiles/"
 #define PROGRAM_EXTENSION ".choco"
+#define COMMAND_EXTENSION ".command"
 #define COMPILED_EXTENSION ".chocapic"
 
-string programName;
+string folderName = DEFAULT_FOLDER;
+string programName = "";
 
 bool folderExist() {
-    if (access(DEFAULT_FOLDER, F_OK) == -1) {//le / assure que c'est un dossier
+    if (access(folderName.c_str(), F_OK) == -1) {//le / assure que c'est un dossier
         cout << "Dossier de programmes non trouvé : création en cours... ";
 
-        if (mkdir(DEFAULT_FOLDER, 0777)) {//échec de création
-            cout << "Echec de création du dossier " << DEFAULT_FOLDER << endl;
+        if (mkdir(folderName.c_str(), 0777)) {//échec de création
+            cout << "Echec de création du dossier " << folderName << endl;
             return false;
         }
         else {
@@ -41,8 +43,8 @@ FILE* readOnlyFileFlow(string filename) {
 
     //exécute fichier s'il existe
     cout << filename << endl;
-    if (access((DEFAULT_FOLDER+filename).c_str(), F_OK) != -1) {
-        return fopen((DEFAULT_FOLDER+filename).c_str(),"r");
+    if (access((folderName + filename).c_str(), F_OK) != -1) {
+        return fopen((folderName + filename).c_str(),"r");
     }
     
     cout << "Echec d'accès au fichier" << endl;
@@ -59,7 +61,7 @@ FILE* programGeneration(int argc, char** argv) {
     vector<string> programList;
     vector<string> compiledList;
 
-    DIR *fluxFolder = opendir(DEFAULT_FOLDER);
+    DIR *fluxFolder = opendir(folderName.c_str());
     while (struct dirent *fileFolder = readdir(fluxFolder)) {
         string filename = (string)fileFolder->d_name;
         if (filename.find(PROGRAM_EXTENSION, filename.size() - ((string)PROGRAM_EXTENSION).size()) !=  string::npos) {
@@ -72,10 +74,10 @@ FILE* programGeneration(int argc, char** argv) {
     closedir (fluxFolder);
     
     int i = 0;
-    cout << endl << "Dossier " << DEFAULT_FOLDER << " : Fichiers programmes" << endl;//a compiler
+    cout << endl << "Dossier " << folderName << " : Fichiers programmes" << endl;//a compiler
     for (auto file : programList) cout << ++i << " - \"" << file << "\"" << endl;
 
-    cout << endl << "Dossier " << DEFAULT_FOLDER << " : Programmes compilés (inaccessible : wip)" << endl;//a executer
+    cout << endl << "Dossier " << folderName << " : Programmes compilés (inaccessible : wip)" << endl;//a executer
     for (auto file : compiledList) cout << ++i << " - \"" << file << "\"" << endl;
 
     //choisit fichier à traiter
@@ -96,8 +98,8 @@ FILE* programGeneration(int argc, char** argv) {
 }
 
 
-void saveGeneratedProgramFile() {
-    ofstream file((DEFAULT_FOLDER + programName + COMPILED_EXTENSION).c_str());
+void saveCommandProgramFile() {
+    ofstream file((folderName + programName + COMMAND_EXTENSION).c_str());
 
     if (file) {
         file << endl << "===== EXECUTION =====" << endl;
@@ -200,6 +202,12 @@ void saveGeneratedProgramFile() {
                     break;
 
                 //FONCTIONS - ok
+                case command::_CREATE_FUNCTION_:
+                    arguments += "_CREATE_FUNCTION_,\"" + instructContent.second.stringVal + "\""; 
+                    break;
+                case command::_CALL_FUNCTION_:
+                    arguments += "_CALL_FUNCTION_,\"" + instructContent.second.stringVal + "\""; 
+                    break;
                 case command::_ENTER_FUNCTION_:
                     arguments += "_ENTER_FUNCTION_";
                     break;
@@ -224,5 +232,18 @@ void saveGeneratedProgramFile() {
 	    file << endl << "=====================" << endl;
         file.close();
     }
+}
+
+void saveCompiledProgramFile() {
+    ofstream file((folderName + programName + COMPILED_EXTENSION).c_str());
+
+    if (file) {
+        //todo
+        file.close();
+    }
+}
+
+void loadCompiledProgramFile() {
+    //todo
 }
 

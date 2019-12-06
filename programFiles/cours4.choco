@@ -1,7 +1,16 @@
-recette entier () {
-    ecrire "fonction de confirmation"
+ecrire "peut faire des choses sans la fonction\n"
+
+test entier () {
+    ecrire "fonction de confirmation\n"
+    renvoyer 4
 }
 
-ecrire "ok"
+ecrire "creation ok\n"
+
+test ()
+
+ecrire "utilisation ok\n"//petit pb de pile
+
+//ecrire "retours ok si 4 : ",test(),"\n"
 
 TERMINER

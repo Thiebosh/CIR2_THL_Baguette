@@ -22,6 +22,9 @@
   instructAdress declareFonction;
 }
 
+%token ADD_MEMORY_LAYER
+%token REMOVE_MEMORY_LAYER
+
 %token <intValeur>    INT_VALUE
 %token <doubleValeur> DOUBLE_VALUE
 %token <stringValeur> STRING_VALUE
@@ -62,8 +65,7 @@
 %token <adresse> FOR
 %token <adresse> FOREACH
 
-%token ADD_MEMORY_LAYER
-%token REMOVE_MEMORY_LAYER
+%token RETURN
 %token END_PRGM
 
 %left AND OR     /* associativité à gauche */
@@ -73,9 +75,9 @@
 %%
 program : { addInstruct(command::_ENTER_FUNCTION_); } instructBloc END_PRGM { addInstruct(command::_EXIT_FUNCTION_); };
 
-endligne : '\n' | ';' ;
+endline : '\n' | ';' ;
 
-instructBloc : /*Epsilon*/ | instruction endligne instructBloc ;
+instructBloc : /*Epsilon*/ | instruction endline instructBloc ;
 
 instruction :
     /* Ligne vide*/
@@ -291,14 +293,16 @@ boucle :
 function :
     NAME type               { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
       '(' argument ')' '{'  {
-                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse debut fonction
+                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 2);//adresse debut fonction
                                 addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
                                 addInstruct(command::_ENTER_FUNCTION_,$1);
                             }
-      instructBloc '}'      { addInstruct(command::_EXIT_FUNCTION_); }
+      instructBloc '}'      { /*cas void, pas necessairement de return : addInstruct(command::_EXIT_FUNCTION_);*/ }
 
     | NAME              { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
-      '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }//todo
+      '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }
+
+    | RETURN value      { addInstruct(command::_EXIT_FUNCTION_); }
     ;
 
 argument : /*Epsilon*/ | NAME type argument_inter { addInstruct(command::_CREATE_VARIABLE_,$1); };
@@ -315,7 +319,7 @@ int main(int argc, char **argv) {
 
     displayGeneratedProgram();
 
-    saveGeneratedProgramFile();
+    saveCommandProgramFile();//debug
 
     executeGeneratedProgram();
 
