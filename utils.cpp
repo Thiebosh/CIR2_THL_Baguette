@@ -282,11 +282,10 @@ void executeCrement(string varName, operation operation) {
 /********************************************************/
 /*	PARTIE III : TABLEAUX								*/
 /********************************************************/
-/*
-remettre au gout du jour
-void executeTabAction(instruction& instructContent, tabAction action) {
-	string name = stringList[instructContent.second.tabPos];
-	delVal(instructContent.second);//string recupere : peut supprimer du tableau
+
+//remettre au gout du jour
+void executeTabAction(valInstruct& instructContent, tabAction action) {
+	string name = instructContent.stringVal;
 
 	if ((action == tabAction::_create_ && tableaux.top().find(name) == tableaux.top().end()) ||//tab est bien nouveau
 		(action != tabAction::_create_ && tableaux.top().find(name) != tableaux.top().end())) {//tab existe bien
@@ -337,7 +336,7 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 		case tabAction::_create_:
 			value = depiler();//supprime pas : besoin de transmettre valeur associee
 
-			if (instructContent.second.type == value.type) {//verif types
+			if (instructContent.type == value.type) {//verif types
 				declaration = {(unsigned)memoryLayer.size(), value.type};//ordre de declaration
 
 				switch(value.type) {
@@ -426,5 +425,5 @@ void executeTabAction(instruction& instructContent, tabAction action) {
 	}
 	//else : pb
 }
-*/
+
 
