@@ -187,10 +187,10 @@ void saveCommandProgramFile() {
 
                 //SAUTS (conditions, boucles, fonctions) - ok
                 case command::_GOTO_:
-                    arguments += "_GOTO_," + instructContent.second.intVal;
+                    arguments += "_GOTO_," + to_string(instructContent.second.intVal);
                     break;
                 case command::_GOTO_TEST_:
-                    arguments += "_GOTO_TEST_," + instructContent.second.intVal;
+                    arguments += "_GOTO_TEST_," + to_string(instructContent.second.intVal);
                     break;
 
                 //VARIABLES - ok

@@ -64,6 +64,7 @@
 %token <adresse> DO
 %token <adresse> FOR
 %token <adresse> FOREACH
+%token <adresse> FUNCTION
 
 %token RETURN
 %token END_PRGM
@@ -291,13 +292,21 @@ boucle :
 
 
 function :
-    NAME type               { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
+    FUNCTION NAME type      { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
       '(' argument ')' '{'  {
-                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 2);//adresse debut fonction
-                                addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
-                                addInstruct(command::_ENTER_FUNCTION_,$1);
+                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 3);//adresse debut fonction
+                                addInstruct(command::_CREATE_FUNCTION_,$2);//nom de fonction,todo
+                                
+                                $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction : saute
+                                addInstruct(command::_GOTO_);
+
+                                addInstruct(command::_ENTER_FUNCTION_,$2);
                             }
-      instructBloc '}'      { /*cas void, pas necessairement de return : addInstruct(command::_EXIT_FUNCTION_);*/ }
+      instructBloc '}'      { 
+                                //cas void, pas necessairement de return : addInstruct(command::_EXIT_FUNCTION_);
+                                //pour instruction memorisee, mettre valeur a instructionList.size()
+                                instructionList[$1.refInstruct].second.intVal = instructionList.size();
+                            }
 
     | NAME              { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
       '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }

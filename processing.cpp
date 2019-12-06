@@ -199,7 +199,7 @@ const map<command, functionPointer> executeCommand = {
 				for (auto param : fonctions[instructContent.stringVal].listParam) {
 					variables.top().insert({ param.first,castVal(depiler(),param.second) });//depile et initialise variables (nom, valeur castee)
 				}
-				depiler();//consommer le -1 de fin de parametres
+				delVal(depiler());//consommer le -1 de fin de parametres
 			}
 		}},
 	{command::_EXIT_FUNCTION_,
@@ -337,6 +337,25 @@ void displayGeneratedProgram() {
 			cout << "SUPPRIME STRATE MEMOIRE" << endl;
 			break;
 
+		case command::_EMPILE_VALUE_:
+			cout << "AJOUTE ";
+			switch (instructContent.second.type) {
+			case valType::_int_:
+				cout << instructContent.second.intVal;
+				break;
+			case valType::_double_:
+				cout << instructContent.second.doubleVal;
+				break;
+			case valType::_string_:
+				cout << "\"" << instructContent.second.stringVal << "\"";
+				break;
+
+			}
+			cout << " A LA PILE";
+			break;
+		case command::_EMPILE_VARIABLE_:
+			cout << "AJOUTE VALEUR DE '" << instructContent.second.stringVal << "' A LA PILE";
+			break;
 		case command::_EMPILE_TABLE_SIZE_:
 		name =instructContent.second.stringVal;
 		if (tableaux.top().find(name) != tableaux.top().end()) {//var existe bien
