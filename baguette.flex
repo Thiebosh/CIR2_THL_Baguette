@@ -55,6 +55,7 @@ faire 	  { return DO; }
 pour      { return FOR; }
 parcourir { return FOREACH; }
 
+renvoyer	{ return RETURN; }
 TERMINER(.|\n)*	{ return END_PRGM; }
 
 

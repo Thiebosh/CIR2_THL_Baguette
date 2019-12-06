@@ -1,7 +1,6 @@
 /*fichier bison : parse*/
 %{
-  #include "storage.cpp"
-  #include "processing.cpp"
+  #include "files.cpp"
 
   //sauts conditionnels
   typedef struct {
@@ -22,6 +21,9 @@
   instructAdress adresse;
   instructAdress declareFonction;
 }
+
+%token ADD_MEMORY_LAYER
+%token REMOVE_MEMORY_LAYER
 
 %token <intValeur>    INT_VALUE
 %token <doubleValeur> DOUBLE_VALUE
@@ -63,8 +65,7 @@
 %token <adresse> FOR
 %token <adresse> FOREACH
 
-%token ADD_MEMORY_LAYER
-%token REMOVE_MEMORY_LAYER
+%token RETURN
 %token END_PRGM
 
 %left AND OR     /* associativité à gauche */
@@ -74,9 +75,9 @@
 %%
 program : { addInstruct(command::_ENTER_FUNCTION_); } instructBloc END_PRGM { addInstruct(command::_EXIT_FUNCTION_); };
 
-endligne : '\n' | ';' ;
+endline : '\n' | ';' ;
 
-instructBloc : /*Epsilon*/ | instruction endligne instructBloc ;
+instructBloc : /*Epsilon*/ | instruction endline instructBloc ;
 
 instruction :
     /* Ligne vide*/
@@ -105,24 +106,24 @@ output_inter : /*Epsilon*/ | ',' output ;
 
 oneCrement :
       INCREMENT NAME   { 
-                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
-                                    addInstruct(command::_PLUS_CREMENT_,$2);
-                                }
+                            addInstruct(command::_EMPILE_VALUE_,(int)1);
+                            addInstruct(command::_PLUS_CREMENT_,$2);
+                        }
     | DECREMENT NAME   { 
-                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
-                                    addInstruct(command::_MOINS_CREMENT_,$2);
-                                }
+                            addInstruct(command::_EMPILE_VALUE_,(int)1);
+                            addInstruct(command::_MOINS_CREMENT_,$2);
+                        }
     
     | INCREMENT NAME '['INT_VALUE']'   { 
-                                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
-                                                    addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
-                                                    addInstruct(command::_PLUS_CREMENT_,$2); 
-                                                }
+                                            addInstruct(command::_EMPILE_VALUE_,(int)1);
+                                            addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
+                                            addInstruct(command::_PLUS_CREMENT_,$2); 
+                                        }
     | DECREMENT NAME '['INT_VALUE']'   {
-                                                    addInstruct(command::_EMPILE_VALUE_,(int)1);
-                                                    addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
-                                                    addInstruct(command::_MOINS_CREMENT_,$2); 
-                                                }
+                                            addInstruct(command::_EMPILE_VALUE_,(int)1);
+                                            addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
+                                            addInstruct(command::_MOINS_CREMENT_,$2); 
+                                        }
     ;
 
 valCrement :
@@ -292,14 +293,16 @@ boucle :
 function :
     NAME type               { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
       '(' argument ')' '{'  {
-                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 1);//adresse debut fonction
+                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 2);//adresse debut fonction
                                 addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
                                 addInstruct(command::_ENTER_FUNCTION_,$1);
                             }
-      instructBloc '}'      { addInstruct(command::_EXIT_FUNCTION_); }
+      instructBloc '}'      { /*cas void, pas necessairement de return : addInstruct(command::_EXIT_FUNCTION_);*/ }
 
     | NAME              { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
-      '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }//todo
+      '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }
+
+    | RETURN value      { addInstruct(command::_EXIT_FUNCTION_); }
     ;
 
 argument : /*Epsilon*/ | NAME type argument_inter { addInstruct(command::_CREATE_VARIABLE_,$1); };
@@ -308,14 +311,17 @@ argument_inter : /*Epsilon*/ | ',' argument ;
 %%
 
 int main(int argc, char **argv) {
-  if (!folderExist()) exit(0);//ne peut pas fonctionner sans
+    //commence par verifier si argument (dossier)
+    if (!folderExist()) exit(0);//ne peut pas fonctionner sans
 
-  if ((yyin = programGeneration(argc, argv)) == NULL) exit(0);//ne peut pas fonctionner sans
-  yyparse();
+    if ((yyin = programGeneration(argc, argv)) == NULL) exit(0);//ne peut pas fonctionner sans
+    yyparse();
 
-  displayGeneratedProgram();
+    displayGeneratedProgram();
 
-  executeGeneratedProgram();
-  
-  return 0;
+    saveCommandProgramFile();//debug
+
+    executeGeneratedProgram();
+
+    return 0;
 }

@@ -156,6 +156,11 @@ typedef struct {
 	deque<param> listParam;
 } functionAccess;
 
+typedef struct {
+	string name;
+	unsigned int returnAdress;
+} functionCall;
+
 typedef pair<command, valInstruct> instruction;
 
 typedef void (*functionPointer)(valInstruct& instructContent);//necessaire pour map de commandes - fonctions lambda
@@ -181,6 +186,8 @@ stack<map<string, tabAccess>> tableaux;
 stack<memoryState> memoryLayer;
 
 map<string, functionAccess> fonctions;
+
+stack<functionCall> appelFonction;
 
 deque<instruction> instructionList;
 

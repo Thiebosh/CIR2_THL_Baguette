@@ -144,111 +144,15 @@ const map<command, functionPointer> executeCommand = {
 			}},
 	
 
-	{command::_ENTER_FUNCTION_,	
-		[](valInstruct& instructContent) { 
-			variables.push({});//separation memoire
-			tableaux.push({});//separation memoire
-			enterMemoryLayer();//nettoyage plus simple
-
-			if (instructContent.type == valType::_string_) {//si entre dans une "vraie" fonction, nombre et type des arguments est ok dans pile
-				for (auto param : fonctions[instructContent.stringVal].listParam) {
-					variables.top().insert({ param.first,castVal(depiler(),param.second) });//depile et initialise variables
-				}
-				depiler();//consommer le -1 de fin de parametres
-
-				/*
-				switch (fonctions[instructContent.stringVal].returnVal) {//prevoit emplacement de valeur de retours
-					//case valType::_void_:
-						//break;
-					case valType::_bool_:
-						++memoryLayer.top().boolListSize;
-						break;
-					case valType::_int_:
-						++memoryLayer.top().intListSize;
-						break;
-					case valType::_double_:
-						++memoryLayer.top().doubleListSize;
-						break;
-					case valType::_string_:
-						++memoryLayer.top().stringListSize;
-						break;
-				}
-				*/
-			}
-		}},
-	{command::_EXIT_FUNCTION_,	
-		[](valInstruct& instructContent) {
-			bool returnBool;
-			int returnInt;
-			double returnDouble;
-			string returnString;
-
-			if (instructContent.type == valType::_string_) { //si ne quitte pas le programme, cherche l'instruction qui suit l'appel
-				valType returnType = fonctions[instructContent.stringVal].returnType;
-				switch(returnType) {
-					//case valType::_void_:
-						//break;
-					case valType::_bool_:
-						returnBool = boolList[castVal(depiler(),returnType).tabPos];
-						break;
-					case valType::_int_:
-						returnInt = intList[castVal(depiler(),returnType).tabPos];
-						break;
-					case valType::_double_:
-						returnDouble = doubleList[castVal(depiler(),returnType).tabPos];
-						break;
-					case valType::_string_:
-						returnString = stringList[castVal(depiler(),returnType).tabPos];
-						break;
-				}
-			}
-
-			exitMemoryLayer();
-			variables.pop();
-			tableaux.pop();
-
-			if (instructContent.type == valType::_string_) { //si ne quitte pas le programme, cherche l'instruction qui suit l'appel
-				valAccess returnInstruct = castVal(depiler(),valType::_int_);
-				indexInstruction = intList[returnInstruct.tabPos];
-				delVal(returnInstruct);
-
-				//ajoute la valeur de retour a la pile
-				valType returnType = fonctions[instructContent.stringVal].returnType;
-				switch(returnType) {
-					//case valType::_void_:
-						//break;
-					case valType::_bool_:
-						executionPile.push(addVal({returnType,(int)boolList.size()}));
-						boolList.push_back(returnBool);
-						break;
-					case valType::_int_:
-						executionPile.push(addVal({returnType,(int)intList.size()}));
-						intList.push_back(returnInt);
-						break;
-					case valType::_double_:
-						executionPile.push(addVal({returnType,(int)doubleList.size()}));
-						doubleList.push_back(returnDouble);
-						break;
-					case valType::_string_:
-						executionPile.push(addVal({returnType,(int)stringList.size()}));
-						stringList.push_back(returnString);
-						break;
-				}
-			}
-		}},
 	{command::_CREATE_FUNCTION_,
 		[](valInstruct& instructContent) {
 			if (fonctions.find(instructContent.stringVal) == fonctions.end()) {//fonction est bien nouvelle
 				valAccess tmp = castVal(depiler(), valType::_int_);
-				int beginFunction = intList[tmp.tabPos];
-				delVal(tmp);
-
-				tmp = depiler();
-				valType typeFunction = tmp.type;
+				int beginInstruct = intList[tmp.tabPos];
 				delVal(tmp);
 
 				deque<param> listParam;
-				while ((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] != -1) {
+				while (!((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1)) {//tant que pas fin
 					tmp = castVal(depiler(), valType::_string_);
 					string paramName = stringList[tmp.tabPos];
 					delVal(tmp);
@@ -260,7 +164,11 @@ const map<command, functionPointer> executeCommand = {
 					listParam.push_back({ paramName,paramType });
 				}
 
-				fonctions.insert({instructContent.stringVal,{ beginFunction,typeFunction,listParam } });
+				tmp = depiler();
+				valType typeFunction = tmp.type;
+				delVal(tmp);
+
+				fonctions.insert({instructContent.stringVal,{ beginInstruct,typeFunction,listParam } });
 			}
 			else error(errorCode::alreadyDeclaredFunction);
 		}},
@@ -273,13 +181,86 @@ const map<command, functionPointer> executeCommand = {
 					if ((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1) error(errorCode::notEnoughArgument);
 					castVal(tmp, param.second);//affiche erreur de conversion si impossible
 				}
-				if ((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1) error(errorCode::tooMuchArgument);
+				if (!((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1)) error(errorCode::tooMuchArgument);
 				executionPile = copyPile;//retablit pile initiale
 
-				executionPile.push(addVal({valType::_int_,(int)++indexInstruction }));//met adresse retour dans pile
-				indexInstruction = fonctions[instructContent.stringVal].refInstruct;//saute a adresse debut fonction
+				appelFonction.push({instructContent.stringVal,++indexInstruction});//stocke fonction appellee et adresse retour
+				indexInstruction = fonctions[instructContent.stringVal].refInstruct;//saute a adresse debut fonction (enter function)
 			}
 			else error(errorCode::unknowFunction);
+		}},
+	{command::_ENTER_FUNCTION_,	
+		[](valInstruct& instructContent) { 
+			variables.push({});//separation memoire
+			tableaux.push({});//separation memoire
+			enterMemoryLayer();//nettoyage plus simple
+
+			if (!appelFonction.empty()) {//si entre dans une "vraie" fonction, nombre et type des arguments est ok dans pile
+				for (auto param : fonctions[instructContent.stringVal].listParam) {
+					variables.top().insert({ param.first,castVal(depiler(),param.second) });//depile et initialise variables (nom, valeur castee)
+				}
+				depiler();//consommer le -1 de fin de parametres
+			}
+		}},
+	{command::_EXIT_FUNCTION_,
+		[](valInstruct& instructContent) {
+			functionCall leavingFonction;
+			valType returnType;
+			bool returnBool;
+			int returnInt;
+			double returnDouble;
+			string returnString;
+
+			if (!appelFonction.empty()) { //si ne quitte pas le programme, retourne valeur et retrouve adresse d appel
+				leavingFonction = appelFonction.top();
+				appelFonction.pop();
+
+				returnType = fonctions[leavingFonction.name].returnType;
+				int tabPos = castVal(depiler(),returnType).tabPos;
+				switch(returnType) {
+					//case valType::_void_:
+						//break;
+					case valType::_bool_:
+						returnBool = boolList[tabPos];
+						break;
+					case valType::_int_:
+						returnInt = intList[tabPos];
+						break;
+					case valType::_double_:
+						returnDouble = doubleList[tabPos];
+						break;
+					case valType::_string_:
+						returnString = stringList[tabPos];
+						break;
+				}
+			}
+			else return;//quitte programme
+
+			exitMemoryLayer();
+			variables.pop();
+			tableaux.pop();
+
+			indexInstruction = leavingFonction.returnAdress;
+			switch(returnType) {//ajoute la valeur de retour a la pile
+				//case valType::_void_:
+					//break;
+				case valType::_bool_:
+					executionPile.push(addVal({returnType,(int)boolList.size()}));
+					boolList.push_back(returnBool);
+					break;
+				case valType::_int_:
+					executionPile.push(addVal({returnType,(int)intList.size()}));
+					intList.push_back(returnInt);
+					break;
+				case valType::_double_:
+					executionPile.push(addVal({returnType,(int)doubleList.size()}));
+					doubleList.push_back(returnDouble);
+					break;
+				case valType::_string_:
+					executionPile.push(addVal({returnType,(int)stringList.size()}));
+					stringList.push_back(returnString);
+					break;
+			}
 		}},
 
 
@@ -344,7 +325,7 @@ void displayGeneratedProgram() {
 	int size;
 	int tabPos;
 	valAccess value;
-	for (auto instructContent : instructionList) {
+	for (instruction instructContent : instructionList) {
 		if (instructContent.first == command::_ENTER_BLOCK_) cout << endl;
 		cout << "INSTRUCTION " << setw((streamsize)(1 + log10(instructionList.size()))) << i++ << " - ";
 
@@ -531,10 +512,10 @@ void displayGeneratedProgram() {
 			cout << "SUPPRIME ZONE D'EXECUTION";
 			break;
 		case command::_CREATE_FUNCTION_:
-			cout << "AJOUTE FONCTION";
+			cout << "INITIALISE FONCTION '" << instructContent.second.stringVal << "'";
 			break;
 		case command::_CALL_FUNCTION_:
-			cout << "APPELLE FONCTION";
+			cout << "APPELLE FONCTION '" << instructContent.second.stringVal << "'";
 			break;
 
 
