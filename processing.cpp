@@ -52,7 +52,7 @@ const map<command, functionPointer> executeCommand = {
 			}
 			else error(errorCode::unknowVariable);
 		}},
-	/*
+	
 	{command::_EMPILE_TABLE_SIZE_,
 		[](valInstruct& instructContent) {
 			executeTabAction(instructContent, tabAction::_empile_size_);
@@ -61,7 +61,7 @@ const map<command, functionPointer> executeCommand = {
 		[](valInstruct& instructContent) {
 			executeTabAction(instructContent, tabAction::_empile_case_);
 		}},
-	*/
+	
 
 	{command::_PLUS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_plus_);		}},
 	{command::_MOINS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_moins_); 		}},
@@ -125,7 +125,7 @@ const map<command, functionPointer> executeCommand = {
 			else error(errorCode::unknowVariable);
 		}},
 
-	/*
+	
 		{command::_CREATE_TABLE_,
 			[](valInstruct& instructContent) {
 				executeTabAction(instructContent, tabAction::_create_);
@@ -142,7 +142,7 @@ const map<command, functionPointer> executeCommand = {
 			[](valInstruct& instructContent) {
 				executeTabAction(instructContent, tabAction::_remove_);
 			}},
-	*/
+	
 
 	{command::_ENTER_FUNCTION_,	
 		[](valInstruct& instructContent) { 
@@ -356,65 +356,45 @@ void displayGeneratedProgram() {
 			cout << "SUPPRIME STRATE MEMOIRE" << endl;
 			break;
 
-		case command::_EMPILE_VALUE_:
-			cout << "AJOUTE ";
-			switch (instructContent.second.type) {
+		case command::_EMPILE_TABLE_SIZE_:
+		name =instructContent.second.stringVal;
+		if (tableaux.top().find(name) != tableaux.top().end()) {//var existe bien
+			switch(tableaux.top()[name].type) {
 			case valType::_int_:
-				cout << instructContent.second.intVal;
+				size = intList.size();
 				break;
 			case valType::_double_:
-				cout << instructContent.second.doubleVal;
+				size = doubleList.size();
 				break;
 			case valType::_string_:
-				cout << "\"" << instructContent.second.stringVal << "\"";
+				size = stringList.size();
 				break;
-
 			}
-			cout << " A LA PILE";
-			break;
-		case command::_EMPILE_VARIABLE_:
-			cout << "AJOUTE VALEUR DE '" << instructContent.second.stringVal << "' A LA PILE";
-			break;
-		/*
-			case command::_EMPILE_TABLE_SIZE_:
-				name = stringList[instructContent.second.tabPos];
-				if (tableaux.top().find(name) != tableaux.top().end()) {//var existe bien
-					switch(tableaux.top()[name].type) {
-					case valType::_int_:
-						size = intList.size();
-						break;
-					case valType::_double_:
-						size = doubleList.size();
-						break;
-					case valType::_string_:
-						size = stringList.size();
-						break;
-					}
-					cout << "AJOUTE " << size << " A LA PILE";
-				}
-				else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
-				break;
-			case command::_EMPILE_TABLE_ELEMENT_:
-				name = stringList[instructContent.second.tabPos];
-				tabPos = intList[executionPile.top().tabPos];//recupere val associee a adresse
+			cout << "AJOUTE " << size << " A LA PILE";
+		}
+		else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+		break;
+		case command::_EMPILE_TABLE_ELEMENT_:
+			name = instructContent.second.stringVal;
+			tabPos = executionPile.top().tabPos;//recupere val associee a adresse
 
-				if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
-					tabPos = tableaux.top()[name].valuesPos[tabPos];//recupere val a case souhaitee
-					switch(tableaux.top()[name].type) {
-					case valType::_int_:
-						cout << "AJOUTE ", intArray[tabPos]," A LA PILE";
-						break;
-					case valType::_double_:
-						cout << "AJOUTE ", doubleArray[tabPos]," A LA PILE";
-						break;
-					case valType::_string_:
-						cout << "AJOUTE ", stringArray[tabPos]," A LA PILE";
-						break;
-					}
+			if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
+				tabPos = tableaux.top()[name].valuesPos[tabPos];//recupere val a case souhaitee
+				switch(tableaux.top()[name].type) {
+				case valType::_int_:
+					cout << "AJOUTE ", intArray[tabPos]," A LA PILE";
+					break;
+				case valType::_double_:
+					cout << "AJOUTE ", doubleArray[tabPos]," A LA PILE";
+					break;
+				case valType::_string_:
+					cout << "AJOUTE ", stringArray[tabPos]," A LA PILE";
+					break;
 				}
-				else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
-				break;
-		*/
+			}
+			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+			break;
+
 
 		case command::_PLUS_CREMENT_:
 			cout << "SOMME LA VARIABLE '" << instructContent.second.stringVal << "' ET LA DERNIERE VALEUR";
@@ -483,9 +463,10 @@ void displayGeneratedProgram() {
 			cout << "ACTUALISE VARIABLE '" << instructContent.second.stringVal << "'";
 			break;
 
-		/*
+		
 			case command::_CREATE_TABLE_:
-				name = stringList[instructContent.second.tabPos];
+				cout << "jerentreeter icvi" << endl;
+				name = instructContent.second.stringVal;
 				if (tableaux.top().find(name) == tableaux.top().end()) {
 					value = executionPile.top();
 
@@ -497,7 +478,7 @@ void displayGeneratedProgram() {
 				else cout << "ERREUR : TABLEAU " << name << " EXISTE DEJA";
 				break;
 			case command::_ADD_TABLE_ELEMENT_:
-				name = stringList[instructContent.second.tabPos];
+				name = instructContent.second.stringVal;
 				if (tableaux.top().find(name) != tableaux.top().end()) {
 					value = executionPile.top();
 
@@ -509,7 +490,7 @@ void displayGeneratedProgram() {
 				else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
 				break;
 			case command::_UPDATE_TABLE_ELEMENT_:
-				name = stringList[instructContent.second.tabPos];
+				name = instructContent.second.stringVal;
 				if (tableaux.top().find(name) != tableaux.top().end()) {
 					value = executionPile.top();
 					tabPos = intList[value.tabPos];
@@ -528,7 +509,7 @@ void displayGeneratedProgram() {
 				else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
 				break;
 			case command::_REMOVE_TABLE_ELEMENT_:
-				name = stringList[instructContent.second.tabPos];
+				name = instructContent.second.stringVal;
 				if (tableaux.top().find(name) != tableaux.top().end()) {
 					value = executionPile.top();
 					tabPos = intList[value.tabPos];
@@ -541,7 +522,7 @@ void displayGeneratedProgram() {
 				}
 				else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
 				break;
-		*/
+		
 
 		case command::_ENTER_FUNCTION_:
 			cout << "AJOUTE ZONE D'EXECUTION";
