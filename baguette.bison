@@ -87,7 +87,9 @@ instruction :
     | IO
     | condition
     | boucle
-    | function
+    | function_declare
+    | function_use
+    | function_return
     ;
 
 memoryBloc :
@@ -180,24 +182,26 @@ affectVar :
 value :
       '(' value ')'
     
-    | INT_VALUE       { addInstruct(command::_EMPILE_VALUE_,(int)$1); }
-    | DOUBLE_VALUE    { addInstruct(command::_EMPILE_VALUE_,(double)$1); }
-    | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,(string)$1); }
+    | INT_VALUE     { addInstruct(command::_EMPILE_VALUE_,(int)$1); }
+    | DOUBLE_VALUE  { addInstruct(command::_EMPILE_VALUE_,(double)$1); }
+    | STRING_VALUE  { addInstruct(command::_EMPILE_VALUE_,(string)$1); }
     
-    | SIZE NAME            { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
+    | SIZE NAME     { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
 
-    | value '+' value     { addInstruct(command::_PLUS_);}
-    | value '-' value     { addInstruct(command::_MOINS_);}
-    | value '*' value     { addInstruct(command::_FOIS_);}
-    | value '/' value     { addInstruct(command::_DIVISE_PAR_);}
+    | value '+' value   { addInstruct(command::_PLUS_);}
+    | value '-' value   { addInstruct(command::_MOINS_);}
+    | value '*' value   { addInstruct(command::_FOIS_);}
+    | value '/' value   { addInstruct(command::_DIVISE_PAR_);}
     
-    | NAME                 { addInstruct(command::_EMPILE_VARIABLE_,$1); }
-    | NAME'['INT_VALUE']'  { 
-                                      addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
-                                      addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
-                                    }
+    | NAME                  { addInstruct(command::_EMPILE_VARIABLE_,$1); }
+    | NAME'['INT_VALUE']'   { 
+                                addInstruct(command::_EMPILE_VALUE_,(int)$3);//index tab
+                                addInstruct(command::_EMPILE_TABLE_ELEMENT_,$1);//nom tab
+                            }
 
     | oneCrement
+
+    | function_use
     ;
 
 logic_test :
@@ -291,7 +295,7 @@ boucle :
     ;
 
 
-function :
+function_declare :
     FUNCTION NAME type      { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
       '(' argument ')' '{'  {
                                 addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 3);//adresse debut fonction
@@ -307,12 +311,14 @@ function :
                                 //pour instruction memorisee, mettre valeur a instructionList.size()
                                 instructionList[$1.refInstruct].second.intVal = instructionList.size();
                             }
-
-    | NAME              { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
-      '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }
-
-    | RETURN value      { addInstruct(command::_EXIT_FUNCTION_); }
     ;
+
+function_use :
+    NAME                { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
+      '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }
+    ;
+
+function_return : RETURN value { addInstruct(command::_EXIT_FUNCTION_); } ;
 
 argument : /*Epsilon*/ | NAME type argument_inter { addInstruct(command::_CREATE_VARIABLE_,$1); };
 argument_inter : /*Epsilon*/ | ',' argument ;

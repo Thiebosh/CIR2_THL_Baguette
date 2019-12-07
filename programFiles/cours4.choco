@@ -1,7 +1,7 @@
 ecrire "peut faire des choses avant la fonction\n"
 
 recette test entier () {
-    ecrire "fonction de confirmation\n"
+    ecrire "\tOn est dans la fonction ! \n"
     renvoyer 4
 }
 
@@ -9,8 +9,8 @@ ecrire "creation ok\n"
 
 test ()
 
-ecrire "utilisation ok \n","test"//petit pb de pile
+ecrire "utilisation ok \n"
 
-//ecrire "retours ok si 4 : ",test(),"\n"
+ecrire "retour ok si 4 : ",test(),"\n"
 
 TERMINER

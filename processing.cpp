@@ -163,6 +163,7 @@ const map<command, functionPointer> executeCommand = {
 
 					listParam.push_back({ paramName,paramType });
 				}
+				delVal(tmp);//consommer le -1 de fin de parametres
 
 				tmp = depiler();
 				valType typeFunction = tmp.type;
@@ -184,7 +185,7 @@ const map<command, functionPointer> executeCommand = {
 				if (!((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1)) error(errorCode::tooMuchArgument);
 				executionPile = copyPile;//retablit pile initiale
 
-				appelFonction.push({instructContent.stringVal,++indexInstruction});//stocke fonction appellee et adresse retour
+				appelFonction.push({instructContent.stringVal,indexInstruction});//stocke fonction appellee et adresse retour
 				indexInstruction = fonctions[instructContent.stringVal].refInstruct;//saute a adresse debut fonction (enter function)
 			}
 			else error(errorCode::unknowFunction);
@@ -193,7 +194,6 @@ const map<command, functionPointer> executeCommand = {
 		[](valInstruct& instructContent) { 
 			variables.push({});//separation memoire
 			tableaux.push({});//separation memoire
-			enterMemoryLayer();//nettoyage plus simple
 
 			if (!appelFonction.empty()) {//si entre dans une "vraie" fonction, nombre et type des arguments est ok dans pile
 				for (auto param : fonctions[instructContent.stringVal].listParam) {
@@ -201,6 +201,8 @@ const map<command, functionPointer> executeCommand = {
 				}
 				delVal(depiler());//consommer le -1 de fin de parametres
 			}
+
+			enterMemoryLayer();//nettoyage plus simple
 		}},
 	{command::_EXIT_FUNCTION_,
 		[](valInstruct& instructContent) {
@@ -216,7 +218,8 @@ const map<command, functionPointer> executeCommand = {
 				appelFonction.pop();
 
 				returnType = fonctions[leavingFonction.name].returnType;
-				int tabPos = castVal(depiler(),returnType).tabPos;
+				valAccess tmp = castVal(depiler(),returnType);
+				int tabPos = tmp.tabPos;
 				switch(returnType) {
 					//case valType::_void_:
 						//break;
@@ -233,6 +236,7 @@ const map<command, functionPointer> executeCommand = {
 						returnString = stringList[tabPos];
 						break;
 				}
+				delVal(tmp);
 			}
 			else return;//quitte programme
 
@@ -245,19 +249,19 @@ const map<command, functionPointer> executeCommand = {
 				//case valType::_void_:
 					//break;
 				case valType::_bool_:
-					executionPile.push(addVal({returnType,(int)boolList.size()}));
+					executionPile.push({returnType,(int)boolList.size()});
 					boolList.push_back(returnBool);
 					break;
 				case valType::_int_:
-					executionPile.push(addVal({returnType,(int)intList.size()}));
+					executionPile.push({returnType,(int)intList.size()});
 					intList.push_back(returnInt);
 					break;
 				case valType::_double_:
-					executionPile.push(addVal({returnType,(int)doubleList.size()}));
+					executionPile.push({returnType,(int)doubleList.size()});
 					doubleList.push_back(returnDouble);
 					break;
 				case valType::_string_:
-					executionPile.push(addVal({returnType,(int)stringList.size()}));
+					executionPile.push({returnType,(int)stringList.size()});
 					stringList.push_back(returnString);
 					break;
 			}
