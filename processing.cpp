@@ -153,7 +153,7 @@ const map<command, functionPointer> executeCommand = {
 
 				deque<param> listParam;
 				while (!((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1)) {//tant que pas fin
-					tmp = castVal(depiler(), valType::_string_);
+					tmp = castVal(tmp, valType::_string_);
 					string paramName = stringList[tmp.tabPos];
 					delVal(tmp);
 
@@ -528,17 +528,17 @@ void displayGeneratedProgram() {
 				break;
 		
 
-		case command::_ENTER_FUNCTION_:
-			cout << "AJOUTE ZONE D'EXECUTION";
-			break;
-		case command::_EXIT_FUNCTION_:
-			cout << "SUPPRIME ZONE D'EXECUTION";
-			break;
 		case command::_CREATE_FUNCTION_:
 			cout << "INITIALISE FONCTION '" << instructContent.second.stringVal << "'";
 			break;
 		case command::_CALL_FUNCTION_:
 			cout << "APPELLE FONCTION '" << instructContent.second.stringVal << "'";
+			break;
+		case command::_ENTER_FUNCTION_:
+			cout << "AJOUTE ZONE D'EXECUTION pour '" << instructContent.second.stringVal << "'";
+			break;
+		case command::_EXIT_FUNCTION_:
+			cout << "SUPPRIME ZONE D'EXECUTION" << endl << endl;
 			break;
 
 

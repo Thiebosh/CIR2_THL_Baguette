@@ -297,9 +297,9 @@ boucle :
 
 function_declare :
     FUNCTION NAME type      { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
-      '(' argument ')' '{'  {
+      '(' argument_declare ')' '{'  {
                                 addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 3);//adresse debut fonction
-                                addInstruct(command::_CREATE_FUNCTION_,$2);//nom de fonction,todo
+                                addInstruct(command::_CREATE_FUNCTION_,$2);//nom de fonction
                                 
                                 $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction : saute
                                 addInstruct(command::_GOTO_);
@@ -315,13 +315,16 @@ function_declare :
 
 function_use :
     NAME                { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
-      '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }
+      '(' argument_use ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }
     ;
 
 function_return : RETURN value { addInstruct(command::_EXIT_FUNCTION_); } ;
 
-argument : /*Epsilon*/ | NAME type argument_inter { addInstruct(command::_CREATE_VARIABLE_,$1); };
-argument_inter : /*Epsilon*/ | ',' argument ;
+argument_declare : /*Epsilon*/ | NAME type { addInstruct(command::_EMPILE_VALUE_,$1); } argument_declare_inter ;
+argument_declare_inter : /*Epsilon*/ | ',' argument_declare ;
+
+argument_use : /*Epsilon*/ | value argument_use_inter ;
+argument_use_inter : /*Epsilon*/ | ',' argument_use ;
     
 %%
 

@@ -209,7 +209,7 @@ void saveCommandProgramFile() {
                     arguments += "_CALL_FUNCTION_,\"" + instructContent.second.stringVal + "\""; 
                     break;
                 case command::_ENTER_FUNCTION_:
-                    arguments += "_ENTER_FUNCTION_";
+                    arguments += "_ENTER_FUNCTION_,\"" + instructContent.second.stringVal + "\"";
                     break;
                 case command::_EXIT_FUNCTION_:
                     arguments += "_EXIT_FUNCTION_";
