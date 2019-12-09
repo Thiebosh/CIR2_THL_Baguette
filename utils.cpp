@@ -355,7 +355,6 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 			break;
 
 		case tabAction::_create_:
-			cout << executionPile.size() << endl;
 			tmp = depiler();
 			type = tmp.type;
 			delVal(tmp);
@@ -368,8 +367,6 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 			break;
 			
 		case tabAction::_add_:
-
-			cout << "contenu pile : " << executionPile.size() << endl;
 			value = depiler();//supprime pas : besoin de transmettre valeur associee
 			
 			tableaux.top()[name].valuesPos.push_back(toTab(castVal(value,tableaux.top()[name].type)).tabPos);
