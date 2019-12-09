@@ -1,7 +1,10 @@
 5 = liste entier montab
 
-ecrire montab [0]
+ecrire montab [0],"\n"
+montab [0] = entier testRecup
+ecrire testRecup,"\n"
 
 7 = montab[]
+ecrire montab [1],"\n"
 
 TERMINER

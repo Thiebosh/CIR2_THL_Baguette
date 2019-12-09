@@ -4,25 +4,16 @@
 /*	PARTIE I : AJOUT ET EXECUTION DES COMMANDES			*/
 /********************************************************/
 void addInstruct(command command) {
-	cout << (int)command << endl;
 	instructionList.push_back({ command, { valType::_int_,-1,-1,"" } });
-	cout << "fait" << endl;
 };
 void addInstruct(command command, int intValue) {
-	cout << (int)command << "  " << intValue << endl;
 	instructionList.push_back({ command, { valType::_int_,intValue,-1,"" } });
-	cout << "fait" << endl;
 };
 void addInstruct(command command, double doubleValue) {
-	cout << (int)command << "  " << doubleValue << endl;
 	instructionList.push_back({ command, { valType::_double_,-1,doubleValue,"" } });
-	cout << "fait" << endl;
 };
 void addInstruct(command command, string stringValue) {
-	cout << (int)command << "  " << stringValue << endl;
 	instructionList.push_back({ command, { valType::_string_,-1,-1,stringValue } });
-	cout << "fait" << endl;
-	cout << "nuéro de commande " <<(int)command::_EXIT_FUNCTION_ << endl;
 };
 
 
@@ -370,26 +361,6 @@ void displayGeneratedProgram() {
 			cout << "AJOUTE VALEUR DE '" << instructContent.second.stringVal << "' A LA PILE";
 			break;
 		case command::_EMPILE_TABLE_SIZE_:
-		name =instructContent.second.stringVal;
-		if (tableaux.top().find(name) != tableaux.top().end()) {//var existe bien
-			switch(tableaux.top()[name].type) {
-			case valType::_int_:
-				cout << instructContent.second.intVal;
-				break;
-			case valType::_double_:
-				cout << instructContent.second.doubleVal;
-				break;
-			case valType::_string_:
-				cout << "\"" << instructContent.second.stringVal << "\"";
-				break;
-
-			}
-			cout << " A LA PILE";
-			break;
-		case command::_EMPILE_VARIABLE_:
-			cout << "AJOUTE VALEUR DE '" << instructContent.second.stringVal << "' A LA PILE";
-			break;
-		case command::_EMPILE_TABLE_SIZE_:
 				//IDEM
 			name =instructContent.second.stringVal;
 			if (tableaux.top().find(name) != tableaux.top().end()) {//var existe bien
@@ -501,57 +472,47 @@ void displayGeneratedProgram() {
 			break;
 
 		
-			case command::_CREATE_TABLE_:
-				cout << "INITIALISE LISTE '" << instructContent.second.stringVal << "'";
-				break;
-			case command::_ADD_TABLE_ELEMENT_:
-				//IDEM
-				name = instructContent.second.stringVal;
-				if (tableaux.top().find(name) != tableaux.top().end()) {
-					value = executionPile.top();
+		case command::_CREATE_TABLE_:
+			cout << "INITIALISE LISTE '" << instructContent.second.stringVal << "'";
+			break;
+		case command::_ADD_TABLE_ELEMENT_:
+			cout << "PROLONGE LISTE " << name << endl;
+			break;
+		case command::_UPDATE_TABLE_ELEMENT_:
+			//IDEM
+			name = instructContent.second.stringVal;
+			if (tableaux.top().find(name) != tableaux.top().end()) {
+				value = executionPile.top();
+				tabPos = intList[value.tabPos];
 
+				if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
+					tabPos = tableaux.top()[name].valuesPos[tabPos];
+					value = executionPile.top();
 					if (instructContent.second.type == value.type) {
-						printVal("PROLONGE TABLEAU " + name + " AVEC ",value);
+						cout << "MODIFIE INDICE " << tabPos << " DU TABLEAU " << name;
+						printVal(" AVEC ",value);
 					}
 					else cout << "ERREUR : TYPES DIFFERENTS";
 				}
-				else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
-				break;
-			case command::_UPDATE_TABLE_ELEMENT_:
-				//IDEM
-				name = instructContent.second.stringVal;
-				if (tableaux.top().find(name) != tableaux.top().end()) {
-					value = executionPile.top();
-					tabPos = intList[value.tabPos];
+				else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";
+			}
+			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+			break;
+		case command::_REMOVE_TABLE_ELEMENT_:
+			//IDEM
+			name = instructContent.second.stringVal;
+			if (tableaux.top().find(name) != tableaux.top().end()) {
+				value = executionPile.top();
+				tabPos = intList[value.tabPos];
 
-					if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
-						tabPos = tableaux.top()[name].valuesPos[tabPos];
-						value = executionPile.top();
-						if (instructContent.second.type == value.type) {
-							cout << "MODIFIE INDICE " << tabPos << " DU TABLEAU " << name;
-							printVal(" AVEC ",value);
-						}
-						else cout << "ERREUR : TYPES DIFFERENTS";
-					}
-					else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";
+				if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
+					tabPos = tableaux.top()[name].valuesPos[tabPos];
+					cout << "SUPPRIME INDICE " << tabPos << " DU TABLEAU " << name;
 				}
-				else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
-				break;
-			case command::_REMOVE_TABLE_ELEMENT_:
-				//IDEM
-				name = instructContent.second.stringVal;
-				if (tableaux.top().find(name) != tableaux.top().end()) {
-					value = executionPile.top();
-					tabPos = intList[value.tabPos];
-
-					if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
-						tabPos = tableaux.top()[name].valuesPos[tabPos];
-						cout << "SUPPRIME INDICE " << tabPos << " DU TABLEAU " << name;
-					}
-					else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";
-				}
-				else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
-				break;
+				else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";
+			}
+			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+			break;
 		
 
 		case command::_CREATE_FUNCTION_:
