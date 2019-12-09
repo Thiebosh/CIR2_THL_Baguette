@@ -4,7 +4,6 @@
 - ajouter boucle do while au menu principal
 - essayer de passer les variables globales en local?
 - finir reprise tab
-- ajouter foreach dans bison
 - ajouter operations modulo et puissance
 - indice -1 d'un tableau pour accéder au dernier élément
 - ajouter length (taille) : retourne taille string ou nb digits nombre
