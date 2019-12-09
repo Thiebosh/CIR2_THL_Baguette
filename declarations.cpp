@@ -10,6 +10,20 @@
 #include <iomanip>
 #include <cmath>
 
+//files
+#include <fstream>
+#include <vector>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+
+#define DEFAULT_FOLDER "programFiles/"
+#define PROGRAM_EXTENSION ".choco"
+#define COMMAND_EXTENSION ".command"
+#define COMPILED_EXTENSION ".chocapic"
+
+
 using namespace std;
 
 
@@ -245,4 +259,4 @@ void addInstruct(command command, string stringValue);
 //const map<command, functionPointer> executeCommand;
 //		Part 2
 void displayGeneratedProgram();
-void executeGeneratedProgram();
+void saveCommandProgramFile(string folderName, string programName);
