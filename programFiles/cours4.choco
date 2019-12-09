@@ -1,7 +1,8 @@
-ecrire "peut faire des choses sans la fonction\n"
+ecrire "PARTIE 1\n"
+ecrire "peut faire des choses avant la fonction\n"
 
-test entier () {
-    ecrire "fonction de confirmation\n"
+recette test entier () {
+    ecrire "\tOn est dans la fonction ! \n"
     renvoyer 4
 }
 
@@ -9,8 +10,48 @@ ecrire "creation ok\n"
 
 test ()
 
-ecrire "utilisation ok\n"//petit pb de pile
+ecrire "utilisation ok \n"
 
-//ecrire "retours ok si 4 : ",test(),"\n"
+ecrire "retour ok si 4 : ",test(),"\n"
+
+
+
+ecrire "\n\nPARTIE 2\n"
+//tester declaration seule
+recette test_param texte (val1 entier, val2 entier, val3 texte) {
+    ecrire "valeurs transmises : \n\t", val1, "\n\t", val2, "\n\t", val3, "\n"
+    si (val1) {
+        ecrire "val1 différente de 0 \n"
+    }
+    renvoyer "c'est bon, j'ai fini!"
+}
+
+test_param( 12 , 45 , "un string" ) = texte valeur_retour
+
+ecrire "valeur retournée : ",valeur_retour
+
+
+
+ecrire "\n\nPARTIE 3\n"
+55 = entier exemple
+ecrire "avant fonctions : exemple = ",exemple,"\n"
+
+recette testRobustesse1 entier (exemple entier) {
+    ecrire "dans fonction 1 : exemple = ",exemple,"\n"
+    0 = entier nouvelle_var
+    renvoyer 0
+}
+recette testRobustesse2 entier (exemple entier) {
+    110 = exemple
+    testRobustesse1 (exemple)
+    ecrire "dans fonction 2 : exemple = ",exemple,"\n"
+    renvoyer 0
+}
+
+testRobustesse1 (exemple)
+testRobustesse2 (exemple)
+ecrire "après fonctions : exemple = ",exemple,"\n"
+
+ecrire "fonction nouvelle_var n'existe pas en dehors de la fonction : erreur à prévoir\n\n",nouvelle_var
 
 TERMINER

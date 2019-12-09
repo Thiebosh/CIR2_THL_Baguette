@@ -54,6 +54,7 @@ tantque 	{ return WHILE; }
 faire 	  { return DO; }
 pour      { return FOR; }
 parcourir { return FOREACH; }
+recette   { return FUNCTION; }
 
 renvoyer	{ return RETURN; }
 TERMINER(.|\n)*	{ return END_PRGM; }

@@ -1,6 +1,6 @@
 /*fichier bison : parse*/
 %{
-  #include "files.cpp"
+  #include "processing.cpp"
 
   //sauts conditionnels
   typedef struct {
@@ -64,6 +64,7 @@
 %token <adresse> DO
 %token <adresse> FOR
 %token <adresse> FOREACH
+%token <adresse> FUNCTION
 
 %token RETURN
 %token END_PRGM
@@ -86,7 +87,9 @@ instruction :
     | IO
     | condition
     | boucle
-    | function
+    | function_declare
+    | function_use
+    | function_return
     ;
 
 memoryBloc :
@@ -179,16 +182,16 @@ affectVar :
 value :
       '(' value ')'
     
-    | INT_VALUE       { addInstruct(command::_EMPILE_VALUE_,(int)$1); }
-    | DOUBLE_VALUE    { addInstruct(command::_EMPILE_VALUE_,(double)$1); }
-    | STRING_VALUE    { addInstruct(command::_EMPILE_VALUE_,(string)$1); }
+    | INT_VALUE     { addInstruct(command::_EMPILE_VALUE_,(int)$1); }
+    | DOUBLE_VALUE  { addInstruct(command::_EMPILE_VALUE_,(double)$1); }
+    | STRING_VALUE  { addInstruct(command::_EMPILE_VALUE_,(string)$1); }
     
-    | SIZE NAME            { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
+    | SIZE NAME     { addInstruct(command::_EMPILE_TABLE_SIZE_,$2); }
 
-    | value '+' value     { addInstruct(command::_PLUS_);}
-    | value '-' value     { addInstruct(command::_MOINS_);}
-    | value '*' value     { addInstruct(command::_FOIS_);}
-    | value '/' value     { addInstruct(command::_DIVISE_PAR_);}
+    | value '+' value   { addInstruct(command::_PLUS_);}
+    | value '-' value   { addInstruct(command::_MOINS_);}
+    | value '*' value   { addInstruct(command::_FOIS_);}
+    | value '/' value   { addInstruct(command::_DIVISE_PAR_);}
     
     | NAME                 { addInstruct(command::_EMPILE_VARIABLE_,$1); }
     | NAME'['INT_VALUE']'  { 
@@ -197,6 +200,8 @@ value :
                             }
 
     | oneCrement
+
+    | function_use
     ;
 
 logic_test :
@@ -290,38 +295,169 @@ boucle :
     ;
 
 
-function :
-    NAME type               { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
-      '(' argument ')' '{'  {
-                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 2);//adresse debut fonction
-                                addInstruct(command::_CREATE_FUNCTION_,$1);//nom de fonction,todo
-                                addInstruct(command::_ENTER_FUNCTION_,$1);
+function_declare :
+    FUNCTION NAME type      { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
+      '(' argument_declare ')' '{'  {
+                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 3);//adresse debut fonction
+                                addInstruct(command::_CREATE_FUNCTION_,$2);//nom de fonction
+                                
+                                $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction : saute
+                                addInstruct(command::_GOTO_);
+
+                                addInstruct(command::_ENTER_FUNCTION_,$2);
                             }
-      instructBloc '}'      { /*cas void, pas necessairement de return : addInstruct(command::_EXIT_FUNCTION_);*/ }
-
-    | NAME              { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
-      '(' argument ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }
-
-    | RETURN value      { addInstruct(command::_EXIT_FUNCTION_); }
+      instructBloc '}'      { 
+                                //cas void, pas necessairement de return : addInstruct(command::_EXIT_FUNCTION_);
+                                //pour instruction memorisee, mettre valeur a instructionList.size()
+                                instructionList[$1.refInstruct].second.intVal = instructionList.size();
+                            }
     ;
 
-argument : /*Epsilon*/ | NAME type argument_inter { addInstruct(command::_CREATE_VARIABLE_,$1); };
-argument_inter : /*Epsilon*/ | ',' argument ;
+function_use :
+    NAME                { addInstruct(command::_EMPILE_VALUE_,(int)-1); } //guette -1 pour fin de declaration des parametres
+      '(' argument_use ')'  { addInstruct(command::_CALL_FUNCTION_,$1); }
+    ;
+
+function_return : RETURN value { addInstruct(command::_EXIT_FUNCTION_); } ;
+
+argument_declare : /*Epsilon*/ | NAME type { addInstruct(command::_EMPILE_VALUE_,$1); } argument_declare_inter ;
+argument_declare_inter : /*Epsilon*/ | ',' argument_declare ;
+
+argument_use : /*Epsilon*/ | value argument_use_inter ;
+argument_use_inter : /*Epsilon*/ | ',' argument_use ;
     
 %%
 
 int main(int argc, char **argv) {
-    //commence par verifier si argument (dossier)
-    if (!folderExist()) exit(0);//ne peut pas fonctionner sans
+    string folderName = DEFAULT_FOLDER;
+    string programName = "";
+    FILE* flux = NULL;
 
-    if ((yyin = programGeneration(argc, argv)) == NULL) exit(0);//ne peut pas fonctionner sans
-    yyparse();
 
-    displayGeneratedProgram();
+    ++argv, --argc;
+    if (argc) {
+        folderName = argv[0];//si donne autre dossier, remplace
+        if (folderName[folderName.size() - 1] != '/') folderName += "/";//le / assure que c'est un dossier
+    }
 
-    saveCommandProgramFile();//debug
 
-    executeGeneratedProgram();
+    //teste acces au dossier (ne peut pas fonctionner sans)
+    if (access(folderName.c_str(), F_OK) == -1) {
+        cout << "Dossier de stockage " << folderName << " non trouvé : création en cours... ";
+
+        if (mkdir(folderName.c_str(), 0777)) {//échec de création
+            cout << "Echec de création du dossier " << endl;
+            exit(0);
+        }
+        else {
+            cout << "fait" << endl << "Placez votre ou vos fichiers " << PROGRAM_EXTENSION << " et " << COMPILED_EXTENSION << " dans le répertoire créé puis entrez un caractère pour continuer : " << endl;
+			cin.ignore();
+			cin.get();
+        }
+    }
+    
+
+    //recupere contenu dossier
+    vector<string> programList;
+    vector<string> compiledList;
+
+    DIR *fluxFolder = opendir(folderName.c_str());
+    while (struct dirent *fileFolder = readdir(fluxFolder)) {
+        string filename = (string)fileFolder->d_name;
+
+        if      (filename.find(PROGRAM_EXTENSION,  filename.size() - ((string)PROGRAM_EXTENSION).size())  !=  string::npos) {
+            programList.push_back(filename);
+        }
+        else if (filename.find(COMPILED_EXTENSION, filename.size() - ((string)COMPILED_EXTENSION).size()) !=  string::npos) {
+            compiledList.push_back(filename);
+        }
+    }
+    closedir (fluxFolder);
+    
+
+    //affiche contenu dossier
+    int i = 0;
+    cout << endl << "Dossier " << folderName << " : Fichiers programmes (compiler)" << endl;
+    for (auto file : programList)  cout << ++i << " - \"" << file << "\"" << endl;
+
+    cout << endl << "Dossier " << folderName << " : Programmes compilés (exécuter)" << endl;
+    for (auto file : compiledList) cout << ++i << " - \"" << file << "\"" << endl;
+
+
+    //choisit fichier à traiter
+    int saisie;
+    cout << endl << "Votre sélection (0 pour quitter) : ";
+    do cin >> saisie; while (saisie < -1 || saisie > programList.size() + compiledList.size());
+
+    if (--saisie < 0) exit(0);
+    else if (saisie < programList.size()) {
+        programName = programList[saisie];
+        cout << programName << endl;
+
+        //execute fichier s'il existe
+        if (access((folderName + programName).c_str(), F_OK) != -1) {
+            if (yyin = fopen((folderName + programName).c_str(),"r")) {
+                yyparse();
+                displayGeneratedProgram();
+                
+                //enregistre version compilee
+                programName = programName.substr(0,programName.size() - ((string)PROGRAM_EXTENSION).size());
+                ofstream file((folderName + programName + COMPILED_EXTENSION).c_str());
+                if (file) {
+                    for (instruction instructContent : instructionList) {
+                        file << endl;
+                        file << (int)instructContent.first << " "; 
+                        file << (int)instructContent.second.type << " ";
+                        file << instructContent.second.intVal << " ";
+                        file << instructContent.second.doubleVal << " ";
+                        file << "\"" + instructContent.second.stringVal + "\"";
+                    }
+                    file.close();
+                }
+
+                //saveCommandProgramFile();//debug
+            }
+        }
+        else cout << "Echec d'accès au fichier" << endl;
+    }
+    else {
+        programName = compiledList[saisie - programList.size()];
+
+        //recupere version compilee
+        ifstream file((folderName + programName).c_str());
+        if (file) {
+            while (file.good()) {//verifie eof, failbit et badbit
+                int getCommand;
+                int getType;
+                int getInt;
+                double getDouble;
+                string getString;
+
+                file >> getCommand >> getType >> getInt >> getDouble;
+                file.ignore();
+                getline(file,getString);
+                getString = getString.substr(1,getString.size()-2);
+
+                instructionList.push_back({(command)getCommand,{(valType)getType,getInt,getDouble,getString}});
+            }
+            file.close();
+        }
+
+        //execute version compilee
+        indexInstruction = 0;
+        cout << endl << "===== EXECUTION =====" << endl;
+        while (indexInstruction < instructionList.size()) {
+            instruction instructContent = instructionList[indexInstruction];
+            indexInstruction++;
+            if (executeCommand.find(instructContent.first) != executeCommand.end()) {
+                (*(executeCommand.at(instructContent.first))) (instructContent.second);
+            }
+            else {
+                cout << "unknow command : " << (int)instructContent.first << endl;
+            }
+        }
+        cout << endl << "=====================" << endl;
+    }
 
     return 0;
 }

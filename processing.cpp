@@ -162,7 +162,7 @@ const map<command, functionPointer> executeCommand = {
 
 				deque<param> listParam;
 				while (!((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1)) {//tant que pas fin
-					tmp = castVal(depiler(), valType::_string_);
+					tmp = castVal(tmp, valType::_string_);
 					string paramName = stringList[tmp.tabPos];
 					delVal(tmp);
 
@@ -172,6 +172,7 @@ const map<command, functionPointer> executeCommand = {
 
 					listParam.push_back({ paramName,paramType });
 				}
+				delVal(tmp);//consommer le -1 de fin de parametres
 
 				tmp = depiler();
 				valType typeFunction = tmp.type;
@@ -193,7 +194,7 @@ const map<command, functionPointer> executeCommand = {
 				if (!((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1)) error(errorCode::tooMuchArgument);
 				executionPile = copyPile;//retablit pile initiale
 
-				appelFonction.push({instructContent.stringVal,++indexInstruction});//stocke fonction appellee et adresse retour
+				appelFonction.push({instructContent.stringVal,indexInstruction});//stocke fonction appellee et adresse retour
 				indexInstruction = fonctions[instructContent.stringVal].refInstruct;//saute a adresse debut fonction (enter function)
 			}
 			else error(errorCode::unknowFunction);
@@ -202,14 +203,15 @@ const map<command, functionPointer> executeCommand = {
 		[](valInstruct& instructContent) { 
 			variables.push({});//separation memoire
 			tableaux.push({});//separation memoire
-			enterMemoryLayer();//nettoyage plus simple
 
 			if (!appelFonction.empty()) {//si entre dans une "vraie" fonction, nombre et type des arguments est ok dans pile
 				for (auto param : fonctions[instructContent.stringVal].listParam) {
 					variables.top().insert({ param.first,castVal(depiler(),param.second) });//depile et initialise variables (nom, valeur castee)
 				}
-				depiler();//consommer le -1 de fin de parametres
+				delVal(depiler());//consommer le -1 de fin de parametres
 			}
+
+			enterMemoryLayer();//nettoyage plus simple
 		}},
 	{command::_EXIT_FUNCTION_,
 		[](valInstruct& instructContent) {
@@ -225,7 +227,8 @@ const map<command, functionPointer> executeCommand = {
 				appelFonction.pop();
 
 				returnType = fonctions[leavingFonction.name].returnType;
-				int tabPos = castVal(depiler(),returnType).tabPos;
+				valAccess tmp = castVal(depiler(),returnType);
+				int tabPos = tmp.tabPos;
 				switch(returnType) {
 					//case valType::_void_:
 						//break;
@@ -242,6 +245,7 @@ const map<command, functionPointer> executeCommand = {
 						returnString = stringList[tabPos];
 						break;
 				}
+				delVal(tmp);
 			}
 			else return;//quitte programme
 
@@ -254,19 +258,19 @@ const map<command, functionPointer> executeCommand = {
 				//case valType::_void_:
 					//break;
 				case valType::_bool_:
-					executionPile.push(addVal({returnType,(int)boolList.size()}));
+					executionPile.push({returnType,(int)boolList.size()});
 					boolList.push_back(returnBool);
 					break;
 				case valType::_int_:
-					executionPile.push(addVal({returnType,(int)intList.size()}));
+					executionPile.push({returnType,(int)intList.size()});
 					intList.push_back(returnInt);
 					break;
 				case valType::_double_:
-					executionPile.push(addVal({returnType,(int)doubleList.size()}));
+					executionPile.push({returnType,(int)doubleList.size()});
 					doubleList.push_back(returnDouble);
 					break;
 				case valType::_string_:
-					executionPile.push(addVal({returnType,(int)stringList.size()}));
+					executionPile.push({returnType,(int)stringList.size()});
 					stringList.push_back(returnString);
 					break;
 			}
@@ -298,9 +302,9 @@ const map<command, functionPointer> executeCommand = {
 		}},
 	{command::_STOP_,
 		[](valInstruct& instructContent) {
-			cout << endl << "Entrez un caractère pour continuer... ";
-			void* tmp;
-			cin >> tmp;
+			cout << endl << "Appuyez sur entrée pour continuer... ";
+			cin.ignore();
+			cin.get();
 		}},
 	{command::_READ_,
 		[](valInstruct& instructContent) {
@@ -346,10 +350,29 @@ void displayGeneratedProgram() {
 			cout << "SUPPRIME STRATE MEMOIRE" << endl;
 			break;
 
-
 		case command::_EMPILE_VALUE_:
 			cout << "AJOUTE ";
 			switch (instructContent.second.type) {
+			case valType::_int_:
+				cout << instructContent.second.intVal;
+				break;
+			case valType::_double_:
+				cout << instructContent.second.doubleVal;
+				break;
+			case valType::_string_:
+				cout << "\"" << instructContent.second.stringVal << "\"";
+				break;
+
+			}
+			cout << " A LA PILE";
+			break;
+		case command::_EMPILE_VARIABLE_:
+			cout << "AJOUTE VALEUR DE '" << instructContent.second.stringVal << "' A LA PILE";
+			break;
+		case command::_EMPILE_TABLE_SIZE_:
+		name =instructContent.second.stringVal;
+		if (tableaux.top().find(name) != tableaux.top().end()) {//var existe bien
+			switch(tableaux.top()[name].type) {
 			case valType::_int_:
 				cout << instructContent.second.intVal;
 				break;
@@ -531,17 +554,17 @@ void displayGeneratedProgram() {
 				break;
 		
 
-		case command::_ENTER_FUNCTION_:
-			cout << "AJOUTE ZONE D'EXECUTION";
-			break;
-		case command::_EXIT_FUNCTION_:
-			cout << "SUPPRIME ZONE D'EXECUTION";
-			break;
 		case command::_CREATE_FUNCTION_:
 			cout << "INITIALISE FONCTION '" << instructContent.second.stringVal << "'";
 			break;
 		case command::_CALL_FUNCTION_:
 			cout << "APPELLE FONCTION '" << instructContent.second.stringVal << "'";
+			break;
+		case command::_ENTER_FUNCTION_:
+			cout << "AJOUTE ZONE D'EXECUTION pour '" << instructContent.second.stringVal << "'";
+			break;
+		case command::_EXIT_FUNCTION_:
+			cout << "SUPPRIME ZONE D'EXECUTION" << endl << endl;
 			break;
 
 
@@ -564,19 +587,139 @@ void displayGeneratedProgram() {
 	cout << "=====================" << endl;
 }
 
-void executeGeneratedProgram() {//run program (similaire à de l'assembleur)
-	indexInstruction = 0;
+void saveCommandProgramFile(string folderName, string programName) {
+    programName = programName.substr(0,programName.size() - ((string)PROGRAM_EXTENSION).size());
+    ofstream file((folderName + programName + COMMAND_EXTENSION).c_str());
 
-	cout << endl << "===== EXECUTION =====" << endl;
-	while (indexInstruction < instructionList.size()) {
-		instruction instructContent = instructionList[indexInstruction];
-		indexInstruction++;
-		if (executeCommand.find(instructContent.first) != executeCommand.end()) {
-			(*(executeCommand.at(instructContent.first))) (instructContent.second);
-		}
-		else {
-			cout << "unknow command : " << (int)instructContent.first << endl;
-		}
-	}
-	cout << endl << "=====================" << endl;
+    if (file) {
+        file << endl << "===== EXECUTION =====" << endl;
+        for (instruction instructContent : instructionList) {
+            string arguments = "command::";
+            switch (instructContent.first) {
+                //MEMOIRE - ok
+                case command::_ENTER_BLOCK_: 
+                    arguments += "_ENTER_BLOCK_"; 
+                    break;
+                case command::_EXIT_BLOCK_: 
+                    arguments += "_EXIT_BLOCK_"; 
+                    break;
+
+                //EMPILEMENT - ok
+                case command::_EMPILE_VALUE_:
+                    arguments += "_EMPILE_VALUE_,"; 
+                    switch (instructContent.second.type) {
+                        case valType::_int_:
+                            arguments += to_string(instructContent.second.intVal);
+                            break;
+                        case valType::_double_:
+                            arguments += to_string(instructContent.second.doubleVal);
+                            break;
+                        case valType::_string_:
+                            arguments += "\"" + instructContent.second.stringVal + "\"";
+                            break;
+                    }
+                    break;
+                case command::_EMPILE_VARIABLE_:
+                    arguments += "_EMPILE_VARIABLE_,\"" + instructContent.second.stringVal + "\""; 
+                    break;
+
+                //OPERATIONS (var to var) - ok
+                case command::_PLUS_CREMENT_:
+                    arguments += "_PLUS_CREMENT_,\"" + instructContent.second.stringVal + "\""; 
+                    break;
+                case command::_MOINS_CREMENT_:
+                    arguments += "_MOINS_CREMENT_,\"" + instructContent.second.stringVal + "\""; 
+                    break;
+                case command::_FOIS_CREMENT_:
+                    arguments += "_FOIS_CREMENT_,\"" + instructContent.second.stringVal + "\""; 
+                    break;
+                case command::_DIVISE_CREMENT_:
+                    arguments += "_DIVISE_CREMENT_,\"" + instructContent.second.stringVal + "\""; 
+                    break;
+                case command::_PLUS_:
+                    arguments += "_PLUS_"; 
+                    break;
+                case command::_MOINS_:
+                    arguments += "_MOINS_"; 
+                    break;
+                case command::_FOIS_:
+                    arguments += "_FOIS_"; 
+                    break;
+                case command::_DIVISE_PAR_:
+                    arguments += "_DIVISE_PAR_"; 
+                    break;
+
+                //COMPARAISON - ok
+                case command::_AND_:
+                    arguments += "_AND_"; 
+                    break;
+                case command::_OR_:
+                    arguments += "_OR_"; 
+                    break;
+                case command::_EQUIV_:
+                    arguments += "_EQUIV_"; 
+                    break;
+                case command::_DIFF_:
+                    arguments += "_DIFF_"; 
+                    break;
+                case command::_SUPERIEUR_:
+                    arguments += "_SUPERIEUR_"; 
+                    break;
+                case command::_INFERIEUR_:
+                    arguments += "_INFERIEUR_"; 
+                    break;
+                case command::_SUP_EGAL_:
+                    arguments += "_SUP_EGAL_"; 
+                    break;
+                case command::_INF_EGAL_:
+                    arguments += "_INF_EGAL_"; 
+                    break;
+
+                //SAUTS (conditions, boucles, fonctions) - ok
+                case command::_GOTO_:
+                    arguments += "_GOTO_," + to_string(instructContent.second.intVal);
+                    break;
+                case command::_GOTO_TEST_:
+                    arguments += "_GOTO_TEST_," + to_string(instructContent.second.intVal);
+                    break;
+
+                //VARIABLES - ok
+                case command::_CREATE_VARIABLE_:
+                    arguments += "_CREATE_VARIABLE_,\"" + instructContent.second.stringVal + "\"";
+                    break;
+                case command::_UPDATE_VARIABLE_:
+                    arguments += "_UPDATE_VARIABLE_,\"" + instructContent.second.stringVal + "\"";
+                    break;
+
+                //FONCTIONS - ok
+                case command::_CREATE_FUNCTION_:
+                    arguments += "_CREATE_FUNCTION_,\"" + instructContent.second.stringVal + "\""; 
+                    break;
+                case command::_CALL_FUNCTION_:
+                    arguments += "_CALL_FUNCTION_,\"" + instructContent.second.stringVal + "\""; 
+                    break;
+                case command::_ENTER_FUNCTION_:
+                    arguments += "_ENTER_FUNCTION_,\"" + instructContent.second.stringVal + "\"";
+                    break;
+                case command::_EXIT_FUNCTION_:
+                    arguments += "_EXIT_FUNCTION_";
+                    break;
+
+                //ENTREE SORTIE - ok
+                case command::_WRITE_:
+                    arguments += "_WRITE_"; 
+                    break;
+                case command::_STOP_:
+                    arguments += "_STOP_"; 
+                    break;
+                case command::_READ_:
+                    arguments += "_READ_,\"" + instructContent.second.stringVal + "\""; 
+                    break;
+            }
+
+            file << "addInstruct(" << arguments << ");" << endl;
+        }
+	    file << endl << "=====================" << endl;
+        file.close();
+    }
 }

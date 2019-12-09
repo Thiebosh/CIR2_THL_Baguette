@@ -1,6 +1,6 @@
 
 ===== EXECUTION =====
-addInstruct(command::_ENTER_FUNCTION_);
+addInstruct(command::_ENTER_FUNCTION_,"");
 addInstruct(command::_EMPILE_VALUE_,"PARTIE 1\n");
 addInstruct(command::_WRITE_);
 addInstruct(command::_EMPILE_VALUE_,1);
