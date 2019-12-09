@@ -73,7 +73,7 @@
 %left '*' '/'     /* associativité à gauche */
 
 %%
-program : { addInstruct(command::_ENTER_FUNCTION_); } instructBloc END_PRGM { addInstruct(command::_EXIT_FUNCTION_); };
+program : { addInstruct(command::_ENTER_FUNCTION_); } instructBloc END_PRGM { cout << "ici" << endl; addInstruct(command::_EXIT_FUNCTION_); };
 
 endline : '\n' | ';' ;
 

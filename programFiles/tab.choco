@@ -1,5 +1,7 @@
 5 = liste entier montab
 
-ecrire montab [0] 
+ecrire montab [0]
+
+7 = montab[]
 
 TERMINER

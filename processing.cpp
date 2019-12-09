@@ -4,16 +4,25 @@
 /*	PARTIE I : AJOUT ET EXECUTION DES COMMANDES			*/
 /********************************************************/
 void addInstruct(command command) {
+	cout << (int)command << endl;
 	instructionList.push_back({ command, { valType::_int_,-1,-1,"" } });
+	cout << "fait" << endl;
 };
 void addInstruct(command command, int intValue) {
+	cout << (int)command << "  " << intValue << endl;
 	instructionList.push_back({ command, { valType::_int_,intValue,-1,"" } });
+	cout << "fait" << endl;
 };
 void addInstruct(command command, double doubleValue) {
+	cout << (int)command << "  " << doubleValue << endl;
 	instructionList.push_back({ command, { valType::_double_,-1,doubleValue,"" } });
+	cout << "fait" << endl;
 };
 void addInstruct(command command, string stringValue) {
+	cout << (int)command << "  " << stringValue << endl;
 	instructionList.push_back({ command, { valType::_string_,-1,-1,stringValue } });
+	cout << "fait" << endl;
+	cout << "nuéro de commande " <<(int)command::_EXIT_FUNCTION_ << endl;
 };
 
 

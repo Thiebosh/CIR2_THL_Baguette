@@ -102,6 +102,27 @@ valAccess castVal(valAccess value, valType cast, bool isVar) {
 	else error(errorCode::conversionType);
 }
 
+valAccess toTab(valAccess value) {
+	valType type = value.type;
+	int newpos;
+	switch(type) {
+		case valType::_int_:
+			newpos = intArray.size();
+			intArray.push_back(intList[value.tabPos]);
+			break;
+		case valType::_double_:
+			newpos = doubleArray.size();
+			doubleArray.push_back(doubleList[value.tabPos]);
+			break;
+		case valType::_string_:
+			newpos = stringArray.size();
+			stringArray.push_back(stringList[value.tabPos]);
+			break;
+	}
+	delVal(value);
+	return {type,newpos};
+}
+
 void executeOperation(operation operation) {
 	//recupere valeurs
 	valAccess val2 = depiler();
@@ -288,8 +309,11 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 		(action != tabAction::_create_ && tableaux.top().find(name) != tableaux.top().end())) {//tab existe bien
 		int tabPos;
 		valAccess value;
+		valAccess tmp;
+		valType type;
 		tabAccess declaration;
 		switch (action) {
+	/*
 		case tabAction::_empile_size_:
 			switch(tableaux.top()[name].type) {
 			case valType::_int_:
@@ -304,7 +328,7 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 			}
 			intList.push_back(tableaux.top()[name].valuesPos.size());//name
 			break;
-
+		*/
 		case tabAction::_empile_case_:
 			value = depiler();
 			tabPos = intList[value.tabPos];//recupere val associee a adresse
@@ -331,54 +355,24 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 			break;
 
 		case tabAction::_create_:
-			value = depiler();//supprime pas : besoin de transmettre valeur associee
+			cout << executionPile.size() << endl;
+			tmp = depiler();
+			type = tmp.type;
+			delVal(tmp);
 
-			if (instructContent.type == value.type) {//verif types
-				declaration = {(unsigned)memoryLayer.size(), value.type};//ordre de declaration
+			declaration = {(unsigned)memoryLayer.size(), type};//ordre de declaration
 
-				switch(value.type) {
-				case valType::_int_:
-					declaration.valuesPos.push_back(intArray.size());
-					intArray.push_back(intList[value.tabPos]);
-					break;
-				case valType::_double_:
-					declaration.valuesPos.push_back(doubleArray.size());
-					doubleArray.push_back(doubleList[value.tabPos]);
-					break;
-				case valType::_string_:
-					declaration.valuesPos.push_back(stringArray.size());
-					stringArray.push_back(stringList[value.tabPos]);
-					break;
-				}
+			declaration.valuesPos.push_back(toTab(castVal(depiler(),type)).tabPos);
 
-				tableaux.top().insert({name,declaration});
-			}
-			//else ? cast here
-
-			delVal(value);//stocke en typeArray
+			tableaux.top().insert({name,declaration});
 			break;
-
+			
 		case tabAction::_add_:
-			value = depiler();//supprime pas : besoin de transmettre valeur associee
-			if (tableaux.top()[name].type == value.type) {
-				switch(value.type) {
-				case valType::_int_:
-					tableaux.top()[name].valuesPos.push_back(intArray.size());
-					intArray.push_back(intList[value.tabPos]);
-					break;
-				case valType::_double_:
-					tableaux.top()[name].valuesPos.push_back(doubleArray.size());
-					doubleArray.push_back(doubleList[value.tabPos]);
-					break;
-				case valType::_string_:
-					tableaux.top()[name].valuesPos.push_back(doubleArray.size());
-					stringArray.push_back(stringList[value.tabPos]);
-					break;
-				}
-			}
-			//else ? cast here
 
-			delVal(value);//stocke en typeArray
+			cout << "contenu pile : " << executionPile.size() << endl;
+			value = depiler();//supprime pas : besoin de transmettre valeur associee
+			
+			tableaux.top()[name].valuesPos.push_back(toTab(castVal(value,tableaux.top()[name].type)).tabPos);
 			break;
 
 		case tabAction::_update_:
@@ -421,6 +415,7 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 		}
 	}
 	//else : pb
+	// retester existance du tableau 
 }
 
 
