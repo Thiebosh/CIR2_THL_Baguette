@@ -23,6 +23,12 @@ void printVal(string beginMessage, valAccess val, string endMessage) {
 	cout << endMessage;
 }
 
+void pauseProcess() {
+	cout << endl << "Appuyez sur entrée pour continuer... ";
+	cin.ignore();
+	cin.get();
+}
+
 void replaceString(string& subject, const string& search, const string& replace) {
 	size_t pos = 0;
 	while ((pos = subject.find(search, pos)) != std::string::npos) {

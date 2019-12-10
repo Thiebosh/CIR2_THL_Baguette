@@ -291,12 +291,7 @@ const map<command, functionPointer> executeCommand = {
 
 			delVal(val);
 		}},
-	{command::_STOP_,
-		[](valInstruct& instructContent) {
-			cout << endl << "Appuyez sur entrée pour continuer... ";
-			cin.ignore();
-			cin.get();
-		}},
+	{command::_STOP_,[](valInstruct& instructContent) { pauseProcess(); }},
 	{command::_READ_,
 		[](valInstruct& instructContent) {
 			string valName = instructContent.stringVal;

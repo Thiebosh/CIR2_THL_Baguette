@@ -238,6 +238,7 @@ void exitMemoryLayer();
 // Utils
 //		Part 1
 void printVal(string beginMessage, valAccess val, string endMessage = "");
+void pauseProcess();
 void replaceString(string& subject, const string& search, const string& replace);
 void error(errorCode cause);
 valAccess depiler();
