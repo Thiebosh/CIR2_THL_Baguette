@@ -373,11 +373,12 @@ int main(int argc, char **argv) {
 
         //affiche contenu dossier
         int i = 0;
+	    streamsize digit = 1 + log10(programList.size() + compiledList.size());
         cout << endl << "Dossier " << folderName << " : Fichiers programmes (compiler)" << endl;
-        for (auto file : programList)  cout << ++i << " - \"" << file << "\"" << endl;
+        for (auto file : programList)  cout << setw(digit) << ++i << " - \"" << file << "\"" << endl;
 
         cout << endl << "Dossier " << folderName << " : Programmes compilés (exécuter)" << endl;
-        for (auto file : compiledList) cout << ++i << " - \"" << file << "\"" << endl;
+        for (auto file : compiledList) cout << setw(digit) << ++i << " - \"" << file << "\"" << endl;
 
 
         //choisit fichier à traiter

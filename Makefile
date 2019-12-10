@@ -12,5 +12,5 @@ launch:
 	./baguette
 
 all:
-	make compile
-	make run
+	make generate
+	make launch

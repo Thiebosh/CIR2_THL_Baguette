@@ -329,13 +329,10 @@ void displayGeneratedProgram(globalVariables& allVariables) {
 	cout << endl << "==== CODE GENERE ====" << endl;
 
 	int i = 0;
-	string name;
-	int size;
-	int tabPos;
-	valAccess value;
+	streamsize digitInstruct = 1 + log10(instructionList.size());
 	for (instruction instructContent : instructionList) {
 		if (instructContent.first == command::_ENTER_BLOCK_) cout << endl;
-		cout << "INSTRUCTION " << setw((streamsize)(1 + log10(instructionList.size()))) << i++ << " - ";
+		cout << "INSTRUCTION " << setw(digitInstruct) << i++ << " - ";
 
 		switch (instructContent.first) {
 		case command::_ENTER_BLOCK_:
@@ -444,7 +441,7 @@ void displayGeneratedProgram(globalVariables& allVariables) {
 			cout << "INITIALISE LISTE '" << instructContent.second.stringVal << "'";
 			break;
 		case command::_ADD_TABLE_ELEMENT_:
-			cout << "PROLONGE LISTE " << name << endl;
+			cout << "PROLONGE LISTE " << instructContent.second.stringVal << endl;
 			break;
 		case command::_UPDATE_TABLE_ELEMENT_:
 			cout << "MODIFIE CONTENU D'UNE CASE DE '" << instructContent.second.stringVal << "'";
@@ -465,6 +462,9 @@ void displayGeneratedProgram(globalVariables& allVariables) {
 			break;
 		case command::_EXIT_FUNCTION_:
 			cout << "SUPPRIME ZONE D'EXECUTION" << endl << endl;
+			break;
+		case command::_END_FUNCTION_:
+			cout << "FIN DE ZONE D'EXECUTION" << endl << endl;
 			break;
 
 

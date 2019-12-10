@@ -40,7 +40,7 @@ void replaceString(string& subject, const string& search, const string& replace)
 }
 
 void error(globalVariables& allVariables, errorCode cause) {
-	cout << "ERREUR : " << allVariables.errorMessage[cause] << endl;
+	cout << "ERREUR A L'INSTRUCTION " << allVariables.indexInstruction - 1 << " : " << allVariables.errorMessage[cause] << endl;
 	exit((int)cause + 1);//code erreur
 }
 
