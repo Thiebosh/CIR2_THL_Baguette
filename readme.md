@@ -6,7 +6,7 @@
 - indice -1 d'un tableau pour accéder au dernier élément
 - ajouter length (taille) : retourne taille string ou nb digits nombre
 - ajouter IO sleep
-- autoriser retours vide ou tableau
+- autoriser retour vide ou tableau
 - rendre paramètres facultatifs ( fonction(,4,) => fonction(entier var1 = 0, reel var2 = 0, texte var3 = "") )
 
 ## aller plus loin : 

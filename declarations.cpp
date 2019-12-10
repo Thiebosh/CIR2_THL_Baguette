@@ -136,12 +136,7 @@ enum class errorCode {
 
 
 /********************************************************/
-/*	PARTIE II : OBJET ERREUR							*/
-/********************************************************/
-//passer error en objet
-
-/********************************************************/
-/*	PARTIE III : TYPES PERSONNALISES					*/
+/*	PARTIE II : TYPES PERSONNALISES						*/
 /********************************************************/
 typedef struct {//initialiser dans ordre de déclaration
 	valType type = valType::_int_;
@@ -171,8 +166,8 @@ typedef struct {//initialiser dans ordre de déclaration
 typedef pair<string,valType> param;
 
 typedef struct {
-	int refInstruct;
-	valType returnType;
+	int refInstruct = -1;
+	valType returnType = valType::_int_;
 	deque<param> listParam;
 } functionAccess;
 
@@ -232,12 +227,12 @@ typedef void (*functionPointer)(valInstruct& instructContent, globalVariables& a
 
 
 /********************************************************/
-/*	PARTIE IV : VARIABLE GLOBALE OBLIGATOIRE (BISON)	*/
+/*	PARTIE III : VARIABLE GLOBALE OBLIGATOIRE (BISON)	*/
 /********************************************************/
 deque<instruction> instructionList;//necessairement global
 
 /********************************************************/
-/*	PARTIE V : PROTOTYPES								*/
+/*	PARTIE IV : PROTOTYPES								*/
 /********************************************************/
 // Memory
 //		Part 1
