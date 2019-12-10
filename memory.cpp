@@ -26,8 +26,8 @@ valAccess addVal(valInstruct instructContent) {
 valAccess addVar(valInstruct instructContent) {
 	string name = stringList[castVal(depiler(), valType::_string_).tabPos];
 
-	variables.top().insert({ name,addVal(instructContent) });
-	return { instructContent.type,variables.top()[name].tabPos };
+	currentExecution.top().variables.insert({ name,addVal(instructContent) });
+	return { instructContent.type,currentExecution.top().variables[name].tabPos };
 }
 
 
@@ -58,9 +58,9 @@ void delVal(valAccess val) {
 	}
 
 	//VARIABLES : decremente references tableau des valeurs suivantes
-	for (auto var : variables.top()) {
+	for (auto var : currentExecution.top().variables) {
 		if (var.second.type == val.type && var.second.tabPos > val.tabPos) {
-			variables.top()[var.first].tabPos--;
+			currentExecution.top().variables[var.first].tabPos--;
 		}
 	}
 
@@ -87,27 +87,27 @@ void delVal(valAccess val) {
 
 void delVar(string name) {
 	//decremente references tableau des valeurs suivantes dans la pile et la liste de variables + supprime valeur du tableau
-	delVal(variables.top()[name]);
-	variables.top().erase(name);
+	delVal(currentExecution.top().variables[name]);
+	currentExecution.top().variables.erase(name);
 }
 
 void delTabVal(string tabName, int tabCase) {
 	//decaler les adresses superieures a l'adresse a supprimer
-	for (auto tab : tableaux.top()) {//parcourt tous les tableaux
-		if (tab.second.type == tableaux.top()[tabName].type) {//si tableau est du type impacte
+	for (auto tab : currentExecution.top().tableaux) {//parcourt tous les tableaux
+		if (tab.second.type == currentExecution.top().tableaux[tabName].type) {//si tableau est du type impacte
 			for (int tabPos = 0; tabPos < (int)tab.second.valuesPos.size(); ++tabPos) {//checke toutes ses adresses
-				if (tab.second.valuesPos[tabPos] > tableaux.top()[tabName].valuesPos[tabCase]) {//si adresse au dela de celle supprimee
-					tableaux.top()[tab.first].valuesPos[tabPos]--;//reduit d'un (1 valeur supprimee)
+				if (tab.second.valuesPos[tabPos] > currentExecution.top().tableaux[tabName].valuesPos[tabCase]) {//si adresse au dela de celle supprimee
+					currentExecution.top().tableaux[tab.first].valuesPos[tabPos]--;//reduit d'un (1 valeur supprimee)
 				}
 			}
 		}
 	}
 
 	//supprimer le stockage de l'adresse
-	tableaux.top()[tabName].valuesPos.erase(tableaux.top()[tabName].valuesPos.begin() + tabCase);
+	currentExecution.top().tableaux[tabName].valuesPos.erase(currentExecution.top().tableaux[tabName].valuesPos.begin() + tabCase);
 
 	//supprimer le stockage de la valeur
-	switch (tableaux.top()[tabName].type) {
+	switch (currentExecution.top().tableaux[tabName].type) {
 	case valType::_int_:
 		if (tabCase == intArray.size() - 1) intArray.pop_back();
 		else intArray.erase(intArray.begin() + tabCase);
@@ -124,43 +124,43 @@ void delTabVal(string tabName, int tabCase) {
 }
 
 void delTab(string tabName) {
-	switch (tableaux.top()[tabName].type) {
+	switch (currentExecution.top().tableaux[tabName].type) {
 	case valType::_int_:
-		while (tableaux.top()[tabName].valuesPos.size() > 0) {//tant que non vide
+		while (currentExecution.top().tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
 			//supprime la valeur
-			int tabPos = tableaux.top()[tabName].valuesPos[tableaux.top()[tabName].valuesPos.size() - 1];
+			int tabPos = currentExecution.top().tableaux[tabName].valuesPos[currentExecution.top().tableaux[tabName].valuesPos.size() - 1];
 			if (tabPos == intArray.size() - 1) intArray.pop_back();
 			else intArray.erase(intArray.begin() + tabPos);
 
 			//supprime l'adresse
-			tableaux.top()[tabName].valuesPos.pop_back();
+			currentExecution.top().tableaux[tabName].valuesPos.pop_back();
 		}
 		break;
 	case valType::_double_:
-		while (tableaux.top()[tabName].valuesPos.size() > 0) {//tant que non vide
+		while (currentExecution.top().tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
 			//supprime la valeur
-			int tabPos = tableaux.top()[tabName].valuesPos[tableaux.top()[tabName].valuesPos.size() - 1];
+			int tabPos = currentExecution.top().tableaux[tabName].valuesPos[currentExecution.top().tableaux[tabName].valuesPos.size() - 1];
 			if (tabPos == doubleArray.size() - 1) doubleArray.pop_back();
 			else doubleArray.erase(doubleArray.begin() + tabPos);
 
 			//supprime l'adresse
-			tableaux.top()[tabName].valuesPos.pop_back();
+			currentExecution.top().tableaux[tabName].valuesPos.pop_back();
 		}
 		break;
 	case valType::_string_:
-		while (tableaux.top()[tabName].valuesPos.size() > 0) {//tant que non vide
+		while (currentExecution.top().tableaux[tabName].valuesPos.size() > 0) {//tant que non vide
 			//supprime la valeur
-			int tabPos = tableaux.top()[tabName].valuesPos[tableaux.top()[tabName].valuesPos.size() - 1];
+			int tabPos = currentExecution.top().tableaux[tabName].valuesPos[currentExecution.top().tableaux[tabName].valuesPos.size() - 1];
 			if (tabPos == stringArray.size() - 1) stringArray.pop_back();
 			else stringArray.erase(stringArray.begin() + tabPos);
 
 			//supprime l'adresse
-			tableaux.top()[tabName].valuesPos.pop_back();
+			currentExecution.top().tableaux[tabName].valuesPos.pop_back();
 		}
 		break;
 	}
 	//supprime tableau
-	tableaux.top().erase(tabName);
+	currentExecution.top().tableaux.erase(tabName);
 }
 
 
@@ -173,7 +173,7 @@ void enterMemoryLayer() {
 
 void exitMemoryLayer() {
 	//supprime tableaux declares dans le bloc
-	map<string, tabAccess> tableauxCopy = tableaux.top();
+	map<string, tabAccess> tableauxCopy = currentExecution.top().tableaux;
 	for (auto tab : tableauxCopy) {
 		if (tab.second.memoryLayer == memoryLayer.size()) {
 			delTab(tab.first);
@@ -184,7 +184,7 @@ void exitMemoryLayer() {
 	memoryLayer.pop();
 
 	//supprime variables declarees dans le bloc
-	map<string, valAccess> variablesCopy = variables.top();
+	map<string, valAccess> variablesCopy = currentExecution.top().variables;
 	for (auto var : variablesCopy) {
 		if ((var.second.type == valType::_bool_ 	&& (unsigned)var.second.tabPos >= initial.boolListSize) ||
 			(var.second.type == valType::_int_ 		&& (unsigned)var.second.tabPos >= initial.intListSize) ||

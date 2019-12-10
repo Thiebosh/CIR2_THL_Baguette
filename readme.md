@@ -1,7 +1,6 @@
 # théorie des langages
 
 ## pile de choses à faire :
-- ajouter boucle do while au menu principal
 - essayer de passer les variables globales en local?
 - finir reprise tab
 - ajouter operations modulo et puissance
@@ -10,9 +9,6 @@
 - ajouter IO sleep
 - autoriser retours vide ou tableau
 - rendre paramètres facultatifs ( fonction(,4,) => fonction(entier var1 = 0, reel var2 = 0, texte var3 = "") )
-
-- generaliser variables aux tableaux : si nom introuvable dans les variables, chercher dans les tableaux. si trouvé, depiler case et continuer pareil
-
 
 ## aller plus loin : 
 - mémoire programme (instruction list) opti : vector de bool et types pour enregistrer uniquement info utile(conversion binaire). Pour string, taille puis caractères. Si taille max, flag de fin de texte : 1 si fini, 0 pour continuer à lire string
