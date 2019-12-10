@@ -138,7 +138,42 @@ enum class errorCode {
 /********************************************************/
 /*	PARTIE II : OBJET ERREUR							*/
 /********************************************************/
-//passer error en objet
+/*
+class Error {
+private:
+enum class errorCode {
+	unknowCommand,
+	conversionType,
+	unknowVariable,
+	alreadyUseVariable,
+	emptyExecutionStack,
+	alreadyDeclaredFunction,
+	unknowFunction,
+	notEnoughArgument,
+	tooMuchArgument
+};
+
+map<errorCode, string> errorMessage = { //peut etre passe en parametres
+		{errorCode::emptyExecutionStack,	"[EXECUTION] pile vide"},
+		{errorCode::conversionType,			"[TYPE] types incompatibles - échec de conversion"},
+
+		{errorCode::unknowCommand,			"[EXECUTION] commande inconnue"},
+		{errorCode::unknowVariable,			"[VARIABLE] nom de variable inconnu"},
+		{errorCode::unknowFunction,			"[FONCTION] nom de fonction inconnu"},
+
+		{errorCode::alreadyUseVariable,		"[VARIABLE] nom de variable déjà en utilisation"},
+		{errorCode::alreadyDeclaredFunction,"[FONCTION] nom de fonction déjà utilisé"},
+
+		{errorCode::notEnoughArgument,		"[FONCTION] pas assez de valeurs en paramètres"},
+		{errorCode::tooMuchArgument,		"[FONCTION] trop de valeurs en paramètres"}
+	};
+
+public:
+static throw() {
+        cout << "ERREUR : " << allVariables.errorMessage[cause] << endl;
+	exit((int)cause + 1);//code erreur
+}
+*/
 
 /********************************************************/
 /*	PARTIE III : TYPES PERSONNALISES					*/
