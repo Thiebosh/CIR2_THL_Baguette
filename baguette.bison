@@ -356,6 +356,7 @@ int main(int argc, char **argv) {
 
         //initialise varriables
 		instructionList.clear();
+        globalVariables allVariables = {};
 
         //recupere contenu dossier
         vector<string> programList;
@@ -400,7 +401,7 @@ int main(int argc, char **argv) {
             if (access((folderName + programName).c_str(), F_OK) != -1) {
                 if (yyin = fopen((folderName + programName).c_str(),"r")) {
                     yyparse();
-                    displayGeneratedProgram();
+                    displayGeneratedProgram(allVariables);
                     
                     //enregistre version compilee
                     programName = programName.substr(0,programName.size() - ((string)PROGRAM_EXTENSION).size());
@@ -447,15 +448,13 @@ int main(int argc, char **argv) {
             }
 
             //execute version compilee
-            indexInstruction = 0;
             cout << endl << "===== EXECUTION =====" << endl;
-            while (indexInstruction < instructionList.size()) {
-                instruction instructContent = instructionList[indexInstruction];
-                indexInstruction++;
+            while (allVariables.indexInstruction < instructionList.size()) {
+                instruction instructContent = instructionList[allVariables.indexInstruction++];
                 if (executeCommand.find(instructContent.first) != executeCommand.end()) {
-                    (*(executeCommand.at(instructContent.first))) (instructContent.second);
+                    (*(executeCommand.at(instructContent.first))) (instructContent.second, allVariables);
                 }
-                else error(errorCode::unknowCommand);
+                else error(allVariables, errorCode::unknowCommand);
             }
             cout << endl << "=====================" << endl;
         }
