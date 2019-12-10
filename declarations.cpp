@@ -31,6 +31,7 @@ using namespace std;
 /*	PARTIE I : ENUMERATIONS								*/
 /********************************************************/
 enum class valType {//fixe types
+	_void_,
 	_bool_,
 	_int_,
 	_double_,
@@ -113,6 +114,7 @@ enum class command {
 	//FONCTIONS
 	_ENTER_FUNCTION_,
 	_EXIT_FUNCTION_,
+	_END_FUNCTION_,
 	_CREATE_FUNCTION_,
 	_CALL_FUNCTION_,
 
@@ -123,6 +125,7 @@ enum class command {
 };
 
 enum class errorCode {
+	folderCreationFailed,
 	unknowCommand,
 	conversionType,
 	unknowVariable,
@@ -131,7 +134,8 @@ enum class errorCode {
 	alreadyDeclaredFunction,
 	unknowFunction,
 	notEnoughArgument,
-	tooMuchArgument
+	tooMuchArgument,
+	missingReturn
 };
 
 
@@ -206,6 +210,7 @@ typedef struct {
 
 	//erreurs
 	map<errorCode, string> errorMessage = { //peut etre passe en parametres
+		{errorCode::folderCreationFailed,	"[SYSTEME] Echec de création du dossier"},
 		{errorCode::emptyExecutionStack,	"[EXECUTION] pile vide"},
 		{errorCode::conversionType,			"[TYPE] types incompatibles - échec de conversion"},
 
@@ -217,7 +222,8 @@ typedef struct {
 		{errorCode::alreadyDeclaredFunction,"[FONCTION] nom de fonction déjà utilisé"},
 
 		{errorCode::notEnoughArgument,		"[FONCTION] pas assez de valeurs en paramètres"},
-		{errorCode::tooMuchArgument,		"[FONCTION] trop de valeurs en paramètres"}
+		{errorCode::tooMuchArgument,		"[FONCTION] trop de valeurs en paramètres"},
+		{errorCode::missingReturn,			"[FONCTION] valeur de retour attendue"}
 	};
 } globalVariables;
 
@@ -250,7 +256,7 @@ void exitMemoryLayer(globalVariables& allVariables);
 // Utils
 //		Part 1
 void printVal(globalVariables& allVariables, string beginMessage, valAccess val, string endMessage = "");
-void pauseProcess();
+void pauseProcess(string message = "");
 void replaceString(string& subject, const string& search, const string& replace);
 void error(globalVariables& allVariables, errorCode cause);
 valAccess depiler(globalVariables& allVariables);

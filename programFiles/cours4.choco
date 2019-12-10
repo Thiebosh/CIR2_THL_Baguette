@@ -1,6 +1,20 @@
 ecrire "PARTIE 1\n"
 ecrire "peut faire des choses avant la fonction\n"
 
+recette fonction vacant () {
+    ecrire "pas de retour!\n"
+}
+recette autreFonction vacant () {
+    ecrire "atteint\n"
+    renvoyer 6
+    ecrire "pas atteignable\n"
+}
+fonction()
+autreFonction()
+
+
+
+ecrire "\n\nPARTIE 2\n"
 recette test entier () {
     ecrire "\tOn est dans la fonction ! \n"
     renvoyer 4
@@ -16,7 +30,7 @@ ecrire "retour ok si 4 : ",test(),"\n"
 
 
 
-ecrire "\n\nPARTIE 2\n"
+ecrire "\n\nPARTIE 3\n"
 //tester declaration seule
 recette test_param texte (val1 entier, val2 entier, val3 texte) {
     ecrire "valeurs transmises : \n\t", val1, "\n\t", val2, "\n\t", val3, "\n"
@@ -32,7 +46,7 @@ ecrire "valeur retournée : ",valeur_retour
 
 
 
-ecrire "\n\nPARTIE 3\n"
+ecrire "\n\nPARTIE 4\n"
 55 = entier exemple
 ecrire "avant fonctions : exemple = ",exemple,"\n"
 
@@ -52,6 +66,7 @@ testRobustesse1 (exemple)
 testRobustesse2 (exemple)
 ecrire "après fonctions : exemple = ",exemple,"\n"
 
-ecrire "fonction nouvelle_var n'existe pas en dehors de la fonction : erreur à prévoir\n\n",nouvelle_var
+ecrire "\nnouvelle_var n'existe pas en dehors de la fonction : erreur à prévoir\n",nouvelle_var
+
 
 TERMINER

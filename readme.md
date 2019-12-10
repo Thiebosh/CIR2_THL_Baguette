@@ -6,8 +6,6 @@
 - indice -1 d'un tableau pour accéder au dernier élément
 - ajouter length (taille) : retourne taille string ou nb digits nombre
 - ajouter IO sleep
-- autoriser retour vide ou tableau
-- rendre paramètres facultatifs ( fonction(,4,) => fonction(entier var1 = 0, reel var2 = 0, texte var3 = "") )
 
 ## aller plus loin : 
 - mémoire programme (instruction list) opti : vector de bool et types pour enregistrer uniquement info utile(conversion binaire). Pour string, taille puis caractères. Si taille max, flag de fin de texte : 1 si fini, 0 pour continuer à lire string

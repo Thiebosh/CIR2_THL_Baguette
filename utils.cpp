@@ -23,8 +23,10 @@ void printVal(globalVariables& allVariables, string beginMessage, valAccess val,
 	cout << endMessage;
 }
 
-void pauseProcess() {
-	cout << endl << "Appuyez sur entrée pour continuer... ";
+void pauseProcess(string message) {
+	cout << endl;
+	if (message != "") cout << message << ". ";
+	cout << "Appuyez sur entrée pour continuer... ";
 	cin.ignore();
 	cin.get();
 }

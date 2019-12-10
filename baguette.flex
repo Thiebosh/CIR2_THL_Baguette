@@ -16,9 +16,10 @@ faux    { yylval.intValeur = 0; return INT_VALUE; }
 -?[0-9]+               { yylval.intValeur = atoi(yytext); return INT_VALUE; }
 -?[0-9]+[\.][0-9]*     { yylval.doubleValeur = atof(yytext); return DOUBLE_VALUE; }
 
-entier                      { return INT; }
-reel                        { return DOUBLE; }
-texte                       { return STRING; }
+vacant        { return VOID; }
+entier        { return INT; }
+reel          { return DOUBLE; }
+texte         { return STRING; }
 \"[^\"\n]*\"  { //OK car guillemets 
                 string read = strdup(yytext);
                 yylval.stringValeur = strdup(read.substr(1,read.size()-2).c_str());//retire les guillemets

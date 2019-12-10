@@ -49,9 +49,8 @@ pour 0 = entier i : i < 15 : 7 += i { //doit redeclarer variable i
 }
 
 //pour 0 = liste entier i : taille i < 3 : 0 = i[] {
-//    ecrire "for : ",i[taille i - 1],"\n"
+//    ecrire "for : ",taille i,"->",i[taille i - 1],"\n"
 //}
 
-//pour chaque
 
 TERMINER

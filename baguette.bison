@@ -294,23 +294,23 @@ boucle :
                                             }
     ;
 
+function_type : type | VOID ;
 
 function_declare :
-    FUNCTION NAME type      { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
+    FUNCTION NAME function_type     { addInstruct(command::_EMPILE_VALUE_,(int)-1); }//guette -1 pour fin de declaration des parametres
       '(' argument_declare ')' '{'  {
-                                addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 3);//adresse debut fonction
-                                addInstruct(command::_CREATE_FUNCTION_,$2);//nom de fonction
-                                
-                                $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction : saute
-                                addInstruct(command::_GOTO_);
+                                        addInstruct(command::_EMPILE_VALUE_,(int)instructionList.size() + 3);//adresse debut fonction
+                                        addInstruct(command::_CREATE_FUNCTION_,$2);//nom de fonction
+                                        
+                                        $1.refInstruct = instructionList.size();//quand arrive à ce numero d'instruction : saute
+                                        addInstruct(command::_GOTO_);
 
-                                addInstruct(command::_ENTER_FUNCTION_,$2);
-                            }
-      instructBloc '}'      { 
-                                //cas void, pas necessairement de return : addInstruct(command::_EXIT_FUNCTION_);
-                                //pour instruction memorisee, mettre valeur a instructionList.size()
-                                instructionList[$1.refInstruct].second.intVal = instructionList.size();
-                            }
+                                        addInstruct(command::_ENTER_FUNCTION_,$2);
+                                    }
+      instructBloc '}'              { 
+                                        addInstruct(command::_END_FUNCTION_);//cas void, pas necessairement de return
+                                        instructionList[$1.refInstruct].second.intVal = instructionList.size();
+                                    }
     ;
 
 function_use :
@@ -339,24 +339,19 @@ int main(int argc, char **argv) {
 
 
     do {
+        //initialise varriables
+		instructionList.clear();
+        globalVariables allVariables = {};
+
+
         //teste acces au dossier (ne peut pas fonctionner sans)
         if (access(folderName.c_str(), F_OK) == -1) {
             cout << "Dossier de stockage " << folderName << " non trouvé : création en cours... ";
 
-            if (mkdir(folderName.c_str(), 0777)) {//échec de création
-                cout << "Echec de création du dossier " << endl;
-                exit(0);
-            }
-            else {
-                cout << "fait" << endl << "Placez votre ou vos fichiers " << PROGRAM_EXTENSION << " et " << COMPILED_EXTENSION << " dans le répertoire créé puis entrez un caractère pour continuer : " << endl;
-                cin.ignore();
-                cin.get();
-            }
+            if (mkdir(folderName.c_str(), 0777)) error(allVariables, errorCode::folderCreationFailed);
+            else pauseProcess("Placez votre ou vos fichiers " + (string)PROGRAM_EXTENSION + " et " + (string)COMPILED_EXTENSION + " dans le répertoire créé");
         }
 
-        //initialise varriables
-		instructionList.clear();
-        globalVariables allVariables = {};
 
         //recupere contenu dossier
         vector<string> programList;
@@ -390,17 +385,19 @@ int main(int argc, char **argv) {
         cout << endl << "Votre sélection (0 pour quitter) : ";
         do cin >> saisie; while (saisie < -1 || saisie > programList.size() + compiledList.size());
 
-
-        string programName = "";
+        string programName = "", operation = "";
         if (--saisie < 0) break;
         else if (saisie < programList.size()) {
             programName = programList[saisie];
             cout << programName << endl;
+            operation = "Compilation";
 
             //execute fichier s'il existe
             if (access((folderName + programName).c_str(), F_OK) != -1) {
                 if (yyin = fopen((folderName + programName).c_str(),"r")) {
                     yyparse();
+                    pauseProcess("Acquisition de Bison terminée");
+
                     displayGeneratedProgram(allVariables);
                     
                     //enregistre version compilee
@@ -426,6 +423,7 @@ int main(int argc, char **argv) {
         else {
             programName = compiledList[saisie - programList.size()];
             cout << programName << endl;
+            operation = "Acquisition";
 
             //recupere version compilee
             ifstream file((folderName + programName).c_str());
@@ -459,7 +457,7 @@ int main(int argc, char **argv) {
             cout << endl << "=====================" << endl;
         }
 
-        pauseProcess();
+        pauseProcess(operation + " terminée");
     } while (true);
 
     return 0;

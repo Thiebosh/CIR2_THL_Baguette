@@ -165,9 +165,12 @@ const map<command, functionPointer> executeCommand = {
 				}
 				delVal(allVariables, tmp);//consommer le -1 de fin de parametres
 
-				tmp = depiler(allVariables);
-				valType typeFunction = tmp.type;
-				delVal(allVariables, tmp);
+				valType typeFunction = valType::_void_;
+				if (!allVariables.executionPile.empty()) {
+					tmp = depiler(allVariables);
+					typeFunction = tmp.type;
+					delVal(allVariables, tmp);
+				}
 
 				allVariables.fonctions.insert({instructContent.stringVal,{ beginInstruct,typeFunction,listParam } });
 			}
@@ -260,6 +263,17 @@ const map<command, functionPointer> executeCommand = {
 					break;
 				}
 			}
+		}},
+	{command::_END_FUNCTION_,
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			if (allVariables.currentExecution.size() > 1) {
+				allVariables.indexInstruction = allVariables.currentExecution.top().returnAdress;
+				
+				if (allVariables.fonctions[allVariables.currentExecution.top().name].returnType != valType::_void_) error(allVariables, errorCode::missingReturn);
+			}
+
+			exitMemoryLayer(allVariables);
+			allVariables.currentExecution.pop();
 		}},
 
 
