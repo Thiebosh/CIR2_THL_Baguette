@@ -136,7 +136,12 @@ enum class errorCode {
 
 
 /********************************************************/
-/*	PARTIE II : TYPES PERSONNALISES						*/
+/*	PARTIE II : OBJET ERREUR							*/
+/********************************************************/
+//passer error en objet
+
+/********************************************************/
+/*	PARTIE III : TYPES PERSONNALISES					*/
 /********************************************************/
 typedef struct {//initialiser dans ordre de déclaration
 	valType type = valType::_int_;
@@ -179,86 +184,88 @@ typedef struct {
 	map<string, tabAccess> tableaux;
 } functionCall;
 
+typedef struct {
+	//valeurs simples : pile, variables
+	deque<bool>     boolList;
+	deque<int>		intList;
+	deque<double>	doubleList;
+	deque<string>	stringList;
+
+	//valeurs multiples : tableaux
+	deque<int>		intArray;
+	deque<double>	doubleArray;
+	deque<string>	stringArray;
+
+	//couche memoire
+	stack<memoryState> memoryLayer;
+
+	//references globales
+	map<string, functionAccess> fonctions;
+
+	//piles d'execution
+	stack<valAccess> executionPile;
+	stack<functionCall> currentExecution;
+
+	//instructions
+	unsigned int indexInstruction = 0;// compteur instruction
+
+	//erreurs
+	map<errorCode, string> errorMessage = { //peut etre passe en parametres
+		{errorCode::emptyExecutionStack,	"[EXECUTION] pile vide"},
+		{errorCode::conversionType,			"[TYPE] types incompatibles - échec de conversion"},
+
+		{errorCode::unknowCommand,			"[EXECUTION] commande inconnue"},
+		{errorCode::unknowVariable,			"[VARIABLE] nom de variable inconnu"},
+		{errorCode::unknowFunction,			"[FONCTION] nom de fonction inconnu"},
+
+		{errorCode::alreadyUseVariable,		"[VARIABLE] nom de variable déjà en utilisation"},
+		{errorCode::alreadyDeclaredFunction,"[FONCTION] nom de fonction déjà utilisé"},
+
+		{errorCode::notEnoughArgument,		"[FONCTION] pas assez de valeurs en paramètres"},
+		{errorCode::tooMuchArgument,		"[FONCTION] trop de valeurs en paramètres"}
+	};
+} globalVariables;
+
 typedef pair<command, valInstruct> instruction;
 
-typedef void (*functionPointer)(valInstruct& instructContent);//necessaire pour map de commandes - fonctions lambda
+typedef void (*functionPointer)(valInstruct& instructContent, globalVariables& allVariables);//necessaire pour map de commandes - fonctions lambda
 
 
 /********************************************************/
-/*	PARTIE III : VARIABLES GLOBALES						*/
+/*	PARTIE IV : VARIABLE GLOBALE OBLIGATOIRE (BISON)	*/
 /********************************************************/
-//valeurs simples : pile, variables
-deque<bool>     boolList;
-deque<int>		intList;
-deque<double>	doubleList;
-deque<string>	stringList;
-
-//valeurs multiples : tableaux
-deque<int>		intArray;
-deque<double>	doubleArray;
-deque<string>	stringArray;
-
-//couche memoire
-stack<memoryState> memoryLayer;
-
-//references globales
-map<string, functionAccess> fonctions;
-
-//piles d'execution
-stack<valAccess> executionPile;
-stack<functionCall> currentExecution;
-
-//instructions
-deque<instruction> instructionList;
-unsigned int indexInstruction = 0;   // compteur instruction 
-
-//erreurs
-map<errorCode, string> errorMessage = {
-	{errorCode::emptyExecutionStack,	"[EXECUTION] pile vide"},
-	{errorCode::conversionType,			"[TYPE] types incompatibles - échec de conversion"},
-
-	{errorCode::unknowCommand,			"[EXECUTION] commande inconnue"},
-	{errorCode::unknowVariable,			"[VARIABLE] nom de variable inconnu"},
-	{errorCode::unknowFunction,			"[FONCTION] nom de fonction inconnu"},
-
-	{errorCode::alreadyUseVariable,		"[VARIABLE] nom de variable déjà en utilisation"},
-	{errorCode::alreadyDeclaredFunction,"[FONCTION] nom de fonction déjà utilisé"},
-
-	{errorCode::notEnoughArgument,		"[FONCTION] pas assez de valeurs en paramètres"},
-	{errorCode::tooMuchArgument,		"[FONCTION] trop de valeurs en paramètres"}
-};
-
+deque<instruction> instructionList;//necessairement global
 
 /********************************************************/
-/*	PARTIE IV : PROTOTYPES								*/
+/*	PARTIE V : PROTOTYPES								*/
 /********************************************************/
 // Memory
 //		Part 1
-valAccess addVal(valInstruct instructContent);
-valAccess addVar(valInstruct instructContent);
+valAccess addVal(globalVariables& allVariables, valInstruct instructContent);
+valAccess addVar(globalVariables& allVariables, valInstruct instructContent);
 //		Part 2
-void delVal(valAccess val);
-void delVar(string name);
-void delTabVal(string tabName, int tabCase);
-void delTab(string tabName);
+void delVal(globalVariables& allVariables, valAccess val);
+void delVar(globalVariables& allVariables, string name);
+void delTabVal(globalVariables& allVariables, string tabName, int tabCase);
+void delTab(globalVariables& allVariables, string tabName);
 //		Part 3
-void enterMemoryLayer();
-void exitMemoryLayer();
+void enterMemoryLayer(globalVariables& allVariables);
+void exitMemoryLayer(globalVariables& allVariables);
 
 // Utils
 //		Part 1
-void printVal(string beginMessage, valAccess val, string endMessage = "");
+void printVal(globalVariables& allVariables, string beginMessage, valAccess val, string endMessage = "");
 void pauseProcess();
 void replaceString(string& subject, const string& search, const string& replace);
-void error(errorCode cause);
-valAccess depiler();
+void error(globalVariables& allVariables, errorCode cause);
+valAccess depiler(globalVariables& allVariables);
 //		Part 2
-valAccess castVal(valAccess value, valType cast, bool isVar = 0);
-void executeOperation(operation operation);
-void executeComparaison(comparaison comparaison);
-void executeCrement(string varName, operation operation);
+valAccess castVal(globalVariables& allVariables, valAccess value, valType cast, bool isVar = 0);
+void executeOperation(globalVariables& allVariables, operation operation);
+void executeComparaison(globalVariables& allVariables, comparaison comparaison);
+void executeCrement(globalVariables& allVariables, string varName, operation operation);
 //		Part 3
-void executeTabAction(instruction& instructContent, tabAction action);
+void executeTabAction(globalVariables& allVariables, instruction& instructContent, tabAction action);
 
 
 // Processing
@@ -269,5 +276,5 @@ void addInstruct(command command, double doubleValue);
 void addInstruct(command command, string stringValue);
 //const map<command, functionPointer> executeCommand;
 //		Part 2
-void displayGeneratedProgram();
+void displayGeneratedProgram(globalVariables& allVariables);
 void saveCommandProgramFile(string folderName, string programName);

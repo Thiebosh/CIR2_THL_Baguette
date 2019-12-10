@@ -3,21 +3,21 @@
 /********************************************************/
 /*	PARTIE I : UTILITAIRES								*/
 /********************************************************/
-void printVal(string beginMessage, valAccess val, string endMessage) {
+void printVal(globalVariables& allVariables, string beginMessage, valAccess val, string endMessage) {
 	cout << beginMessage;
 	switch (val.type) {
 	case valType::_bool_:
-		cout << boolList[val.tabPos];
+		cout << allVariables.boolList[val.tabPos];
 		break;
 	case valType::_int_:
-		cout << intList[val.tabPos];
+		cout << allVariables.intList[val.tabPos];
 		break;
 	case valType::_double_:
-		cout << doubleList[val.tabPos];
+		cout << allVariables.doubleList[val.tabPos];
 		break;
 	case valType::_string_:
 		//si trouve \ suivi de t ou n dans la string, le transforme en un seul caractere
-		cout << stringList[val.tabPos];
+		cout << allVariables.stringList[val.tabPos];
 		break;
 	}
 	cout << endMessage;
@@ -37,19 +37,19 @@ void replaceString(string& subject, const string& search, const string& replace)
 	}
 }
 
-void error(errorCode cause) {
-	cout << "ERREUR : " << errorMessage[cause] << endl;
+void error(globalVariables& allVariables, errorCode cause) {
+	cout << "ERREUR : " << allVariables.errorMessage[cause] << endl;
 	exit((int)cause + 1);//code erreur
 }
 
-valAccess depiler() {
+valAccess depiler(globalVariables& allVariables) {
 	valAccess var;
 
-	if (!executionPile.empty()) {
-		var = executionPile.top();
-		executionPile.pop();
+	if (!allVariables.executionPile.empty()) {
+		var = allVariables.executionPile.top();
+		allVariables.executionPile.pop();
 	}
-	else error(errorCode::emptyExecutionStack);
+	else error(allVariables, errorCode::emptyExecutionStack);
 
 	return var;
 }
@@ -58,203 +58,203 @@ valAccess depiler() {
 /********************************************************/
 /*	PARTIE II : COMBINAISONS							*/
 /********************************************************/
-valAccess castVal(valAccess value, valType cast, bool isVar) {
+valAccess castVal(globalVariables& allVariables, valAccess value, valType cast, bool isVar) {
 	if (value.type == cast) return value;
 
 	else if (value.type != valType::_string_ && cast != valType::_string_) {
 		valAccess result = { cast };//string vers string
 		switch (cast) {
 		case valType::_bool_:
-			result.tabPos = boolList.size();
+			result.tabPos = allVariables.boolList.size();
 			switch (value.type) {
 			case valType::_int_:
-				boolList.push_back(intList[value.tabPos]);
+				allVariables.boolList.push_back(allVariables.intList[value.tabPos]);
 				break;
 			case valType::_double_:
-				boolList.push_back(doubleList[value.tabPos]);
+				allVariables.boolList.push_back(allVariables.doubleList[value.tabPos]);
 				break;
 			}
 			break;
 
 		case valType::_int_:
-			result.tabPos = intList.size();
+			result.tabPos = allVariables.intList.size();
 			switch (value.type) {
 			case valType::_bool_:
-				intList.push_back(boolList[value.tabPos]);
+				allVariables.intList.push_back(allVariables.boolList[value.tabPos]);
 				break;
 			case valType::_double_:
-				intList.push_back((int)doubleList[value.tabPos]);
+				allVariables.intList.push_back((int)allVariables.doubleList[value.tabPos]);
 				break;
 			}
 			break;
 
 		case valType::_double_:
-			result.tabPos = doubleList.size();
+			result.tabPos = allVariables.doubleList.size();
 			switch (value.type) {
 			case valType::_bool_:
-				doubleList.push_back(boolList[value.tabPos]);
+				allVariables.doubleList.push_back(allVariables.boolList[value.tabPos]);
 				break;
 			case valType::_int_:
-				doubleList.push_back(intList[value.tabPos]);
+				allVariables.doubleList.push_back(allVariables.intList[value.tabPos]);
 				break;
 			}
 			break;
 		}
 
-		if (!isVar) delVal(value);
+		if (!isVar) delVal(allVariables, value);
 		return result;
 	}
 
-	else error(errorCode::conversionType);
+	else error(allVariables, errorCode::conversionType);
 }
 
-valAccess toTab(valAccess value) {
+valAccess toTab(globalVariables& allVariables, valAccess value) {
 	valType type = value.type;
 	int newpos;
 	switch(type) {
 		case valType::_int_:
-			newpos = intArray.size();
-			intArray.push_back(intList[value.tabPos]);
+			newpos = allVariables.intArray.size();
+			allVariables.intArray.push_back(allVariables.intList[value.tabPos]);
 			break;
 		case valType::_double_:
-			newpos = doubleArray.size();
-			doubleArray.push_back(doubleList[value.tabPos]);
+			newpos = allVariables.doubleArray.size();
+			allVariables.doubleArray.push_back(allVariables.doubleList[value.tabPos]);
 			break;
 		case valType::_string_:
-			newpos = stringArray.size();
-			stringArray.push_back(stringList[value.tabPos]);
+			newpos = allVariables.stringArray.size();
+			allVariables.stringArray.push_back(allVariables.stringList[value.tabPos]);
 			break;
 	}
-	delVal(value);
+	delVal(allVariables, value);
 	return {type,newpos};
 }
 
-void executeOperation(operation operation) {
+void executeOperation(globalVariables& allVariables, operation operation) {
 	//recupere valeurs
-	valAccess val2 = depiler();
-	valAccess val1 = depiler();
+	valAccess val2 = depiler(allVariables);
+	valAccess val1 = depiler(allVariables);
 
 	if (val1.type == valType::_string_ && val2.type == valType::_string_) {
 		switch (operation) {
 		case operation::_plus_://concatenation
-			stringList[val1.tabPos] += stringList[val2.tabPos];
+			allVariables.stringList[val1.tabPos] += allVariables.stringList[val2.tabPos];
 			break;
 		}
-		delVal(val1);
+		delVal(allVariables, val1);
 		if (val2.tabPos > val1.tabPos) --val2.tabPos;//prend en compte suppression
-		delVal(val2);
+		delVal(allVariables, val2);
 
-		executionPile.push({ valType::_string_,(int)stringList.size() });
-		stringList.push_back(stringList[val1.tabPos]);
+		allVariables.executionPile.push({ valType::_string_,(int)allVariables.stringList.size() });
+		allVariables.stringList.push_back(allVariables.stringList[val1.tabPos]);
 	}
 
 	else {//si pas deux reels, erreur levee par fonction cast
-		val2 = castVal(val2, valType::_double_);
-		val1 = castVal(val1, valType::_double_);
+		val2 = castVal(allVariables, val2, valType::_double_);
+		val1 = castVal(allVariables, val1, valType::_double_);
 
 		double result(0);//cast au plus haut
 		switch (operation) {
 		case operation::_plus_:
-			result = doubleList[val1.tabPos] + doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] + allVariables.doubleList[val2.tabPos];
 			break;
 		case operation::_moins_:
-			result = doubleList[val1.tabPos] - doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] - allVariables.doubleList[val2.tabPos];
 			break;
 		case operation::_fois_:
-			result = doubleList[val1.tabPos] * doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] * allVariables.doubleList[val2.tabPos];
 			break;
 		case operation::_divisePar_:
-			result = doubleList[val1.tabPos] / doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] / allVariables.doubleList[val2.tabPos];
 			break;
 		}
-		delVal(val1);
+		delVal(allVariables, val1);
 		if (val2.tabPos > val1.tabPos) --val2.tabPos;//prend en compte suppression
-		delVal(val2);
+		delVal(allVariables, val2);
 
-		executionPile.push({ valType::_double_,(int)doubleList.size() });
-		doubleList.push_back(result);
+		allVariables.executionPile.push({ valType::_double_,(int)allVariables.doubleList.size() });
+		allVariables.doubleList.push_back(result);
 	}
 }
 
-void executeComparaison(comparaison operation) {
+void executeComparaison(globalVariables& allVariables, comparaison operation) {
 	//recupere valeurs
-	valAccess val2 = depiler();
-	valAccess val1 = depiler();
+	valAccess val2 = depiler(allVariables);
+	valAccess val1 = depiler(allVariables);
 
 	if (val1.type != valType::_string_ && val2.type != valType::_string_) {
-		val2 = castVal(val2, valType::_double_);
-		val1 = castVal(val1, valType::_double_);
+		val2 = castVal(allVariables, val2, valType::_double_);
+		val1 = castVal(allVariables, val1, valType::_double_);
 
 		double result(0);//cast au plus haut
 		switch (operation) {
 		case comparaison::_and_:
-			result = doubleList[val1.tabPos] && doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] && allVariables.doubleList[val2.tabPos];
 			break;
 		case comparaison::_or_:
-			result = doubleList[val1.tabPos] || doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] || allVariables.doubleList[val2.tabPos];
 			break;
 		case comparaison::_equiv_:
-			result = doubleList[val1.tabPos] == doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] == allVariables.doubleList[val2.tabPos];
 			break;
 		case comparaison::_diff_:
-			result = doubleList[val1.tabPos] != doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] != allVariables.doubleList[val2.tabPos];
 			break;
 		case comparaison::_inferieur_:
-			result = doubleList[val1.tabPos] > doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] > allVariables.doubleList[val2.tabPos];
 			break;
 		case comparaison::_superieur_:
-			result = doubleList[val1.tabPos] < doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] < allVariables.doubleList[val2.tabPos];
 			break;
 		case comparaison::_inf_egal_:
-			result = doubleList[val1.tabPos] >= doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] >= allVariables.doubleList[val2.tabPos];
 			break;
 		case comparaison::_sup_egal_:
-			result = doubleList[val1.tabPos] <= doubleList[val2.tabPos];
+			result = allVariables.doubleList[val1.tabPos] <= allVariables.doubleList[val2.tabPos];
 			break;
 		}
-		delVal(val1);
+		delVal(allVariables, val1);
 		if (val2.tabPos > val1.tabPos) --val2.tabPos;//prend en compte suppression
-		delVal(val2);
+		delVal(allVariables, val2);
 
-		executionPile.push({ valType::_double_,(int)doubleList.size() });
-		doubleList.push_back(result);
+		allVariables.executionPile.push({ valType::_double_,(int)allVariables.doubleList.size() });
+		allVariables.doubleList.push_back(result);
 	}
 	else {
-		delVal(val1);
+		delVal(allVariables, val1);
 		if (val2.tabPos > val1.tabPos) --val2.tabPos;//prend en compte suppression
-		delVal(val2);
-		error(errorCode::conversionType);
+		delVal(allVariables, val2);
+		error(allVariables, errorCode::conversionType);
 	}
 }
 
-void executeCrement(string varName, operation operation) {
+void executeCrement(globalVariables& allVariables, string varName, operation operation) {
 	//recupere valeur
-	valAccess valCast = depiler();
+	valAccess valCast = depiler(allVariables);
 
-	if (currentExecution.top().variables.find(varName) != currentExecution.top().variables.end()) {//var existe bien
+	if (allVariables.currentExecution.top().variables.find(varName) != allVariables.currentExecution.top().variables.end()) {//var existe bien
 		//1 : changer val en double ou string
 		double valDouble(0);
 		string valString("");
 		if (valCast.type == valType::_string_) {
-			valString = stringList[valCast.tabPos];
+			valString = allVariables.stringList[valCast.tabPos];
 		}
 		else {
-			valCast = castVal(valCast, valType::_double_);
-			valDouble = doubleList[valCast.tabPos];
+			valCast = castVal(allVariables, valCast, valType::_double_);
+			valDouble = allVariables.doubleList[valCast.tabPos];
 		}
-		delVal(valCast);
+		delVal(allVariables, valCast);
 
 		//2 : changer variable content en double ou string
 		valAccess varCast;
 		double varDouble(0);
 		string varString("");
-		if (currentExecution.top().variables[varName].type == valType::_string_) {
-			varCast = currentExecution.top().variables[varName];
-			varString = stringList[varCast.tabPos];
+		if (allVariables.currentExecution.top().variables[varName].type == valType::_string_) {
+			varCast = allVariables.currentExecution.top().variables[varName];
+			varString = allVariables.stringList[varCast.tabPos];
 		}
 		else {
-			varCast = castVal(currentExecution.top().variables[varName], valType::_double_, 1);
-			varDouble = doubleList[varCast.tabPos];
+			varCast = castVal(allVariables, allVariables.currentExecution.top().variables[varName], valType::_double_, 1);
+			varDouble = allVariables.doubleList[varCast.tabPos];
 		}
 
 		//3 : opérer les deux
@@ -275,30 +275,30 @@ void executeCrement(string varName, operation operation) {
 		}
 
 		//4 : intégrer résultat dans variable (verif de type)
-		switch (currentExecution.top().variables[varName].type) {
+		switch (allVariables.currentExecution.top().variables[varName].type) {
 		case valType::_int_:
-			intList[currentExecution.top().variables[varName].tabPos] = (int)varDouble;
+			allVariables.intList[allVariables.currentExecution.top().variables[varName].tabPos] = (int)varDouble;
 			break;
 		case valType::_double_:
-			doubleList[currentExecution.top().variables[varName].tabPos] = varDouble;
+			allVariables.doubleList[allVariables.currentExecution.top().variables[varName].tabPos] = varDouble;
 			break;
 		case valType::_string_:
-			stringList[currentExecution.top().variables[varName].tabPos] = varString;
+			allVariables.stringList[allVariables.currentExecution.top().variables[varName].tabPos] = varString;
 			break;
 		}
 		
 		//5 : ajouter copie a la pile si besoin
-		if (currentExecution.top().variables[varName].type == valType::_string_) {
-			executionPile.push({ valType::_string_,(int)stringList.size() });
-			stringList.push_back(varString);
+		if (allVariables.currentExecution.top().variables[varName].type == valType::_string_) {
+			allVariables.executionPile.push({ valType::_string_,(int)allVariables.stringList.size() });
+			allVariables.stringList.push_back(varString);
 		}
 		else {
-			executionPile.push({ valType::_double_,(int)doubleList.size() });
-			doubleList.push_back(varDouble);
+			allVariables.executionPile.push({ valType::_double_,(int)allVariables.doubleList.size() });
+			allVariables.doubleList.push_back(varDouble);
 		}
 	}
 	else {
-		error(errorCode::unknowVariable);
+		error(allVariables, errorCode::unknowVariable);
 	}
 }
 
@@ -306,13 +306,11 @@ void executeCrement(string varName, operation operation) {
 /********************************************************/
 /*	PARTIE III : TABLEAUX								*/
 /********************************************************/
-
-//remettre au gout du jour
-void executeTabAction(valInstruct& instructContent, tabAction action) {
+void executeTabAction(globalVariables& allVariables, valInstruct& instructContent, tabAction action) {
 	string name = instructContent.stringVal;
 
-	if ((action == tabAction::_create_ && currentExecution.top().tableaux.find(name) == currentExecution.top().tableaux.end()) ||//tab est bien nouveau
-		(action != tabAction::_create_ && currentExecution.top().tableaux.find(name) != currentExecution.top().tableaux.end())) {//tab existe bien
+	if ((action == tabAction::_create_ && allVariables.currentExecution.top().tableaux.find(name) == allVariables.currentExecution.top().tableaux.end()) ||//tab est bien nouveau
+		(action != tabAction::_create_ && allVariables.currentExecution.top().tableaux.find(name) != allVariables.currentExecution.top().tableaux.end())) {//tab existe bien
 		int tabPos;
 		valAccess value;
 		valAccess tmp;
@@ -321,104 +319,104 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 		switch (action) {
 	/*
 		case tabAction::_empile_size_:
-			switch(currentExecution.top().tableaux[name].type) {
+			switch(allVariables.currentExecution.top().tableaux[name].type) {
 			case valType::_int_:
-				executionPile.push({ valType::_int_,(int)intList.size() });
+				allVariables.executionPile.push({ valType::_int_,(int)allVariables.intList.size() });
 				break;
 			case valType::_double_:
-				executionPile.push({ valType::_int_,(int)doubleList.size() });
+				allVariables.executionPile.push({ valType::_int_,(int)allVariables.doubleList.size() });
 				break;
 			case valType::_string_:
-				executionPile.push({ valType::_int_,(int)stringList.size() });
+				allVariables.executionPile.push({ valType::_int_,(int)allVariables.stringList.size() });
 				break;
 			}
-			intList.push_back(currentExecution.top().tableaux[name].valuesPos.size());//name
+			allVariables.intList.push_back(allVariables.currentExecution.top().tableaux[name].valuesPos.size());//name
 			break;
 		*/
 		case tabAction::_empile_case_:
-			value = depiler();
-			tabPos = intList[value.tabPos];//recupere val associee a adresse
-			delVal(value);
+			value = depiler(allVariables);
+			tabPos = allVariables.intList[value.tabPos];//recupere val associee a adresse
+			delVal(allVariables, value);
 
-			if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
-				tabPos = currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
+			if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
+				tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
 
-				switch(currentExecution.top().tableaux[name].type) {
+				switch(allVariables.currentExecution.top().tableaux[name].type) {
 				case valType::_int_:
-					executionPile.push({ valType::_int_,(int)intList.size() });
-					intList.push_back(intArray[tabPos]);
+					allVariables.executionPile.push({ valType::_int_,(int)allVariables.intList.size() });
+					allVariables.intList.push_back(allVariables.intArray[tabPos]);
 					break;
 				case valType::_double_:
-					executionPile.push({ valType::_double_,(int)doubleList.size() });
-					doubleList.push_back(doubleArray[tabPos]);
+					allVariables.executionPile.push({ valType::_double_,(int)allVariables.doubleList.size() });
+					allVariables.doubleList.push_back(allVariables.doubleArray[tabPos]);
 					break;
 				case valType::_string_:
-					executionPile.push({ valType::_string_,(int)stringList.size() });
-					stringList.push_back(stringArray[tabPos]);
+					allVariables.executionPile.push({ valType::_string_,(int)allVariables.stringList.size() });
+					allVariables.stringList.push_back(allVariables.stringArray[tabPos]);
 					break;
 				}
 			}
 			break;
 
 		case tabAction::_create_:
-			tmp = depiler();
+			tmp = depiler(allVariables);
 			type = tmp.type;
-			delVal(tmp);
+			delVal(allVariables, tmp);
 
-			declaration = {(unsigned)memoryLayer.size(), type};//ordre de declaration
+			declaration = {(unsigned)allVariables.memoryLayer.size(), type};//ordre de declaration
 
-			declaration.valuesPos.push_back(toTab(castVal(depiler(),type)).tabPos);
+			declaration.valuesPos.push_back(toTab(allVariables, castVal(allVariables, depiler(allVariables),type)).tabPos);
 
-			currentExecution.top().tableaux.insert({name,declaration});
+			allVariables.currentExecution.top().tableaux.insert({name,declaration});
 			break;
 			
 		case tabAction::_add_:
-			value = depiler();//supprime pas : besoin de transmettre valeur associee
+			value = depiler(allVariables);//supprime pas : besoin de transmettre valeur associee
 			
-			currentExecution.top().tableaux[name].valuesPos.push_back(toTab(castVal(value,currentExecution.top().tableaux[name].type)).tabPos);
+			allVariables.currentExecution.top().tableaux[name].valuesPos.push_back(toTab(allVariables, castVal(allVariables, value,allVariables.currentExecution.top().tableaux[name].type)).tabPos);
 			break;
 
 		case tabAction::_update_:
-			value = depiler();
-			tabPos = intList[value.tabPos];//recupere val associee a adresse
-			delVal(value);
+			value = depiler(allVariables);
+			tabPos = allVariables.intList[value.tabPos];//recupere val associee a adresse
+			delVal(allVariables, value);
 
-			if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
-				tabPos = currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
+			if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
+				tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
 
-				valAccess value = depiler();//supprime pas : besoin de transmettre valeur associee
-				if (currentExecution.top().tableaux[name].type == value.type) {
+				valAccess value = depiler(allVariables);//supprime pas : besoin de transmettre valeur associee
+				if (allVariables.currentExecution.top().tableaux[name].type == value.type) {
 					switch(value.type) {
 					case valType::_int_:
-						intArray[tabPos] = intList[value.tabPos];
+						allVariables.intArray[tabPos] = allVariables.intList[value.tabPos];
 						break;
 					case valType::_double_:
-						doubleArray[tabPos] = doubleList[value.tabPos];
+						allVariables.doubleArray[tabPos] = allVariables.doubleList[value.tabPos];
 						break;
 					case valType::_string_:
-						stringArray[tabPos] = stringList[value.tabPos];
+						allVariables.stringArray[tabPos] = allVariables.stringList[value.tabPos];
 						break;
 					}
 				}
 				//else ? cast here
 
-				delVal(value);//stocke en typeArray
+				delVal(allVariables, value);//stocke en typeArray
 			}
 			break;
 
 		case tabAction::_remove_:
-			value = depiler();
-			tabPos = intList[value.tabPos];//recupere val associee a adresse
-			delVal(value);
+			value = depiler(allVariables);
+			tabPos = allVariables.intList[value.tabPos];//recupere val associee a adresse
+			delVal(allVariables, value);
 
-			if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
-				delTabVal(name,tabPos);
+			if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
+				delTabVal(allVariables, name,tabPos);
 			}
 			break;
 		}
 	}
 	//else : pb
-	// retester existance du tableau 
+	// retester existence du tableau 
 }
 
 

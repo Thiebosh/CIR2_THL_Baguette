@@ -18,200 +18,200 @@ void addInstruct(command command, string stringValue) {
 
 
 const map<command, functionPointer> executeCommand = {
-	{command::_ENTER_BLOCK_,[](valInstruct& instructContent) { enterMemoryLayer();	}},
-	{command::_EXIT_BLOCK_,	[](valInstruct& instructContent) { exitMemoryLayer();	}},
+	{command::_ENTER_BLOCK_,[](valInstruct& instructContent, globalVariables& allVariables) { enterMemoryLayer(allVariables);	}},
+	{command::_EXIT_BLOCK_,	[](valInstruct& instructContent, globalVariables& allVariables) { exitMemoryLayer(allVariables);	}},
 
 
-	{command::_EMPILE_VALUE_,[](valInstruct& instructContent) { executionPile.push(addVal(instructContent)); }},
+	{command::_EMPILE_VALUE_,[](valInstruct& instructContent, globalVariables& allVariables) { allVariables.executionPile.push(addVal(allVariables, instructContent)); }},
 	{command::_EMPILE_VARIABLE_,
-		[](valInstruct& instructContent) {
+		[](valInstruct& instructContent, globalVariables& allVariables) {
 			string name = instructContent.stringVal;
 
-			if (currentExecution.top().variables.find(name) != currentExecution.top().variables.end()) {//var existe bien
+			if (allVariables.currentExecution.top().variables.find(name) != allVariables.currentExecution.top().variables.end()) {//var existe bien
 				//empile une copie qui sera supprimee apres utilisation
-				valAccess copy = { currentExecution.top().variables[name].type };
+				valAccess copy = { allVariables.currentExecution.top().variables[name].type };
 				switch (copy.type) {
 					case valType::_bool_:
-						copy.tabPos = boolList.size();
-						boolList.push_back(boolList[currentExecution.top().variables[name].tabPos]);
+						copy.tabPos = allVariables.boolList.size();
+						allVariables.boolList.push_back(allVariables.boolList[allVariables.currentExecution.top().variables[name].tabPos]);
 						break;
 					case valType::_int_:
-						copy.tabPos = intList.size();
-						intList.push_back(intList[currentExecution.top().variables[name].tabPos]);
+						copy.tabPos = allVariables.intList.size();
+						allVariables.intList.push_back(allVariables.intList[allVariables.currentExecution.top().variables[name].tabPos]);
 						break;
 					case valType::_double_:
-						copy.tabPos = doubleList.size();
-						doubleList.push_back(doubleList[currentExecution.top().variables[name].tabPos]);
+						copy.tabPos = allVariables.doubleList.size();
+						allVariables.doubleList.push_back(allVariables.doubleList[allVariables.currentExecution.top().variables[name].tabPos]);
 						break;
 					case valType::_string_:
-						copy.tabPos = stringList.size();
-						stringList.push_back(stringList[currentExecution.top().variables[name].tabPos]);
+						copy.tabPos = allVariables.stringList.size();
+						allVariables.stringList.push_back(allVariables.stringList[allVariables.currentExecution.top().variables[name].tabPos]);
 						break;
 				}
-				executionPile.push(copy);
+				allVariables.executionPile.push(copy);
 			}
-			else error(errorCode::unknowVariable);
+			else error(allVariables, errorCode::unknowVariable);
 		}},
 	
 	{command::_EMPILE_TABLE_SIZE_,
-		[](valInstruct& instructContent) {
-			executeTabAction(instructContent, tabAction::_empile_size_);
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			executeTabAction(allVariables, instructContent, tabAction::_empile_size_);
 		}},
 	{command::_EMPILE_TABLE_ELEMENT_,
-		[](valInstruct& instructContent) {
-			executeTabAction(instructContent, tabAction::_empile_case_);
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			executeTabAction(allVariables, instructContent, tabAction::_empile_case_);
 		}},
 	
 
-	{command::_PLUS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_plus_);		}},
-	{command::_MOINS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_moins_); 		}},
-	{command::_FOIS_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_fois_); 		}},
-	{command::_DIVISE_CREMENT_,	[](valInstruct& instructContent) { executeCrement(instructContent.stringVal, operation::_divisePar_);	}},
+	{command::_PLUS_CREMENT_,	[](valInstruct& instructContent, globalVariables& allVariables) { executeCrement(allVariables, instructContent.stringVal, operation::_plus_);		}},
+	{command::_MOINS_CREMENT_,	[](valInstruct& instructContent, globalVariables& allVariables) { executeCrement(allVariables, instructContent.stringVal, operation::_moins_); 		}},
+	{command::_FOIS_CREMENT_,	[](valInstruct& instructContent, globalVariables& allVariables) { executeCrement(allVariables, instructContent.stringVal, operation::_fois_); 		}},
+	{command::_DIVISE_CREMENT_,	[](valInstruct& instructContent, globalVariables& allVariables) { executeCrement(allVariables, instructContent.stringVal, operation::_divisePar_);	}},
 
-	{command::_PLUS_,		[](valInstruct& instructContent) { executeOperation(operation::_plus_);		}},
-	{command::_MOINS_,		[](valInstruct& instructContent) { executeOperation(operation::_moins_);	}},
-	{command::_FOIS_,		[](valInstruct& instructContent) { executeOperation(operation::_fois_);		}},
-	{command::_DIVISE_PAR_,	[](valInstruct& instructContent) { executeOperation(operation::_divisePar_); }},
+	{command::_PLUS_,		[](valInstruct& instructContent, globalVariables& allVariables) { executeOperation(allVariables, operation::_plus_);		}},
+	{command::_MOINS_,		[](valInstruct& instructContent, globalVariables& allVariables) { executeOperation(allVariables, operation::_moins_);	}},
+	{command::_FOIS_,		[](valInstruct& instructContent, globalVariables& allVariables) { executeOperation(allVariables, operation::_fois_);		}},
+	{command::_DIVISE_PAR_,	[](valInstruct& instructContent, globalVariables& allVariables) { executeOperation(allVariables, operation::_divisePar_); }},
 
-	{command::_AND_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_and_);	}},
-	{command::_OR_,			[](valInstruct& instructContent) { executeComparaison(comparaison::_or_);	}},
-	{command::_EQUIV_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_equiv_); }},
-	{command::_DIFF_,		[](valInstruct& instructContent) { executeComparaison(comparaison::_diff_);	}},
-	{command::_INFERIEUR_,	[](valInstruct& instructContent) { executeComparaison(comparaison::_inferieur_); }},
-	{command::_SUPERIEUR_,	[](valInstruct& instructContent) { executeComparaison(comparaison::_superieur_); }},
-	{command::_SUP_EGAL_,	[](valInstruct& instructContent) { executeComparaison(comparaison::_sup_egal_);	}},
-	{command::_INF_EGAL_,	[](valInstruct& instructContent) { executeComparaison(comparaison::_inf_egal_);	}},
+	{command::_AND_,		[](valInstruct& instructContent, globalVariables& allVariables) { executeComparaison(allVariables, comparaison::_and_);	}},
+	{command::_OR_,			[](valInstruct& instructContent, globalVariables& allVariables) { executeComparaison(allVariables, comparaison::_or_);	}},
+	{command::_EQUIV_,		[](valInstruct& instructContent, globalVariables& allVariables) { executeComparaison(allVariables, comparaison::_equiv_); }},
+	{command::_DIFF_,		[](valInstruct& instructContent, globalVariables& allVariables) { executeComparaison(allVariables, comparaison::_diff_);	}},
+	{command::_INFERIEUR_,	[](valInstruct& instructContent, globalVariables& allVariables) { executeComparaison(allVariables, comparaison::_inferieur_); }},
+	{command::_SUPERIEUR_,	[](valInstruct& instructContent, globalVariables& allVariables) { executeComparaison(allVariables, comparaison::_superieur_); }},
+	{command::_SUP_EGAL_,	[](valInstruct& instructContent, globalVariables& allVariables) { executeComparaison(allVariables, comparaison::_sup_egal_);	}},
+	{command::_INF_EGAL_,	[](valInstruct& instructContent, globalVariables& allVariables) { executeComparaison(allVariables, comparaison::_inf_egal_);	}},
 
 
-	{command::_GOTO_,		[](valInstruct& instructContent) { indexInstruction = instructContent.intVal;/*instruction est entier naturel*/	}},
+	{command::_GOTO_,		[](valInstruct& instructContent, globalVariables& allVariables) { allVariables.indexInstruction = instructContent.intVal;/*instruction est entier naturel*/	}},
 	{command::_GOTO_TEST_,
-		[](valInstruct& instructContent) {
-			valAccess testResult = depiler();
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			valAccess testResult = depiler(allVariables);
 
 			if (testResult.tabPos != -1 &&
-				(testResult.type == valType::_bool_ && boolList[testResult.tabPos] == false) ||
-				(testResult.type == valType::_int_ && intList[testResult.tabPos] == 0) ||
-				(testResult.type == valType::_double_ && doubleList[testResult.tabPos] == 0)) {
-				indexInstruction = instructContent.intVal;//cas if not 0 : incrementation prealable
+				(testResult.type == valType::_bool_ && allVariables.boolList[testResult.tabPos] == false) ||
+				(testResult.type == valType::_int_ && allVariables.intList[testResult.tabPos] == 0) ||
+				(testResult.type == valType::_double_ && allVariables.doubleList[testResult.tabPos] == 0)) {
+				allVariables.indexInstruction = instructContent.intVal;//cas if not 0 : incrementation prealable
 			}
 
-			delVal(testResult);
+			delVal(allVariables, testResult);
 		}},
 
 
 	{command::_CREATE_VARIABLE_,
-		[](valInstruct& instructContent) {
+		[](valInstruct& instructContent, globalVariables& allVariables) {
 			//recupere type de val
-			valAccess valAdress = depiler();
+			valAccess valAdress = depiler(allVariables);
 			valType varType = valAdress.type;
-			delVal(valAdress);
+			delVal(allVariables, valAdress);
 
-			valAccess value = castVal(depiler(), varType);//adresse de val a associer a var, convertie ou plante programme
+			valAccess value = castVal(allVariables, depiler(allVariables), varType);//adresse de val a associer a var, convertie ou plante programme
 
-			if (currentExecution.top().variables.find(instructContent.stringVal) == currentExecution.top().variables.end()) {//var est bien nouvelle
-				currentExecution.top().variables.insert({instructContent.stringVal,value});
+			if (allVariables.currentExecution.top().variables.find(instructContent.stringVal) == allVariables.currentExecution.top().variables.end()) {//var est bien nouvelle
+				allVariables.currentExecution.top().variables.insert({instructContent.stringVal,value});
 			}
-			else error(errorCode::alreadyUseVariable);
+			else error(allVariables, errorCode::alreadyUseVariable);
 		}},
 	{command::_UPDATE_VARIABLE_,
-		[](valInstruct& instructContent) {
+		[](valInstruct& instructContent, globalVariables& allVariables) {
 			//recupere nom de var
 			string name = instructContent.stringVal;
 
-			valAccess value = depiler();//adresse de val a associer a var
-			if (currentExecution.top().variables.find(name) != currentExecution.top().variables.end()) {//var existe bien
-				currentExecution.top().variables[name] = castVal(value, currentExecution.top().variables[name].type);
+			valAccess value = depiler(allVariables);//adresse de val a associer a var
+			if (allVariables.currentExecution.top().variables.find(name) != allVariables.currentExecution.top().variables.end()) {//var existe bien
+				allVariables.currentExecution.top().variables[name] = castVal(allVariables, value, allVariables.currentExecution.top().variables[name].type);
 			}
-			else error(errorCode::unknowVariable);
+			else error(allVariables, errorCode::unknowVariable);
 		}},
 
 	
 		{command::_CREATE_TABLE_,
-			[](valInstruct& instructContent) {
-				executeTabAction(instructContent, tabAction::_create_);
+			[](valInstruct& instructContent, globalVariables& allVariables) {
+				executeTabAction(allVariables, instructContent, tabAction::_create_);
 			}},
 		{command::_ADD_TABLE_ELEMENT_,
-			[](valInstruct& instructContent) {
-				executeTabAction(instructContent, tabAction::_add_);
+			[](valInstruct& instructContent, globalVariables& allVariables) {
+				executeTabAction(allVariables, instructContent, tabAction::_add_);
 			}},
 		{command::_UPDATE_TABLE_ELEMENT_,
-			[](valInstruct& instructContent) {
-				executeTabAction(instructContent, tabAction::_update_);
+			[](valInstruct& instructContent, globalVariables& allVariables) {
+				executeTabAction(allVariables, instructContent, tabAction::_update_);
 			}},
 		{command::_REMOVE_TABLE_ELEMENT_,
-			[](valInstruct& instructContent) {
-				executeTabAction(instructContent, tabAction::_remove_);
+			[](valInstruct& instructContent, globalVariables& allVariables) {
+				executeTabAction(allVariables, instructContent, tabAction::_remove_);
 			}},
 	
 
 	{command::_CREATE_FUNCTION_,
-		[](valInstruct& instructContent) {
-			if (fonctions.find(instructContent.stringVal) == fonctions.end()) {//fonction est bien nouvelle
-				valAccess tmp = castVal(depiler(), valType::_int_);
-				int beginInstruct = intList[tmp.tabPos];
-				delVal(tmp);
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			if (allVariables.fonctions.find(instructContent.stringVal) == allVariables.fonctions.end()) {//fonction est bien nouvelle
+				valAccess tmp = castVal(allVariables, depiler(allVariables), valType::_int_);
+				int beginInstruct = allVariables.intList[tmp.tabPos];
+				delVal(allVariables, tmp);
 
 				deque<param> listParam;
-				while (!((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1)) {//tant que pas fin
-					tmp = castVal(tmp, valType::_string_);
-					string paramName = stringList[tmp.tabPos];
-					delVal(tmp);
+				while (!((tmp = depiler(allVariables)).type == valType::_int_ && allVariables.intList[tmp.tabPos] == -1)) {//tant que pas fin
+					tmp = castVal(allVariables, tmp, valType::_string_);
+					string paramName = allVariables.stringList[tmp.tabPos];
+					delVal(allVariables, tmp);
 
-					tmp = depiler();
+					tmp = depiler(allVariables);
 					valType paramType = tmp.type;
-					delVal(tmp);
+					delVal(allVariables, tmp);
 
 					listParam.push_back({ paramName,paramType });
 				}
-				delVal(tmp);//consommer le -1 de fin de parametres
+				delVal(allVariables, tmp);//consommer le -1 de fin de parametres
 
-				tmp = depiler();
+				tmp = depiler(allVariables);
 				valType typeFunction = tmp.type;
-				delVal(tmp);
+				delVal(allVariables, tmp);
 
-				fonctions.insert({instructContent.stringVal,{ beginInstruct,typeFunction,listParam } });
+				allVariables.fonctions.insert({instructContent.stringVal,{ beginInstruct,typeFunction,listParam } });
 			}
-			else error(errorCode::alreadyDeclaredFunction);
+			else error(allVariables, errorCode::alreadyDeclaredFunction);
 		}},
 	{command::_CALL_FUNCTION_,
-		[](valInstruct& instructContent) {
-			if (fonctions.find(instructContent.stringVal) != fonctions.end()) {//fonction existe bien
-				stack<valAccess> copyPile = executionPile;//copie pile pour tester son contenu : doit avoir bon nombre de valeurs et bon types
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			if (allVariables.fonctions.find(instructContent.stringVal) != allVariables.fonctions.end()) {//fonction existe bien
+				stack<valAccess> copyPile = allVariables.executionPile;//copie pile pour tester son contenu : doit avoir bon nombre de valeurs et bon types
 				valAccess tmp;
-				for (auto param : fonctions[instructContent.stringVal].listParam) {
-					if ((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1) error(errorCode::notEnoughArgument);
-					castVal(tmp, param.second);//affiche erreur de conversion si impossible
+				for (auto param : allVariables.fonctions[instructContent.stringVal].listParam) {
+					if ((tmp = depiler(allVariables)).type == valType::_int_ && allVariables.intList[tmp.tabPos] == -1) error(allVariables, errorCode::notEnoughArgument);
+					castVal(allVariables, tmp, param.second);//affiche erreur de conversion si impossible
 				}
-				if (!((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1)) error(errorCode::tooMuchArgument);
-				executionPile = copyPile;//retablit pile initiale
+				if (!((tmp = depiler(allVariables)).type == valType::_int_ && allVariables.intList[tmp.tabPos] == -1)) error(allVariables, errorCode::tooMuchArgument);
+				allVariables.executionPile = copyPile;//retablit pile initiale
 
-				currentExecution.push({instructContent.stringVal,indexInstruction});//stocke fonction appellee et adresse retour
-				indexInstruction = fonctions[instructContent.stringVal].refInstruct;//saute a adresse debut fonction (enter function)
+				allVariables.currentExecution.push({instructContent.stringVal,allVariables.indexInstruction});//stocke fonction appellee et adresse retour
+				allVariables.indexInstruction = allVariables.fonctions[instructContent.stringVal].refInstruct;//saute a adresse debut fonction (enter function)
 			}
-			else error(errorCode::unknowFunction);
+			else error(allVariables, errorCode::unknowFunction);
 		}},
 	{command::_ENTER_FUNCTION_,	
-		[](valInstruct& instructContent) {
-			if (!currentExecution.empty()) {//si entre dans une "vraie" fonction, nombre et type des arguments est ok dans pile
-				for (auto param : fonctions[instructContent.stringVal].listParam) {
-					currentExecution.top().variables.insert({ param.first,castVal(depiler(),param.second) });//depile et initialise variables (nom, valeur castee)
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			if (!allVariables.currentExecution.empty()) {//si entre dans une "vraie" fonction, nombre et type des arguments est ok dans pile
+				for (auto param : allVariables.fonctions[instructContent.stringVal].listParam) {
+					allVariables.currentExecution.top().variables.insert({ param.first,castVal(allVariables, depiler(allVariables),param.second) });//depile et initialise variables (nom, valeur castee)
 				}
-				delVal(depiler());//consommer le -1 de fin de parametres
+				delVal(allVariables, depiler(allVariables));//consommer le -1 de fin de parametres
 			}
-			else currentExecution.push({"",0});//main
+			else allVariables.currentExecution.push({"",0});//main
 
-			enterMemoryLayer();//nettoyage plus simple
+			enterMemoryLayer(allVariables);//nettoyage plus simple
 		}},
 	{command::_EXIT_FUNCTION_,
-		[](valInstruct& instructContent) {
-			if (currentExecution.size() < 2) {
-				exitMemoryLayer();
-				currentExecution.pop();
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			if (allVariables.currentExecution.size() < 2) {
+				exitMemoryLayer(allVariables);
+				allVariables.currentExecution.pop();
 			}
 			else { //si ne quitte pas le programme, retourne valeur et retrouve adresse d appel
-				indexInstruction = currentExecution.top().returnAdress;
-				valType returnType = fonctions[currentExecution.top().name].returnType;
-				valAccess tmp = castVal(depiler(), returnType);
+				allVariables.indexInstruction = allVariables.currentExecution.top().returnAdress;
+				valType returnType = allVariables.fonctions[allVariables.currentExecution.top().name].returnType;
+				valAccess tmp = castVal(allVariables, depiler(allVariables), returnType);
 				int tabPos = tmp.tabPos;
 
 				int returnInt;
@@ -222,41 +222,41 @@ const map<command, functionPointer> executeCommand = {
 					/*case valType::_void_:
 						break;
 					case valType::_bool_:
-						returnBool = boolList[tabPos];
+						returnBool = allVariables.boolList[tabPos];
 						break;*/
 				case valType::_int_:
-					returnInt = intList[tabPos];
+					returnInt = allVariables.intList[tabPos];
 					break;
 				case valType::_double_:
-					returnDouble = doubleList[tabPos];
+					returnDouble = allVariables.doubleList[tabPos];
 					break;
 				case valType::_string_:
-					returnString = stringList[tabPos];
+					returnString = allVariables.stringList[tabPos];
 					break;
 				}
-				delVal(tmp);
+				delVal(allVariables, tmp);
 
-				exitMemoryLayer();
-				currentExecution.pop();
+				exitMemoryLayer(allVariables);
+				allVariables.currentExecution.pop();
 
 				switch (returnType) {//ajoute la valeur de retour a la pile
 					/*case valType::_void_:
 						break;
 					case valType::_bool_:
-						executionPile.push({returnType,(int)boolList.size()});
-						boolList.push_back(returnBool);
+						allVariables.executionPile.push({returnType,(int)allVariables.boolList.size()});
+						allVariables.boolList.push_back(returnBool);
 						break;*/
 				case valType::_int_:
-					executionPile.push({ returnType,(int)intList.size() });
-					intList.push_back(returnInt);
+					allVariables.executionPile.push({ returnType,(int)allVariables.intList.size() });
+					allVariables.intList.push_back(returnInt);
 					break;
 				case valType::_double_:
-					executionPile.push({ returnType,(int)doubleList.size() });
-					doubleList.push_back(returnDouble);
+					allVariables.executionPile.push({ returnType,(int)allVariables.doubleList.size() });
+					allVariables.doubleList.push_back(returnDouble);
 					break;
 				case valType::_string_:
-					executionPile.push({ returnType,(int)stringList.size() });
-					stringList.push_back(returnString);
+					allVariables.executionPile.push({ returnType,(int)allVariables.stringList.size() });
+					allVariables.stringList.push_back(returnString);
 					break;
 				}
 			}
@@ -264,54 +264,54 @@ const map<command, functionPointer> executeCommand = {
 
 
 	{command::_WRITE_,//sortie
-		[](valInstruct& instructContent) {
-			valAccess val = depiler();
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			valAccess val = depiler(allVariables);
 			switch (val.type) {
 				case valType::_bool_:
-					cout << boolList[val.tabPos];
+					cout << allVariables.boolList[val.tabPos];
 					break;
 				case valType::_int_:
-					cout << intList[val.tabPos];
+					cout << allVariables.intList[val.tabPos];
 					break;
 				case valType::_double_:
-					cout << doubleList[val.tabPos];
+					cout << allVariables.doubleList[val.tabPos];
 					break;
 				case valType::_string_:
-					string display = stringList[val.tabPos];
+					string display = allVariables.stringList[val.tabPos];
 					replaceString(display,"\\n","\n");
 					replaceString(display,"\\t","\t");
 					cout << display;
 					break;
 			}
 
-			delVal(val);
+			delVal(allVariables, val);
 		}},
-	{command::_STOP_,[](valInstruct& instructContent) { pauseProcess(); }},
+	{command::_STOP_,[](valInstruct& instructContent, globalVariables& allVariables) { pauseProcess(); }},
 	{command::_READ_,
-		[](valInstruct& instructContent) {
+		[](valInstruct& instructContent, globalVariables& allVariables) {
 			string valName = instructContent.stringVal;
-			if (currentExecution.top().variables.find(valName) != currentExecution.top().variables.end()){
-				switch (currentExecution.top().variables[valName].type){
+			if (allVariables.currentExecution.top().variables.find(valName) != allVariables.currentExecution.top().variables.end()){
+				switch (allVariables.currentExecution.top().variables[valName].type){
 					case valType::_int_ :
-						cin >> intList[currentExecution.top().variables[valName].tabPos];
+						cin >> allVariables.intList[allVariables.currentExecution.top().variables[valName].tabPos];
 						break;
 					case valType::_double_ :
-						cin >> doubleList[currentExecution.top().variables[valName].tabPos];
+						cin >> allVariables.doubleList[allVariables.currentExecution.top().variables[valName].tabPos];
 						break;
 					case valType::_string_ :
-						cin >> stringList[currentExecution.top().variables[valName].tabPos]; 
+						cin >> allVariables.stringList[allVariables.currentExecution.top().variables[valName].tabPos]; 
 						break;
 				}
 			}
-			else error(errorCode::unknowVariable);
+			else error(allVariables, errorCode::unknowVariable);
 		}}
 };
 
 
 /********************************************************/
-/*	PARTIE II : MAIN FONCTIONS							*/
+/*	PARTIE II : MAIN allVariables.fonctions							*/
 /********************************************************/
-void displayGeneratedProgram() {
+void displayGeneratedProgram(globalVariables& allVariables) {
 	cout << endl << "==== CODE GENERE ====" << endl;
 
 	int i = 0;
@@ -353,16 +353,16 @@ void displayGeneratedProgram() {
 		case command::_EMPILE_TABLE_SIZE_:
 				//IDEM
 			name =instructContent.second.stringVal;
-			if (currentExecution.top().tableaux.find(name) != currentExecution.top().tableaux.end()) {//var existe bien
-				switch(currentExecution.top().tableaux[name].type) {
+			if (allVariables.currentExecution.top().tableaux.find(name) != allVariables.currentExecution.top().tableaux.end()) {//var existe bien
+				switch(allVariables.currentExecution.top().tableaux[name].type) {
 				case valType::_int_:
-					size = intList.size();
+					size = allVariables.intList.size();
 					break;
 				case valType::_double_:
-					size = doubleList.size();
+					size = allVariables.doubleList.size();
 					break;
 				case valType::_string_:
-					size = stringList.size();
+					size = allVariables.stringList.size();
 					break;
 				}
 				cout << "AJOUTE " << size << " A LA PILE";
@@ -373,11 +373,11 @@ void displayGeneratedProgram() {
 				//IDEM
 				/*
 			name = instructContent.second.stringVal;
-			tabPos = executionPile.top().tabPos;//recupere val associee a adresse
+			tabPos = allVariables.executionPile.top().tabPos;//recupere val associee a adresse
 
-			if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
-				tabPos = currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
-				switch(currentExecution.top().tableaux[name].type) {
+			if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
+				tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
+				switch(allVariables.currentExecution.top().tableaux[name].type) {
 				case valType::_int_:
 					cout << "AJOUTE ", intArray[tabPos]," A LA PILE";
 					break;
@@ -471,16 +471,16 @@ void displayGeneratedProgram() {
 		case command::_UPDATE_TABLE_ELEMENT_:
 			//IDEM
 			name = instructContent.second.stringVal;
-			if (currentExecution.top().tableaux.find(name) != currentExecution.top().tableaux.end()) {
-				value = executionPile.top();
-				tabPos = intList[value.tabPos];
+			if (allVariables.currentExecution.top().tableaux.find(name) != allVariables.currentExecution.top().tableaux.end()) {
+				value = allVariables.executionPile.top();
+				tabPos = allVariables.intList[value.tabPos];
 
-				if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
-					tabPos = currentExecution.top().tableaux[name].valuesPos[tabPos];
-					value = executionPile.top();
+				if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
+					tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];
+					value = allVariables.executionPile.top();
 					if (instructContent.second.type == value.type) {
 						cout << "MODIFIE INDICE " << tabPos << " DU TABLEAU " << name;
-						printVal(" AVEC ",value);
+						printVal(allVariables, " AVEC ",value);
 					}
 					else cout << "ERREUR : TYPES DIFFERENTS";
 				}
@@ -491,12 +491,12 @@ void displayGeneratedProgram() {
 		case command::_REMOVE_TABLE_ELEMENT_:
 			//IDEM
 			name = instructContent.second.stringVal;
-			if (currentExecution.top().tableaux.find(name) != currentExecution.top().tableaux.end()) {
-				value = executionPile.top();
-				tabPos = intList[value.tabPos];
+			if (allVariables.currentExecution.top().tableaux.find(name) != allVariables.currentExecution.top().tableaux.end()) {
+				value = allVariables.executionPile.top();
+				tabPos = allVariables.intList[value.tabPos];
 
-				if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
-					tabPos = currentExecution.top().tableaux[name].valuesPos[tabPos];
+				if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
+					tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];
 					cout << "SUPPRIME INDICE " << tabPos << " DU TABLEAU " << name;
 				}
 				else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";
@@ -624,7 +624,7 @@ void saveCommandProgramFile(string folderName, string programName) {
                     arguments += "_INF_EGAL_"; 
                     break;
 
-                //SAUTS (conditions, boucles, fonctions) - ok
+                //SAUTS (conditions, boucles, allVariables.fonctions) - ok
                 case command::_GOTO_:
                     arguments += "_GOTO_," + to_string(instructContent.second.intVal);
                     break;
@@ -640,7 +640,7 @@ void saveCommandProgramFile(string folderName, string programName) {
                     arguments += "_UPDATE_VARIABLE_,\"" + instructContent.second.stringVal + "\"";
                     break;
 
-                //FONCTIONS - ok
+                //allVariables.fonctions - ok
                 case command::_CREATE_FUNCTION_:
                     arguments += "_CREATE_FUNCTION_,\"" + instructContent.second.stringVal + "\""; 
                     break;

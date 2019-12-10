@@ -1,7 +1,6 @@
 # théorie des langages
 
 ## pile de choses à faire :
-- essayer de passer les variables globales en local?
 - finir reprise tab
 - ajouter operations modulo et puissance
 - indice -1 d'un tableau pour accéder au dernier élément
