@@ -105,12 +105,12 @@ valAccess castVal(globalVariables& allVariables, valAccess value, valType cast, 
 		return result;
 	}
 
-	else error(allVariables, errorCode::conversionType);
+	error(allVariables, errorCode::conversionType);
 }
 
 valAccess toTab(globalVariables& allVariables, valAccess value) {
 	valType type = value.type;
-	int newpos;
+	int newpos = -1;
 	switch(type) {
 		case valType::_int_:
 			newpos = allVariables.intArray.size();
@@ -338,7 +338,7 @@ void executeTabAction(globalVariables& allVariables, valInstruct& instructConten
 			tabPos = allVariables.intList[value.tabPos];//recupere val associee a adresse
 			delVal(allVariables, value);
 
-			if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
+			if (tabPos > -1 && tabPos < (int)allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
 				tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
 
 				switch(allVariables.currentExecution.top().tableaux[name].type) {
@@ -381,7 +381,7 @@ void executeTabAction(globalVariables& allVariables, valInstruct& instructConten
 			tabPos = allVariables.intList[value.tabPos];//recupere val associee a adresse
 			delVal(allVariables, value);
 
-			if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
+			if (tabPos > -1 && tabPos < (int)allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
 				tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
 
 				valAccess value = depiler(allVariables);//supprime pas : besoin de transmettre valeur associee
@@ -409,7 +409,7 @@ void executeTabAction(globalVariables& allVariables, valInstruct& instructConten
 			tabPos = allVariables.intList[value.tabPos];//recupere val associee a adresse
 			delVal(allVariables, value);
 
-			if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
+			if (tabPos > -1 && tabPos < (int)allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
 				delTabVal(allVariables, name,tabPos);
 			}
 			break;

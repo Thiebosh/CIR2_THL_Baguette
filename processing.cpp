@@ -309,7 +309,7 @@ const map<command, functionPointer> executeCommand = {
 
 
 /********************************************************/
-/*	PARTIE II : MAIN allVariables.fonctions							*/
+/*	PARTIE II : MAIN FONCTIONS							*/
 /********************************************************/
 void displayGeneratedProgram(globalVariables& allVariables) {
 	cout << endl << "==== CODE GENERE ====" << endl;
@@ -351,46 +351,10 @@ void displayGeneratedProgram(globalVariables& allVariables) {
 			cout << "AJOUTE VALEUR DE '" << instructContent.second.stringVal << "' A LA PILE";
 			break;
 		case command::_EMPILE_TABLE_SIZE_:
-				//IDEM
-			name =instructContent.second.stringVal;
-			if (allVariables.currentExecution.top().tableaux.find(name) != allVariables.currentExecution.top().tableaux.end()) {//var existe bien
-				switch(allVariables.currentExecution.top().tableaux[name].type) {
-				case valType::_int_:
-					size = allVariables.intList.size();
-					break;
-				case valType::_double_:
-					size = allVariables.doubleList.size();
-					break;
-				case valType::_string_:
-					size = allVariables.stringList.size();
-					break;
-				}
-				cout << "AJOUTE " << size << " A LA PILE";
-			}
-			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+			cout << "AJOUTE TAILLE DE '" << instructContent.second.stringVal << "' A LA PILE";
 			break;
 		case command::_EMPILE_TABLE_ELEMENT_:
-				//IDEM
-				/*
-			name = instructContent.second.stringVal;
-			tabPos = allVariables.executionPile.top().tabPos;//recupere val associee a adresse
-
-			if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
-				tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
-				switch(allVariables.currentExecution.top().tableaux[name].type) {
-				case valType::_int_:
-					cout << "AJOUTE ", intArray[tabPos]," A LA PILE";
-					break;
-				case valType::_double_:
-					cout << "AJOUTE ", doubleArray[tabPos]," A LA PILE";
-					break;
-				case valType::_string_:
-					cout << "AJOUTE ", stringArray[tabPos]," A LA PILE";
-					break;
-				}
-			}
-			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
-			*/
+			cout << "AJOUTE CONTENU D'UNE CASE DE '" << instructContent.second.stringVal << "' A LA PILE";
 			break;
 
 
@@ -469,39 +433,10 @@ void displayGeneratedProgram(globalVariables& allVariables) {
 			cout << "PROLONGE LISTE " << name << endl;
 			break;
 		case command::_UPDATE_TABLE_ELEMENT_:
-			//IDEM
-			name = instructContent.second.stringVal;
-			if (allVariables.currentExecution.top().tableaux.find(name) != allVariables.currentExecution.top().tableaux.end()) {
-				value = allVariables.executionPile.top();
-				tabPos = allVariables.intList[value.tabPos];
-
-				if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
-					tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];
-					value = allVariables.executionPile.top();
-					if (instructContent.second.type == value.type) {
-						cout << "MODIFIE INDICE " << tabPos << " DU TABLEAU " << name;
-						printVal(allVariables, " AVEC ",value);
-					}
-					else cout << "ERREUR : TYPES DIFFERENTS";
-				}
-				else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";
-			}
-			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+			cout << "MODIFIE CONTENU D'UNE CASE DE '" << instructContent.second.stringVal << "'";
 			break;
 		case command::_REMOVE_TABLE_ELEMENT_:
-			//IDEM
-			name = instructContent.second.stringVal;
-			if (allVariables.currentExecution.top().tableaux.find(name) != allVariables.currentExecution.top().tableaux.end()) {
-				value = allVariables.executionPile.top();
-				tabPos = allVariables.intList[value.tabPos];
-
-				if (tabPos > -1 && tabPos < allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
-					tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];
-					cout << "SUPPRIME INDICE " << tabPos << " DU TABLEAU " << name;
-				}
-				else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";
-			}
-			else cout << "ERREUR : TABLEAU " << name << " N'EXISTE PAS";
+			cout << "SUPPRIME UNE CASE DE '" << instructContent.second.stringVal << "'";
 			break;
 		
 

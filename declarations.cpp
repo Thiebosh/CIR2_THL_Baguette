@@ -136,47 +136,7 @@ enum class errorCode {
 
 
 /********************************************************/
-/*	PARTIE II : OBJET ERREUR							*/
-/********************************************************/
-/*
-class Error {
-private:
-enum class errorCode {
-	unknowCommand,
-	conversionType,
-	unknowVariable,
-	alreadyUseVariable,
-	emptyExecutionStack,
-	alreadyDeclaredFunction,
-	unknowFunction,
-	notEnoughArgument,
-	tooMuchArgument
-};
-
-map<errorCode, string> errorMessage = { //peut etre passe en parametres
-		{errorCode::emptyExecutionStack,	"[EXECUTION] pile vide"},
-		{errorCode::conversionType,			"[TYPE] types incompatibles - échec de conversion"},
-
-		{errorCode::unknowCommand,			"[EXECUTION] commande inconnue"},
-		{errorCode::unknowVariable,			"[VARIABLE] nom de variable inconnu"},
-		{errorCode::unknowFunction,			"[FONCTION] nom de fonction inconnu"},
-
-		{errorCode::alreadyUseVariable,		"[VARIABLE] nom de variable déjà en utilisation"},
-		{errorCode::alreadyDeclaredFunction,"[FONCTION] nom de fonction déjà utilisé"},
-
-		{errorCode::notEnoughArgument,		"[FONCTION] pas assez de valeurs en paramètres"},
-		{errorCode::tooMuchArgument,		"[FONCTION] trop de valeurs en paramètres"}
-	};
-
-public:
-static throw() {
-        cout << "ERREUR : " << allVariables.errorMessage[cause] << endl;
-	exit((int)cause + 1);//code erreur
-}
-*/
-
-/********************************************************/
-/*	PARTIE III : TYPES PERSONNALISES					*/
+/*	PARTIE II : TYPES PERSONNALISES						*/
 /********************************************************/
 typedef struct {//initialiser dans ordre de déclaration
 	valType type = valType::_int_;
@@ -206,8 +166,8 @@ typedef struct {//initialiser dans ordre de déclaration
 typedef pair<string,valType> param;
 
 typedef struct {
-	int refInstruct;
-	valType returnType;
+	int refInstruct = -1;
+	valType returnType = valType::_int_;
 	deque<param> listParam;
 } functionAccess;
 
@@ -267,12 +227,12 @@ typedef void (*functionPointer)(valInstruct& instructContent, globalVariables& a
 
 
 /********************************************************/
-/*	PARTIE IV : VARIABLE GLOBALE OBLIGATOIRE (BISON)	*/
+/*	PARTIE III : VARIABLE GLOBALE OBLIGATOIRE (BISON)	*/
 /********************************************************/
 deque<instruction> instructionList;//necessairement global
 
 /********************************************************/
-/*	PARTIE V : PROTOTYPES								*/
+/*	PARTIE IV : PROTOTYPES								*/
 /********************************************************/
 // Memory
 //		Part 1
