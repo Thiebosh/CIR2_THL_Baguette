@@ -231,7 +231,7 @@ void executeCrement(string varName, operation operation) {
 	//recupere valeur
 	valAccess valCast = depiler();
 
-	if (variables.top().find(varName) != variables.top().end()) {//var existe bien
+	if (currentExecution.top().variables.find(varName) != currentExecution.top().variables.end()) {//var existe bien
 		//1 : changer val en double ou string
 		double valDouble(0);
 		string valString("");
@@ -248,12 +248,12 @@ void executeCrement(string varName, operation operation) {
 		valAccess varCast;
 		double varDouble(0);
 		string varString("");
-		if (variables.top()[varName].type == valType::_string_) {
-			varCast = variables.top()[varName];
+		if (currentExecution.top().variables[varName].type == valType::_string_) {
+			varCast = currentExecution.top().variables[varName];
 			varString = stringList[varCast.tabPos];
 		}
 		else {
-			varCast = castVal(variables.top()[varName], valType::_double_, 1);
+			varCast = castVal(currentExecution.top().variables[varName], valType::_double_, 1);
 			varDouble = doubleList[varCast.tabPos];
 		}
 
@@ -275,20 +275,20 @@ void executeCrement(string varName, operation operation) {
 		}
 
 		//4 : intégrer résultat dans variable (verif de type)
-		switch (variables.top()[varName].type) {
+		switch (currentExecution.top().variables[varName].type) {
 		case valType::_int_:
-			intList[variables.top()[varName].tabPos] = (int)varDouble;
+			intList[currentExecution.top().variables[varName].tabPos] = (int)varDouble;
 			break;
 		case valType::_double_:
-			doubleList[variables.top()[varName].tabPos] = varDouble;
+			doubleList[currentExecution.top().variables[varName].tabPos] = varDouble;
 			break;
 		case valType::_string_:
-			stringList[variables.top()[varName].tabPos] = varString;
+			stringList[currentExecution.top().variables[varName].tabPos] = varString;
 			break;
 		}
 		
 		//5 : ajouter copie a la pile si besoin
-		if (variables.top()[varName].type == valType::_string_) {
+		if (currentExecution.top().variables[varName].type == valType::_string_) {
 			executionPile.push({ valType::_string_,(int)stringList.size() });
 			stringList.push_back(varString);
 		}
@@ -311,8 +311,8 @@ void executeCrement(string varName, operation operation) {
 void executeTabAction(valInstruct& instructContent, tabAction action) {
 	string name = instructContent.stringVal;
 
-	if ((action == tabAction::_create_ && tableaux.top().find(name) == tableaux.top().end()) ||//tab est bien nouveau
-		(action != tabAction::_create_ && tableaux.top().find(name) != tableaux.top().end())) {//tab existe bien
+	if ((action == tabAction::_create_ && currentExecution.top().tableaux.find(name) == currentExecution.top().tableaux.end()) ||//tab est bien nouveau
+		(action != tabAction::_create_ && currentExecution.top().tableaux.find(name) != currentExecution.top().tableaux.end())) {//tab existe bien
 		int tabPos;
 		valAccess value;
 		valAccess tmp;
@@ -321,7 +321,7 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 		switch (action) {
 	/*
 		case tabAction::_empile_size_:
-			switch(tableaux.top()[name].type) {
+			switch(currentExecution.top().tableaux[name].type) {
 			case valType::_int_:
 				executionPile.push({ valType::_int_,(int)intList.size() });
 				break;
@@ -332,7 +332,7 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 				executionPile.push({ valType::_int_,(int)stringList.size() });
 				break;
 			}
-			intList.push_back(tableaux.top()[name].valuesPos.size());//name
+			intList.push_back(currentExecution.top().tableaux[name].valuesPos.size());//name
 			break;
 		*/
 		case tabAction::_empile_case_:
@@ -340,10 +340,10 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 			tabPos = intList[value.tabPos];//recupere val associee a adresse
 			delVal(value);
 
-			if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
-				tabPos = tableaux.top()[name].valuesPos[tabPos];//recupere val a case souhaitee
+			if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
+				tabPos = currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
 
-				switch(tableaux.top()[name].type) {
+				switch(currentExecution.top().tableaux[name].type) {
 				case valType::_int_:
 					executionPile.push({ valType::_int_,(int)intList.size() });
 					intList.push_back(intArray[tabPos]);
@@ -369,13 +369,13 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 
 			declaration.valuesPos.push_back(toTab(castVal(depiler(),type)).tabPos);
 
-			tableaux.top().insert({name,declaration});
+			currentExecution.top().tableaux.insert({name,declaration});
 			break;
 			
 		case tabAction::_add_:
 			value = depiler();//supprime pas : besoin de transmettre valeur associee
 			
-			tableaux.top()[name].valuesPos.push_back(toTab(castVal(value,tableaux.top()[name].type)).tabPos);
+			currentExecution.top().tableaux[name].valuesPos.push_back(toTab(castVal(value,currentExecution.top().tableaux[name].type)).tabPos);
 			break;
 
 		case tabAction::_update_:
@@ -383,11 +383,11 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 			tabPos = intList[value.tabPos];//recupere val associee a adresse
 			delVal(value);
 
-			if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
-				tabPos = tableaux.top()[name].valuesPos[tabPos];//recupere val a case souhaitee
+			if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
+				tabPos = currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
 
 				valAccess value = depiler();//supprime pas : besoin de transmettre valeur associee
-				if (tableaux.top()[name].type == value.type) {
+				if (currentExecution.top().tableaux[name].type == value.type) {
 					switch(value.type) {
 					case valType::_int_:
 						intArray[tabPos] = intList[value.tabPos];
@@ -411,7 +411,7 @@ void executeTabAction(valInstruct& instructContent, tabAction action) {
 			tabPos = intList[value.tabPos];//recupere val associee a adresse
 			delVal(value);
 
-			if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
+			if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
 				delTabVal(name,tabPos);
 			}
 			break;

@@ -354,6 +354,8 @@ int main(int argc, char **argv) {
             }
         }
 
+        //initialise varriables
+		instructionList.clear();
 
         //recupere contenu dossier
         vector<string> programList;
@@ -415,13 +417,14 @@ int main(int argc, char **argv) {
                         file.close();
                     }
 
-                    //saveCommandProgramFile();//debug
+                    //saveCommandProgramFile(folderName, programName);//debug
                 }
             }
             else cout << "Echec d'accès au fichier" << endl;
         }
         else {
             programName = compiledList[saisie - programList.size()];
+            cout << programName << endl;
 
             //recupere version compilee
             ifstream file((folderName + programName).c_str());
@@ -452,12 +455,11 @@ int main(int argc, char **argv) {
                 if (executeCommand.find(instructContent.first) != executeCommand.end()) {
                     (*(executeCommand.at(instructContent.first))) (instructContent.second);
                 }
-                else {
-                    cout << "unknow command : " << (int)instructContent.first << endl;
-                }
+                else error(errorCode::unknowCommand);
             }
             cout << endl << "=====================" << endl;
         }
+
         pauseProcess();
     } while (true);
 

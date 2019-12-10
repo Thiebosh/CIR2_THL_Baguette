@@ -27,25 +27,25 @@ const map<command, functionPointer> executeCommand = {
 		[](valInstruct& instructContent) {
 			string name = instructContent.stringVal;
 
-			if (variables.top().find(name) != variables.top().end()) {//var existe bien
+			if (currentExecution.top().variables.find(name) != currentExecution.top().variables.end()) {//var existe bien
 				//empile une copie qui sera supprimee apres utilisation
-				valAccess copy = { variables.top()[name].type };
+				valAccess copy = { currentExecution.top().variables[name].type };
 				switch (copy.type) {
 					case valType::_bool_:
 						copy.tabPos = boolList.size();
-						boolList.push_back(boolList[variables.top()[name].tabPos]);
+						boolList.push_back(boolList[currentExecution.top().variables[name].tabPos]);
 						break;
 					case valType::_int_:
 						copy.tabPos = intList.size();
-						intList.push_back(intList[variables.top()[name].tabPos]);
+						intList.push_back(intList[currentExecution.top().variables[name].tabPos]);
 						break;
 					case valType::_double_:
 						copy.tabPos = doubleList.size();
-						doubleList.push_back(doubleList[variables.top()[name].tabPos]);
+						doubleList.push_back(doubleList[currentExecution.top().variables[name].tabPos]);
 						break;
 					case valType::_string_:
 						copy.tabPos = stringList.size();
-						stringList.push_back(stringList[variables.top()[name].tabPos]);
+						stringList.push_back(stringList[currentExecution.top().variables[name].tabPos]);
 						break;
 				}
 				executionPile.push(copy);
@@ -108,8 +108,8 @@ const map<command, functionPointer> executeCommand = {
 
 			valAccess value = castVal(depiler(), varType);//adresse de val a associer a var, convertie ou plante programme
 
-			if (variables.top().find(instructContent.stringVal) == variables.top().end()) {//var est bien nouvelle
-				variables.top().insert({instructContent.stringVal,value});
+			if (currentExecution.top().variables.find(instructContent.stringVal) == currentExecution.top().variables.end()) {//var est bien nouvelle
+				currentExecution.top().variables.insert({instructContent.stringVal,value});
 			}
 			else error(errorCode::alreadyUseVariable);
 		}},
@@ -119,8 +119,8 @@ const map<command, functionPointer> executeCommand = {
 			string name = instructContent.stringVal;
 
 			valAccess value = depiler();//adresse de val a associer a var
-			if (variables.top().find(name) != variables.top().end()) {//var existe bien
-				variables.top()[name] = castVal(value, variables.top()[name].type);
+			if (currentExecution.top().variables.find(name) != currentExecution.top().variables.end()) {//var existe bien
+				currentExecution.top().variables[name] = castVal(value, currentExecution.top().variables[name].type);
 			}
 			else error(errorCode::unknowVariable);
 		}},
@@ -185,85 +185,80 @@ const map<command, functionPointer> executeCommand = {
 				if (!((tmp = depiler()).type == valType::_int_ && intList[tmp.tabPos] == -1)) error(errorCode::tooMuchArgument);
 				executionPile = copyPile;//retablit pile initiale
 
-				appelFonction.push({instructContent.stringVal,indexInstruction});//stocke fonction appellee et adresse retour
+				currentExecution.push({instructContent.stringVal,indexInstruction});//stocke fonction appellee et adresse retour
 				indexInstruction = fonctions[instructContent.stringVal].refInstruct;//saute a adresse debut fonction (enter function)
 			}
 			else error(errorCode::unknowFunction);
 		}},
 	{command::_ENTER_FUNCTION_,	
-		[](valInstruct& instructContent) { 
-			variables.push({});//separation memoire
-			tableaux.push({});//separation memoire
-
-			if (!appelFonction.empty()) {//si entre dans une "vraie" fonction, nombre et type des arguments est ok dans pile
+		[](valInstruct& instructContent) {
+			if (!currentExecution.empty()) {//si entre dans une "vraie" fonction, nombre et type des arguments est ok dans pile
 				for (auto param : fonctions[instructContent.stringVal].listParam) {
-					variables.top().insert({ param.first,castVal(depiler(),param.second) });//depile et initialise variables (nom, valeur castee)
+					currentExecution.top().variables.insert({ param.first,castVal(depiler(),param.second) });//depile et initialise variables (nom, valeur castee)
 				}
 				delVal(depiler());//consommer le -1 de fin de parametres
 			}
+			else currentExecution.push({"",0});//main
 
 			enterMemoryLayer();//nettoyage plus simple
 		}},
 	{command::_EXIT_FUNCTION_,
 		[](valInstruct& instructContent) {
-			functionCall leavingFonction;
-			valType returnType;
-			bool returnBool;
-			int returnInt;
-			double returnDouble;
-			string returnString;
-
-			if (!appelFonction.empty()) { //si ne quitte pas le programme, retourne valeur et retrouve adresse d appel
-				leavingFonction = appelFonction.top();
-				appelFonction.pop();
-
-				returnType = fonctions[leavingFonction.name].returnType;
-				valAccess tmp = castVal(depiler(),returnType);
+			if (currentExecution.size() < 2) {
+				exitMemoryLayer();
+				currentExecution.pop();
+			}
+			else { //si ne quitte pas le programme, retourne valeur et retrouve adresse d appel
+				indexInstruction = currentExecution.top().returnAdress;
+				valType returnType = fonctions[currentExecution.top().name].returnType;
+				valAccess tmp = castVal(depiler(), returnType);
 				int tabPos = tmp.tabPos;
-				switch(returnType) {
-					//case valType::_void_:
-						//break;
+
+				int returnInt;
+				double returnDouble;
+				string returnString;
+
+				switch (returnType) {
+					/*case valType::_void_:
+						break;
 					case valType::_bool_:
 						returnBool = boolList[tabPos];
-						break;
-					case valType::_int_:
-						returnInt = intList[tabPos];
-						break;
-					case valType::_double_:
-						returnDouble = doubleList[tabPos];
-						break;
-					case valType::_string_:
-						returnString = stringList[tabPos];
-						break;
+						break;*/
+				case valType::_int_:
+					returnInt = intList[tabPos];
+					break;
+				case valType::_double_:
+					returnDouble = doubleList[tabPos];
+					break;
+				case valType::_string_:
+					returnString = stringList[tabPos];
+					break;
 				}
 				delVal(tmp);
-			}
-			else return;//quitte programme
 
-			exitMemoryLayer();
-			variables.pop();
-			tableaux.pop();
+				exitMemoryLayer();
+				currentExecution.pop();
 
-			indexInstruction = leavingFonction.returnAdress;
-			switch(returnType) {//ajoute la valeur de retour a la pile
-				//case valType::_void_:
-					//break;
-				case valType::_bool_:
-					executionPile.push({returnType,(int)boolList.size()});
-					boolList.push_back(returnBool);
-					break;
+				switch (returnType) {//ajoute la valeur de retour a la pile
+					/*case valType::_void_:
+						break;
+					case valType::_bool_:
+						executionPile.push({returnType,(int)boolList.size()});
+						boolList.push_back(returnBool);
+						break;*/
 				case valType::_int_:
-					executionPile.push({returnType,(int)intList.size()});
+					executionPile.push({ returnType,(int)intList.size() });
 					intList.push_back(returnInt);
 					break;
 				case valType::_double_:
-					executionPile.push({returnType,(int)doubleList.size()});
+					executionPile.push({ returnType,(int)doubleList.size() });
 					doubleList.push_back(returnDouble);
 					break;
 				case valType::_string_:
-					executionPile.push({returnType,(int)stringList.size()});
+					executionPile.push({ returnType,(int)stringList.size() });
 					stringList.push_back(returnString);
 					break;
+				}
 			}
 		}},
 
@@ -295,16 +290,16 @@ const map<command, functionPointer> executeCommand = {
 	{command::_READ_,
 		[](valInstruct& instructContent) {
 			string valName = instructContent.stringVal;
-			if (variables.top().find(valName) != variables.top().end()){
-				switch (variables.top()[valName].type){
+			if (currentExecution.top().variables.find(valName) != currentExecution.top().variables.end()){
+				switch (currentExecution.top().variables[valName].type){
 					case valType::_int_ :
-						cin >> intList[variables.top()[valName].tabPos];
+						cin >> intList[currentExecution.top().variables[valName].tabPos];
 						break;
 					case valType::_double_ :
-						cin >> doubleList[variables.top()[valName].tabPos];
+						cin >> doubleList[currentExecution.top().variables[valName].tabPos];
 						break;
 					case valType::_string_ :
-						cin >> stringList[variables.top()[valName].tabPos]; 
+						cin >> stringList[currentExecution.top().variables[valName].tabPos]; 
 						break;
 				}
 			}
@@ -358,8 +353,8 @@ void displayGeneratedProgram() {
 		case command::_EMPILE_TABLE_SIZE_:
 				//IDEM
 			name =instructContent.second.stringVal;
-			if (tableaux.top().find(name) != tableaux.top().end()) {//var existe bien
-				switch(tableaux.top()[name].type) {
+			if (currentExecution.top().tableaux.find(name) != currentExecution.top().tableaux.end()) {//var existe bien
+				switch(currentExecution.top().tableaux[name].type) {
 				case valType::_int_:
 					size = intList.size();
 					break;
@@ -380,9 +375,9 @@ void displayGeneratedProgram() {
 			name = instructContent.second.stringVal;
 			tabPos = executionPile.top().tabPos;//recupere val associee a adresse
 
-			if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
-				tabPos = tableaux.top()[name].valuesPos[tabPos];//recupere val a case souhaitee
-				switch(tableaux.top()[name].type) {
+			if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
+				tabPos = currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
+				switch(currentExecution.top().tableaux[name].type) {
 				case valType::_int_:
 					cout << "AJOUTE ", intArray[tabPos]," A LA PILE";
 					break;
@@ -476,12 +471,12 @@ void displayGeneratedProgram() {
 		case command::_UPDATE_TABLE_ELEMENT_:
 			//IDEM
 			name = instructContent.second.stringVal;
-			if (tableaux.top().find(name) != tableaux.top().end()) {
+			if (currentExecution.top().tableaux.find(name) != currentExecution.top().tableaux.end()) {
 				value = executionPile.top();
 				tabPos = intList[value.tabPos];
 
-				if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
-					tabPos = tableaux.top()[name].valuesPos[tabPos];
+				if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
+					tabPos = currentExecution.top().tableaux[name].valuesPos[tabPos];
 					value = executionPile.top();
 					if (instructContent.second.type == value.type) {
 						cout << "MODIFIE INDICE " << tabPos << " DU TABLEAU " << name;
@@ -496,12 +491,12 @@ void displayGeneratedProgram() {
 		case command::_REMOVE_TABLE_ELEMENT_:
 			//IDEM
 			name = instructContent.second.stringVal;
-			if (tableaux.top().find(name) != tableaux.top().end()) {
+			if (currentExecution.top().tableaux.find(name) != currentExecution.top().tableaux.end()) {
 				value = executionPile.top();
 				tabPos = intList[value.tabPos];
 
-				if (tabPos > -1 && tabPos < tableaux.top()[name].valuesPos.size()) {
-					tabPos = tableaux.top()[name].valuesPos[tabPos];
+				if (tabPos > -1 && tabPos < currentExecution.top().tableaux[name].valuesPos.size()) {
+					tabPos = currentExecution.top().tableaux[name].valuesPos[tabPos];
 					cout << "SUPPRIME INDICE " << tabPos << " DU TABLEAU " << name;
 				}
 				else cout << "ERREUR : INDICE " << tabPos << "INVALIDE";
@@ -544,11 +539,9 @@ void displayGeneratedProgram() {
 }
 
 void saveCommandProgramFile(string folderName, string programName) {
-    programName = programName.substr(0,programName.size() - ((string)PROGRAM_EXTENSION).size());
     ofstream file((folderName + programName + COMMAND_EXTENSION).c_str());
 
     if (file) {
-        file << endl << "===== EXECUTION =====" << endl;
         for (instruction instructContent : instructionList) {
             string arguments = "command::";
             switch (instructContent.first) {
@@ -675,7 +668,6 @@ void saveCommandProgramFile(string folderName, string programName) {
 
             file << "addInstruct(" << arguments << ");" << endl;
         }
-	    file << endl << "=====================" << endl;
         file.close();
     }
 }

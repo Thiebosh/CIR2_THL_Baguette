@@ -123,6 +123,7 @@ enum class command {
 };
 
 enum class errorCode {
+	unknowCommand,
 	conversionType,
 	unknowVariable,
 	alreadyUseVariable,
@@ -173,6 +174,9 @@ typedef struct {
 typedef struct {
 	string name;
 	unsigned int returnAdress;
+	//references locales
+	map<string, valAccess> variables;
+	map<string, tabAccess> tableaux;
 } functionCall;
 
 typedef pair<command, valInstruct> instruction;
@@ -183,37 +187,43 @@ typedef void (*functionPointer)(valInstruct& instructContent);//necessaire pour 
 /********************************************************/
 /*	PARTIE III : VARIABLES GLOBALES						*/
 /********************************************************/
+//valeurs simples : pile, variables
 deque<bool>     boolList;
 deque<int>		intList;
 deque<double>	doubleList;
 deque<string>	stringList;
 
-stack<valAccess> executionPile;
-
-stack<map<string, valAccess>> variables;
-
+//valeurs multiples : tableaux
 deque<int>		intArray;
 deque<double>	doubleArray;
 deque<string>	stringArray;
-stack<map<string, tabAccess>> tableaux;
 
+//couche memoire
 stack<memoryState> memoryLayer;
 
+//references globales
 map<string, functionAccess> fonctions;
 
-stack<functionCall> appelFonction;
+//piles d'execution
+stack<valAccess> executionPile;
+stack<functionCall> currentExecution;
 
+//instructions
 deque<instruction> instructionList;
-
 unsigned int indexInstruction = 0;   // compteur instruction 
 
+//erreurs
 map<errorCode, string> errorMessage = {
-	{errorCode::conversionType,			"[TYPE] types incompatibles - échec de conversion"},
-	{errorCode::unknowVariable,			"[VARIABLE] nom de variable inconnu"},
-	{errorCode::alreadyUseVariable,		"[VARIABLE] nom de variable déjà en utilisation"},
 	{errorCode::emptyExecutionStack,	"[EXECUTION] pile vide"},
-	{errorCode::alreadyDeclaredFunction,"[FONCTION] nom de fonction déjà utilisé"},
+	{errorCode::conversionType,			"[TYPE] types incompatibles - échec de conversion"},
+
+	{errorCode::unknowCommand,			"[EXECUTION] commande inconnue"},
+	{errorCode::unknowVariable,			"[VARIABLE] nom de variable inconnu"},
 	{errorCode::unknowFunction,			"[FONCTION] nom de fonction inconnu"},
+
+	{errorCode::alreadyUseVariable,		"[VARIABLE] nom de variable déjà en utilisation"},
+	{errorCode::alreadyDeclaredFunction,"[FONCTION] nom de fonction déjà utilisé"},
+
 	{errorCode::notEnoughArgument,		"[FONCTION] pas assez de valeurs en paramètres"},
 	{errorCode::tooMuchArgument,		"[FONCTION] trop de valeurs en paramètres"}
 };
