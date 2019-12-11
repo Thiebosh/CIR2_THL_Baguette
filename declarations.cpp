@@ -135,7 +135,8 @@ enum class errorCode {
 	unknowFunction,
 	notEnoughArgument,
 	tooMuchArgument,
-	missingReturn
+	missingReturn,
+	unsupportedOperation
 };
 
 
@@ -215,6 +216,7 @@ typedef struct {
 		{errorCode::conversionType,			"[TYPE] types incompatibles - échec de conversion"},
 
 		{errorCode::unknowCommand,			"[EXECUTION] commande inconnue"},
+		{errorCode::unsupportedOperation,	"[EXECUTION] operation non supportée"},
 		{errorCode::unknowVariable,			"[VARIABLE] nom de variable inconnu"},
 		{errorCode::unknowFunction,			"[FONCTION] nom de fonction inconnu"},
 

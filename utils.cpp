@@ -141,6 +141,9 @@ void executeOperation(globalVariables& allVariables, operation operation) {
 		case operation::_plus_://concatenation
 			allVariables.stringList[val1.tabPos] += allVariables.stringList[val2.tabPos];
 			break;
+		default:
+			error(allVariables, errorCode::unsupportedOperation);
+			break;
 		}
 		delVal(allVariables, val1);
 		if (val2.tabPos > val1.tabPos) --val2.tabPos;//prend en compte suppression
