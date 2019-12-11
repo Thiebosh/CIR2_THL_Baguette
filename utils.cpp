@@ -319,7 +319,7 @@ void executeTabAction(globalVariables& allVariables, valInstruct& instructConten
 		valType type;
 		tabAccess declaration;
 		switch (action) {
-	/*
+	
 		case tabAction::_empile_size_:
 			switch(allVariables.currentExecution.top().tableaux[name].type) {
 			case valType::_int_:
@@ -334,29 +334,45 @@ void executeTabAction(globalVariables& allVariables, valInstruct& instructConten
 			}
 			allVariables.intList.push_back(allVariables.currentExecution.top().tableaux[name].valuesPos.size());//name
 			break;
-		*/
+		
 		case tabAction::_empile_case_:
 			value = depiler(allVariables);
 			tabPos = allVariables.intList[value.tabPos];//recupere val associee a adresse
 			delVal(allVariables, value);
 
+			if(tabPos==-1){
+				switch((allVariables.currentExecution.top().tableaux[name]).type){
+					case valType::_int_:
+						tabPos = allVariables.intArray.size()-1;
+						break;
+
+					case valType::_double_:
+						tabPos = allVariables.doubleArray.size()-1;
+						break;
+
+					case valType::_string_:
+						tabPos = allVariables.stringArray.size()-1;
+						break;
+				}
+			}
+
 			if (tabPos > -1 && tabPos < (int)allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
 				tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
 
 				switch(allVariables.currentExecution.top().tableaux[name].type) {
-				case valType::_int_:
-					allVariables.executionPile.push({ valType::_int_,(int)allVariables.intList.size() });
-					allVariables.intList.push_back(allVariables.intArray[tabPos]);
-					break;
-				case valType::_double_:
-					allVariables.executionPile.push({ valType::_double_,(int)allVariables.doubleList.size() });
-					allVariables.doubleList.push_back(allVariables.doubleArray[tabPos]);
-					break;
-				case valType::_string_:
-					allVariables.executionPile.push({ valType::_string_,(int)allVariables.stringList.size() });
-					allVariables.stringList.push_back(allVariables.stringArray[tabPos]);
-					break;
-				}
+					case valType::_int_:
+						allVariables.executionPile.push({ valType::_int_,(int)allVariables.intList.size() });
+						allVariables.intList.push_back(allVariables.intArray[tabPos]);
+						break;
+					case valType::_double_:
+						allVariables.executionPile.push({ valType::_double_,(int)allVariables.doubleList.size() });
+						allVariables.doubleList.push_back(allVariables.doubleArray[tabPos]);
+						break;
+					case valType::_string_:
+						allVariables.executionPile.push({ valType::_string_,(int)allVariables.stringList.size() });
+						allVariables.stringList.push_back(allVariables.stringArray[tabPos]);
+						break;
+					}
 			}
 			break;
 
