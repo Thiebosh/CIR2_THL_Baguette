@@ -147,7 +147,7 @@ typedef struct {//initialiser dans ordre de déclaration
 	int tabPos = -1;//valeur par defaut : flag d'invalidation
 } valAccess;
 
-typedef struct {//stockage tableau a part : doit preserver valeur ajoutee dans couche memoire (voir part 5) differente de celle supportant la declaration
+typedef struct {//stockage tableau a part : doit preserver valeur ajoutee dans couche memoire differente de celle supportant la declaration
 	unsigned int memoryLayer = 0;
 	valType type = valType::_int_;
 	deque<int> valuesPos;
@@ -185,7 +185,7 @@ typedef struct {
 
 typedef struct {
 	//valeurs simples : pile, variables
-	deque<bool>     boolList;
+	deque<bool>     boolList;	//intene
 	deque<int>		intList;
 	deque<double>	doubleList;
 	deque<string>	stringList;

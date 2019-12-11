@@ -50,11 +50,9 @@ lire      { return INPUT;}
 
 si 			  { return IF; }
 sinon	    { return ELSE; }
-sinonsi	  { return ELIF; }
 tantque 	{ return WHILE; }
 faire 	  { return DO; }
 pour      { return FOR; }
-parcourir { return FOREACH; }
 recette   { return FUNCTION; }
 
 renvoyer	{ return RETURN; }

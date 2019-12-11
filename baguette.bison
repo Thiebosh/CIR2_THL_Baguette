@@ -58,12 +58,10 @@
 %token INPUT
 
 %token <adresse> IF
-%token <adresse> ELIF
 %token ELSE
 %token <adresse> WHILE
 %token <adresse> DO
 %token <adresse> FOR
-%token <adresse> FOREACH
 %token <adresse> FUNCTION
 
 %token RETURN
