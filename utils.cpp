@@ -317,7 +317,7 @@ void executeTabAction(globalVariables& allVariables, valInstruct& instructConten
 		valType type;
 		tabAccess declaration;
 		switch (action) {
-	/*
+	
 		case tabAction::_empile_size_:
 			switch(allVariables.currentExecution.top().tableaux[name].type) {
 			case valType::_int_:
@@ -332,7 +332,7 @@ void executeTabAction(globalVariables& allVariables, valInstruct& instructConten
 			}
 			allVariables.intList.push_back(allVariables.currentExecution.top().tableaux[name].valuesPos.size());//name
 			break;
-		*/
+		
 		case tabAction::_empile_case_:
 			value = depiler(allVariables);
 			tabPos = allVariables.intList[value.tabPos];//recupere val associee a adresse

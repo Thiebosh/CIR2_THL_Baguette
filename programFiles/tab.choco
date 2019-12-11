@@ -7,4 +7,10 @@ ecrire testRecup,"\n"
 7 = montab[]
 ecrire montab [1],"\n"
 
+ecrire "taille mon tab : ", taille montab, "\n"
+
+supprimer montab[0]
+
+ecrire "taille mon tab : ", taille montab, "\n"
+
 TERMINER
