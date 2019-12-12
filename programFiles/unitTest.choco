@@ -1,5 +1,11 @@
-ecrire "debut "
-attendre 1
-ecrire " fin"
+
+5 = entier var
+
+recette rec vacant (entier var) {
+	ecrire var, "\n"
+	//renvoyer rec(var)
+}
+
+rec(var)
 
 TERMINER

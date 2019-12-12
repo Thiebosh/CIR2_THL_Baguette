@@ -45,4 +45,26 @@ pour 0 = entier i : i < 15 : 7 += i { //doit redeclarer variable i
     ecrire "for : ",i,"\n"
 }
 
+/*
+55 = entier exemple
+ecrire "avant fonctions : exemple = ",exemple,"\n"
+
+recette testRobustesse1 entier (exemple entier) {
+    ecrire "dans fonction 1 : exemple = ",exemple,"\n"
+    0 = entier nouvelle_var
+    renvoyer 0
+}
+recette testRobustesse2 entier (exemple entier) {
+    110 = exemple
+    testRobustesse1 (exemple)
+    ecrire "dans fonction 2 : exemple = ",exemple,"\n"
+    renvoyer 0
+}
+
+testRobustesse1 (exemple)
+testRobustesse2 (exemple)
+ecrire "après fonctions : exemple = ",exemple,"\n"
+
+ecrire "fonction nouvelle_var n'existe pas en dehors de la fonction : erreur à prévoir\n\n",nouvelle_var
+*/
 TERMINER

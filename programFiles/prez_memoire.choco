@@ -7,9 +7,22 @@ ceci est toujours un commentaire */
 
 ecrire 1+6*4,"\n"
 
+ecrire "on attend 10 secondes"
 attendre 10
 
 ecrire 4*6+1,"\n";
 ecrire -1*(2+5)/3,"\n\n\n" // c'est un super calcul
+
+
+5 = entier mavar
+
+ouvrir_zone_memoire
+
+    ecrire mavar, "\n"
+    8 = entier zoneval
+
+fermer_zone_memoire
+
+ecrire zoneval "\n"
 
 TERMINER
