@@ -7,8 +7,8 @@ ceci est toujours un commentaire */
 
 ecrire 1+6*4,"\n"
 
-ecrire "on attend 10 secondes"
-attendre 10
+ecrire "on attend 2 secondes"
+attendre 2
 
 ecrire 4*6+1,"\n";
 ecrire -1*(2+5)/3,"\n\n\n" // c'est un super calcul
@@ -23,6 +23,6 @@ ouvrir_zone_memoire
 
 fermer_zone_memoire
 
-ecrire zoneval "\n"
+ecrire "fonction zoneval n'existe pas en dehors de la zone mémoire : erreur à prévoir\n\n", zoneval, "\n"
 
 TERMINER

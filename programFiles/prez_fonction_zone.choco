@@ -45,7 +45,24 @@ pour 0 = entier i : i < 15 : 7 += i { //doit redeclarer variable i
     ecrire "for : ",i,"\n"
 }
 
-/*
+
+
+ecrire "\n\n\nPARTIE 4 : FONCTION ET RECURSIVITE\n\n"
+recette factorielle entier (nombre entier) {
+	si nombre > 0 {
+		renvoyer nombre * factorielle(--nombre)
+	sinon
+		renvoyer 1
+	}
+}
+
+5 = entier var
+
+ecrire "factorielle de ", var, " donne ", factorielle(5)
+
+
+
+ecrire "\n\n\nPARTIE 4 : FONCTION ET MEMOIRE\n\n"
 55 = entier exemple
 ecrire "avant fonctions : exemple = ",exemple,"\n"
 
@@ -66,5 +83,5 @@ testRobustesse2 (exemple)
 ecrire "après fonctions : exemple = ",exemple,"\n"
 
 ecrire "fonction nouvelle_var n'existe pas en dehors de la fonction : erreur à prévoir\n\n",nouvelle_var
-*/
+
 TERMINER
