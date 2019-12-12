@@ -1,0 +1,42 @@
+2 = entier maVar
+ecrire "j'initialise maVar à ",maVar,"\nentrez une valeur : "
+lire maVar
+ecrire "Nouvelle valeur de maVar : ",maVar,"\n\n"
+
+3.5 = maVar
+ecrire "j'affecte 3.5 à maVar entière (cast) : ",maVar,"\n\n"
+
+ecrire "j'incrémente : ",++maVar,"\n"
+ecrire "je décrémente : ",--maVar,"\n\n"
+
+3 *= maVar
+ecrire "je multiplie maVar par 3 et lui affecte directement : ",maVar,"\n"
+
+maVar / 2 - 12 = reel autreVar
+ecrire "j'affecte une opération complexe à une variable réelle 'autreVar' : ",autreVar,"\n"
+
+5 + ++autreVar = entier calcul
+ecrire "j'incrémente autreVar, je lui ajoute 5 et je caste le résultat : ",calcul," (autreVar : ",autreVar,")\n\n"
+
+"hello" = texte placeAuxStrings
+" world" += placeAuxStrings
+ecrire "je concatène des strings : ",placeAuxStrings,"\n"
+
+5 = liste entier montab
+
+ecrire montab [0],"\n"
+montab [0] = entier testRecup
+ecrire testRecup,"\n"
+
+7 = montab[]
+ecrire montab [1],"\n"
+
+ecrire "taille mon tab : ", taille montab, "\n"
+
+supprimer montab[0]
+
+ecrire "taille mon tab : ", taille montab, "\n"
+
+ecrire "dernier element de montab : ", montab[-1], "\n"//bonne valeur?
+
+TERMINER
