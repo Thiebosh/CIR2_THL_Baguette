@@ -6,7 +6,10 @@ ecrire 1.23,"\n","hello world","\n\n";
 ceci est toujours un commentaire */
 
 ecrire 1+6*4,"\n"
-ecrire 4*6+1,"\n"
+
+attendre 10
+
+ecrire 4*6+1,"\n";
 ecrire -1*(2+5)/3,"\n\n\n" // c'est un super calcul
 
 TERMINER
