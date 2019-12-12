@@ -37,6 +37,11 @@ supprimer montab[0]
 
 ecrire "taille mon tab : ", taille montab, "\n"
 
-ecrire "dernier element de montab : ", montab[-1], "\n"//bonne valeur?
+ecrire "dernier element de montab : ", montab[-1], "\n"
+
+vider montab
+
+ecrire "nouvelle taille mon tab : ", taille montab, "\n"
+
 
 TERMINER

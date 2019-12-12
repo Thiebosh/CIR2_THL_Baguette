@@ -57,6 +57,7 @@
 %token WRITE
 %token STOP
 %token INPUT
+%token DELAY
 
 %token <adresse> IF
 %token ELSE
@@ -99,8 +100,9 @@ memoryBloc :
 
 IO :
       WRITE output
-    | STOP          { addInstruct(command::_STOP_); }
-    | INPUT NAME    { addInstruct(command::_READ_,$2); }
+    | STOP              { addInstruct(command::_STOP_); }
+    | INPUT NAME        { addInstruct(command::_READ_,$2); }
+    | DELAY INT_VALUE   { addInstruct(command::_DELAY_,$2); }
     ;
 
 output : value { addInstruct(command::_WRITE_); } output_inter ;

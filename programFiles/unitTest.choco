@@ -1,0 +1,5 @@
+ecrire "debut "
+attendre 1
+ecrire " fin"
+
+TERMINER

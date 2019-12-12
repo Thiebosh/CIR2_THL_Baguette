@@ -298,6 +298,7 @@ const map<command, functionPointer> executeCommand = {
 			delVal(allVariables, val);
 		}},
 	{command::_STOP_,[](valInstruct& instructContent, globalVariables& allVariables) { pauseProcess(); }},
+	{command::_DELAY_,[](valInstruct& instructContent, globalVariables& allVariables) { cout << endl; sleep(instructContent.intVal); }},
 	{command::_READ_,
 		[](valInstruct& instructContent, globalVariables& allVariables) {
 			string valName = instructContent.stringVal;
@@ -477,6 +478,10 @@ void displayGeneratedProgram(globalVariables& allVariables) {
 		case command::_READ_:
 			cout << "RECUPERER VALEUR UTILISATEUR";
 			break;
+		case command::_DELAY_:
+			cout << "ATTENDRE " << instructContent.second.intVal << " secondes";
+			break;
+
 
 		default:
 			cout << "UNKNOW COMMAND : " << (int)instructContent.first;

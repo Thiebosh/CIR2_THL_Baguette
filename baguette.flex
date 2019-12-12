@@ -46,7 +46,8 @@ OU    { return OR; }
 "<="  { return SUP_EGAL; }
 
 ecrire  	{ return WRITE;}
-pause     { return STOP; }//attendre pour delay
+pause     { return STOP; }
+attendre  { return DELAY; }
 lire      { return INPUT;}
 
 si 			  { return IF; }

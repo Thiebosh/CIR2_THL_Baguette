@@ -3,7 +3,6 @@
 ## pile de choses à faire :
 - ajouter operations modulo et puissance
 - ajouter length (taille) : retourne taille string ou nb digits nombre
-- ajouter IO sleep
 
 ## aller plus loin : 
 - mémoire programme (instruction list) opti : vector de bool et types pour enregistrer uniquement info utile(conversion binaire). Pour string, taille puis caractères. Si taille max, flag de fin de texte : 1 si fini, 0 pour continuer à lire string

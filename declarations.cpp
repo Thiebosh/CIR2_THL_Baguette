@@ -123,7 +123,8 @@ enum class command {
 	//ENTREE SORTIE
 	_WRITE_,
 	_STOP_,
-	_READ_
+	_READ_,
+	_DELAY_
 };
 
 enum class errorCode {
