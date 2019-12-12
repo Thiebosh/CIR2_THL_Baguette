@@ -38,6 +38,7 @@
 
 %token SIZE
 %token DELETE
+%token ERASE
 
 %token INCREMENT
 %token DECREMENT
@@ -175,6 +176,7 @@ affectVar :
                                         addInstruct(command::_EMPILE_VALUE_,(int)$4);//index tab
                                         addInstruct(command::_REMOVE_TABLE_ELEMENT_,$2);//nom tab
                                     }
+    | ERASE NAME                    { addInstruct(command::_CLEAR_TABLE_,$2); }//nom tab
     ;
 
 value :

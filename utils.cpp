@@ -405,21 +405,18 @@ void executeTabAction(globalVariables& allVariables, valInstruct& instructConten
 			if (tabPos > -1 && tabPos < (int)allVariables.currentExecution.top().tableaux[name].valuesPos.size()) {
 				tabPos = allVariables.currentExecution.top().tableaux[name].valuesPos[tabPos];//recupere val a case souhaitee
 
-				valAccess value = depiler(allVariables);//supprime pas : besoin de transmettre valeur associee
-				if (allVariables.currentExecution.top().tableaux[name].type == value.type) {
-					switch(value.type) {
-					case valType::_int_:
-						allVariables.intArray[tabPos] = allVariables.intList[value.tabPos];
-						break;
-					case valType::_double_:
-						allVariables.doubleArray[tabPos] = allVariables.doubleList[value.tabPos];
-						break;
-					case valType::_string_:
-						allVariables.stringArray[tabPos] = allVariables.stringList[value.tabPos];
-						break;
-					}
+				valAccess value = castVal(allVariables,depiler(allVariables),allVariables.currentExecution.top().tableaux[name].type);//supprime pas : besoin de transmettre valeur associee
+				switch(value.type) {
+				case valType::_int_:
+					allVariables.intArray[tabPos] = allVariables.intList[value.tabPos];
+					break;
+				case valType::_double_:
+					allVariables.doubleArray[tabPos] = allVariables.doubleList[value.tabPos];
+					break;
+				case valType::_string_:
+					allVariables.stringArray[tabPos] = allVariables.stringList[value.tabPos];
+					break;
 				}
-				//else ? cast here
 
 				delVal(allVariables, value);//stocke en typeArray
 			}
@@ -434,10 +431,16 @@ void executeTabAction(globalVariables& allVariables, valInstruct& instructConten
 				delTabVal(allVariables, name,tabPos);
 			}
 			break;
+
+		case tabAction::_erase_:
+			for (auto pos : allVariables.currentExecution.top().tableaux[name].valuesPos) delTabVal(allVariables,name,pos);
+			break;
 		}
 	}
-	//else : pb
-	// retester existence du tableau 
+	else {
+		if (allVariables.currentExecution.top().tableaux.find(name) == allVariables.currentExecution.top().tableaux.end()) error(allVariables,errorCode::alreadyUseArray);
+		else error(allVariables,errorCode::unknowArray);
+	}
 }
 
 

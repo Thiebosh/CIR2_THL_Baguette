@@ -126,22 +126,26 @@ const map<command, functionPointer> executeCommand = {
 		}},
 
 	
-		{command::_CREATE_TABLE_,
-			[](valInstruct& instructContent, globalVariables& allVariables) {
-				executeTabAction(allVariables, instructContent, tabAction::_create_);
-			}},
-		{command::_ADD_TABLE_ELEMENT_,
-			[](valInstruct& instructContent, globalVariables& allVariables) {
-				executeTabAction(allVariables, instructContent, tabAction::_add_);
-			}},
-		{command::_UPDATE_TABLE_ELEMENT_,
-			[](valInstruct& instructContent, globalVariables& allVariables) {
-				executeTabAction(allVariables, instructContent, tabAction::_update_);
-			}},
-		{command::_REMOVE_TABLE_ELEMENT_,
-			[](valInstruct& instructContent, globalVariables& allVariables) {
-				executeTabAction(allVariables, instructContent, tabAction::_remove_);
-			}},
+	{command::_CREATE_TABLE_,
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			executeTabAction(allVariables, instructContent, tabAction::_create_);
+		}},
+	{command::_ADD_TABLE_ELEMENT_,
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			executeTabAction(allVariables, instructContent, tabAction::_add_);
+		}},
+	{command::_UPDATE_TABLE_ELEMENT_,
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			executeTabAction(allVariables, instructContent, tabAction::_update_);
+		}},
+	{command::_REMOVE_TABLE_ELEMENT_,
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			executeTabAction(allVariables, instructContent, tabAction::_remove_);
+		}},
+	{command::_CLEAR_TABLE_,
+		[](valInstruct& instructContent, globalVariables& allVariables) {
+			executeTabAction(allVariables, instructContent, tabAction::_erase_);
+		}},
 	
 
 	{command::_CREATE_FUNCTION_,
@@ -222,11 +226,8 @@ const map<command, functionPointer> executeCommand = {
 				string returnString;
 
 				switch (returnType) {
-					/*case valType::_void_:
-						break;
-					case valType::_bool_:
-						returnBool = allVariables.boolList[tabPos];
-						break;*/
+				case valType::_void_:
+					break;
 				case valType::_int_:
 					returnInt = allVariables.intList[tabPos];
 					break;
@@ -243,12 +244,8 @@ const map<command, functionPointer> executeCommand = {
 				allVariables.currentExecution.pop();
 
 				switch (returnType) {//ajoute la valeur de retour a la pile
-					/*case valType::_void_:
-						break;
-					case valType::_bool_:
-						allVariables.executionPile.push({returnType,(int)allVariables.boolList.size()});
-						allVariables.boolList.push_back(returnBool);
-						break;*/
+				case valType::_void_:
+					break;
 				case valType::_int_:
 					allVariables.executionPile.push({ returnType,(int)allVariables.intList.size() });
 					allVariables.intList.push_back(returnInt);
@@ -449,7 +446,10 @@ void displayGeneratedProgram(globalVariables& allVariables) {
 		case command::_REMOVE_TABLE_ELEMENT_:
 			cout << "SUPPRIME UNE CASE DE '" << instructContent.second.stringVal << "'";
 			break;
-		
+		case command::_CLEAR_TABLE_:
+			cout << "VIDE '" << instructContent.second.stringVal << "'";
+			break;
+
 
 		case command::_CREATE_FUNCTION_:
 			cout << "INITIALISE FONCTION '" << instructContent.second.stringVal << "'";

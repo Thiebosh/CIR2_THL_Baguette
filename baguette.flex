@@ -29,6 +29,7 @@ texte         { return STRING; }
 liste       { return TAB; }
 taille      { return SIZE; }
 supprimer   { return DELETE; }
+vider       { return ERASE; }
 
 "++"  { return INCREMENT; }
 "--"  { return DECREMENT; }

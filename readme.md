@@ -2,7 +2,6 @@
 
 ## pile de choses à faire :
 - ajouter operations modulo et puissance
-- indice -1 d'un tableau pour accéder au dernier élément (verifier que ok, ou alors suppression a pb)
 - ajouter length (taille) : retourne taille string ou nb digits nombre
 - ajouter IO sleep
 

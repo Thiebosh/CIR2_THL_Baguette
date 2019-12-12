@@ -63,7 +63,8 @@ enum class tabAction {//fixe operations
 	_create_,
 	_add_,
 	_update_,
-	_remove_
+	_remove_,
+	_erase_
 };
 
 enum class command {
@@ -110,6 +111,7 @@ enum class command {
 	_ADD_TABLE_ELEMENT_,
 	_UPDATE_TABLE_ELEMENT_,
 	_REMOVE_TABLE_ELEMENT_,
+	_CLEAR_TABLE_,
 
 	//FONCTIONS
 	_ENTER_FUNCTION_,
@@ -136,7 +138,9 @@ enum class errorCode {
 	notEnoughArgument,
 	tooMuchArgument,
 	missingReturn,
-	unsupportedOperation
+	unsupportedOperation,
+	unknowArray,
+	alreadyUseArray
 };
 
 
@@ -218,9 +222,11 @@ typedef struct {
 		{errorCode::unknowCommand,			"[EXECUTION] commande inconnue"},
 		{errorCode::unsupportedOperation,	"[EXECUTION] operation non supportée"},
 		{errorCode::unknowVariable,			"[VARIABLE] nom de variable inconnu"},
+		{errorCode::unknowArray,			"[VARIABLE] nom de liste inconnu"},
 		{errorCode::unknowFunction,			"[FONCTION] nom de fonction inconnu"},
 
 		{errorCode::alreadyUseVariable,		"[VARIABLE] nom de variable déjà en utilisation"},
+		{errorCode::alreadyUseArray,		"[VARIABLE] nom de liste déjà en utilisation"},
 		{errorCode::alreadyDeclaredFunction,"[FONCTION] nom de fonction déjà utilisé"},
 
 		{errorCode::notEnoughArgument,		"[FONCTION] pas assez de valeurs en paramètres"},
