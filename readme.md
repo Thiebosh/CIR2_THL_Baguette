@@ -1,3 +1,8 @@
+**Novembre 2019 – C++, Flex et Bison : Création d’un langage informatique**
+- Théorie des langages : machine à pile complète avec gestion mémoire optimisée (couches empilées)
+
+<br><hr><br>
+
 # théorie des langages
 
 ## pile de choses à faire :
